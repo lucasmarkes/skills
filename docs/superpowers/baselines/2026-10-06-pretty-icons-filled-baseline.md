@@ -38,3 +38,15 @@ Both saw the construction: a dark contour, a flat fill, a copy of the silhouette
 4. Details (seeds, stripes, holes, veins) in the fill's shade or in paper, never in ink. Ink is for the silhouette and the separate parts (a stem, a handle, a lid).
 5. A keyline the object lands on, measured without its shadow, so a whisk and a bread sit the same size.
 6. Rect, circle, line and path, flat, and a sheet that composes them in colour.
+
+## With the skill (GREEN)
+
+A fresh agent got the skill (`SKILL.md`, `rules.md`, `rules-filled.md`, `examples/pantry`) and the same six names, for a recipes app's category grid at 48 px, with nobody to approve the concepts. Its files are kept as `test/pretty-icons/fixtures/filled-green`.
+
+- **It chose the finish from the context**: filled on 48, because the card shows an illustrated icon in flat colour, and said so.
+- **One palette, one stroke, the shadow as a pasted copy**: every failure the two baseline runs had is gone from the first file. Nothing in the set is a hex the palette does not hold; no element sets a width; every shadow is the body's `d` with `translate(3 3)`.
+- **`check.mjs` printed `ok` on the fifth run.** Run 1: `elements` (a heredoc slip left stray `</svg>` lines), `keyline`, `gap`, `weight`. Run 2: `gap`, `gravity`, `keyline`, `weight`. Runs 3 and 4: `gap` only. The gap rule did most of the work: spots on a cap, wires in a balloon, a highlight by a handle.
+- **The first blind read named five of six.** The reader named mushroom, apple, bread, mug and avocado from the picture, and gave the whisk its name by elimination: "grey wire bulb, brown handle; reads a bit like garlic or a bulb". Under `read.md` that fails. The agent had drawn the balloon as a solid grey body with the wires as shade details inside it.
+- **The redraw made the wires ink parts and the handle the only body**; `check.mjs` printed `ok` on the second run (`gap`, the highlight against the handle, then dropped). A new reader named all six from the picture: "brown handle over wire loops".
+
+What the run added to the skill: `rules-filled.md` 09 now says an object that is wires, a frame or a cage is ink parts with the one solid piece as its body, not a filled silhouette with the wires drawn on it.

@@ -126,6 +126,7 @@ Ink to ink: touch, or one stroke apart, 2.5. Any pair that includes a detail: to
 One object, nameable in one or two words, from at most eight elements: the shadow, one or two bodies, the parts, two or three details, one highlight. A path takes at most twelve commands. No letters, digits, logos or initials. Draw with curves and one asymmetry (a leaf to one side, a spout on the left and a handle on the right): a symmetric rect with a shadow reads as a button.
 
 - **Keep it, for the details:** draw the two or three the object has, in the shade: an onion's bands, a fish's gills, a grater's holes, a jar's label. Not a realistic surface. Not a face.
+- **Keep it, for an object that is wires, a frame or a cage** (a whisk, a basket, a rack): the wires are ink parts, open paths, and the one solid piece (the handle) is the body that casts the shadow. A whisk drawn as a solid balloon with the wires on it in the shade read as garlic.
 - **Keep it, for the examples:** do not copy `examples/pantry`'s metaphors; draw your own objects at its finish.
 - **Rejected when:** `count  grater  9 elements → at most 8`; `count  teapot  path@3 13 commands → at most 12`; or read (`read.md`).
 

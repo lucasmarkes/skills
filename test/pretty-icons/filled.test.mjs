@@ -190,3 +190,11 @@ test("rules-filled.md: the worked body is examples/pantry/egg.svg, and its table
   assert.ok(doc.includes(`the reference, ${REFERENCE_INK[48]},`), "the reference is quoted");
   assert.ok(doc.includes("22.5, 22.5"), "the centre is quoted");
 });
+
+test("the GREEN set: six icons a fresh agent drew with the skill pass every rule", async () => {
+  const r = await checkSet(fix("filled-green"));
+  assert.equal(r.G, 48);
+  assert.equal(r.measured, true);
+  assert.deepEqual(r.failures.map((f) => `${f.rule} ${f.icon} ${f.got}`), []);
+  assert.deepEqual(r.rows.map((x) => x.icon).sort(), ["apple", "avocado", "bread", "mug", "mushroom", "whisk"]);
+});

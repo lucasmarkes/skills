@@ -68,4 +68,5 @@ Edit only that icon's `.svg`. Run steps 4 and 5 for the set.
 | picking a colour that "looks closer" than the palette's | `rules-filled.md`: the fourteen pairs, ink and paper, nothing else; the shade comes with the fill |
 | drawing a seed, a hole or a stripe in ink | `rules-filled.md` 04: details take the body's shade; ink is the contour and the parts |
 | redrawing the shadow, or using `<use>` or `<defs>` | `rules-filled.md` 04: the body's `d` pasted, `translate(3 3)`, its shade, `stroke="none"`, first in the file |
+| filling a whisk's balloon, a basket or a rack as a body | `rules-filled.md` 09: wires are ink parts; the solid piece is the body |
 | drawing a filled body on the 44 keyline | `rules-filled.md` 02: the object's keyline is 41 wide, centred at 22.5; the shadow fills the rest |
