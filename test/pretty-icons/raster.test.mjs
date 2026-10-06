@@ -1,0 +1,76 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { cacheDir, measure, render } from "../../skills/pretty-icons/raster.mjs";
+
+const near = (a, b, eps = 0.05) => assert.ok(Math.abs(a - b) < eps, `${a} ≈ ${b}`);
+const ROOT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">`;
+
+test("cacheDir by platform, architecture and env", () => {
+  assert.equal(cacheDir({}, "darwin", "/Users/x", "arm64"), "/Users/x/Library/Caches/pretty-icons/darwin-arm64");
+  assert.equal(cacheDir({}, "darwin", "/Users/x", "x64"), "/Users/x/Library/Caches/pretty-icons/darwin-x64");
+  assert.equal(cacheDir({ XDG_CACHE_HOME: "/xdg" }, "linux", "/home/x", "x64"), "/xdg/pretty-icons/linux-x64");
+  assert.equal(cacheDir({}, "linux", "/home/x", "arm64"), "/home/x/.cache/pretty-icons/linux-arm64");
+  assert.equal(cacheDir({ LOCALAPPDATA: "C:\\Users\\x\\AppData\\Local" }, "win32", "C:\\Users\\x", "x64").replace(/\\/g, "/"), "C:/Users/x/AppData/Local/pretty-icons/win32-x64");
+  assert.equal(cacheDir({ PRETTY_ICONS_CACHE: "/else" }, "darwin", "/Users/x", "arm64"), "/else/darwin-arm64");
+});
+
+test("a centred stroked square measures its ink box", async () => {
+  // rect 2.5..13.5 with stroke 1.5: ink 1.75..14.25, 12.5 wide, centred
+  const m = await measure(`${ROOT}<rect x="2.5" y="2.5" width="11" height="11" rx="1.5" fill="currentColor" fill-opacity=".2" /></svg>`, 16);
+  near(m.box.x0, 1.75); near(m.box.x1, 14.25); near(m.box.y0, 1.75); near(m.box.y1, 14.25); near(m.box.w, 12.5); near(m.box.h, 12.5);
+  near(m.mass.dx, 0); near(m.mass.dy, 0);
+  assert.ok(m.ink > 50 && m.ink < 100, `ink ${m.ink}`);
+});
+
+test("a square in the top-left has its mass off centre", async () => {
+  const m = await measure(`${ROOT}<rect x="2" y="2" width="4" height="4" rx="1" /></svg>`, 16);
+  assert.ok(m.mass.dx < -3 && m.mass.dy < -3, JSON.stringify(m.mass));
+});
+
+test("currentColor renders as ink", () => {
+  const r = render(`${ROOT}<path d="M2 8h12" /></svg>`, 160);
+  assert.equal(r.width, 160);
+  let inked = 0;
+  for (let i = 3; i < r.pixels.length; i += 4) if (r.pixels[i] > 12) inked++;
+  assert.ok(inked > 100, `${inked} inked pixels`);
+});
+
+test("the cache dir can be moved for a test", () => {
+  const dir = join(tmpdir(), "pi-cache");
+  assert.equal(cacheDir({ PRETTY_ICONS_CACHE: dir }), join(dir, `${process.platform}-${process.arch}`));
+});
+
+test("currentcolor in any case is ink", async () => {
+  const camel = await measure(`${ROOT}<path d="M2 8h12" /></svg>`, 16);
+  const lower = await measure(`${ROOT.replace('stroke="currentColor"', 'stroke="currentcolor"')}<path d="M2 8h12" /></svg>`, 16);
+  assert.ok(camel.ink > 10, `ink ${camel.ink}`);
+  near(lower.ink, camel.ink);
+});
+
+test("a non-square viewBox measures finite numbers", async () => {
+  const m = await measure(`${ROOT.replace('viewBox="0 0 16 16"', 'viewBox="0 0 16 12"')}<path d="M2 6h12" /></svg>`, 16);
+  for (const v of [...Object.values(m.box), m.mass.dx, m.mass.dy, m.ink]) assert.ok(Number.isFinite(v), JSON.stringify(m));
+  near(m.box.x0, 1.25); near(m.box.x1, 14.75); near(m.box.h, 1.5);
+  near(m.mass.dx, 0); near(m.mass.dy, 0);
+});
+
+test("a cache whose binary is missing is `not measured`, exit 2, with the folder to delete", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "pi-cache-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  // the package resolves, its platform binary does not: an interrupted install, or a cache from another machine
+  const pkg = join(root, `${process.platform}-${process.arch}`, "node_modules", "@resvg", "resvg-js");
+  mkdirSync(pkg, { recursive: true });
+  writeFileSync(join(pkg, "package.json"), JSON.stringify({ name: "@resvg/resvg-js", version: "2.6.2", main: "index.js" }));
+  writeFileSync(join(pkg, "index.js"), "throw new Error(\"Cannot find module '@resvg/resvg-js-binary'\\nRequire stack: x\");");
+  const check = new URL("../../skills/pretty-icons/check.mjs", import.meta.url).pathname;
+  const fix = new URL("./fixtures/good-16/", import.meta.url).pathname;
+  const r = spawnSync(process.execPath, [check, fix], { encoding: "utf8", env: { ...process.env, PRETTY_ICONS_CACHE: root } });
+  assert.equal(r.status, 2, r.stdout + r.stderr);
+  const last = r.stdout.trim().split("\n").at(-1);
+  assert.match(last, /^not measured: could not load @resvg\/resvg-js from .*: Cannot find module '@resvg\/resvg-js-binary'; delete that folder to reinstall$/);
+  assert.doesNotMatch(r.stdout + r.stderr, /\n\s+at /, "no stack");
+});

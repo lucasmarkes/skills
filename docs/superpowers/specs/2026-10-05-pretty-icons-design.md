@@ -86,27 +86,43 @@ the others it reads from the SVG's text.
 1. **grid** — one canvas, `viewBox="0 0 G G"`, every number a multiple of
    0.25, no ink outside the live area. `[m]`
 2. **keyline** — each icon takes the format that describes it (circle,
-   square, portrait, landscape) and its ink box lands on that keyline within
-   ±0.5 on each side. `[m]`
+   square, portrait, landscape) and its ink box matches that keyline: width and height
+   each within ±0.5 of one keyline; position is not checked. `[m]`
 3. **stroke** — one width from the preset, centred, round caps and joins,
    `currentColor`; nothing else in the file sets a colour, a width or an
    opacity other than the fill's.
 4. **construction** — a body is a contour plus the 20% fill; a detail is a
    line with no fill. Never a fill without a contour, never a solid shape.
-5. **weight** — each icon's ink is within ±15% of the set's median. With
-   fewer than three icons, the median is taken from the reference values in
-   `rules.md`, scaled by (G / 16)². `[m]`
+   A body's contour is a rect, a circle, a path of at most five straight
+   sides, or a path shaped by curves: a filled path with more than five
+   straight sides is faceted (`contour`). Five is as many as one outline
+   needs: a house is one contour, walls and roof in one closed path, with
+   its door as the accent.
+5. **weight** — each icon's ink is within ±15% of the set's median and
+   within ±20% of the grid's reference (83.5 / 114.2 / 181.9), so a set
+   uniformly heavier than the finish fails. With fewer than three icons, the
+   median is the reference: on 16 the median of `examples/hairline`; the 20
+   and 24 references are measured from the bar set scaled to the grid's live
+   area, at the grid's own stroke. `[m]`
 6. **gravity** — the centre of mass of the ink is within 0.5 units of the
    canvas centre on each axis. The box may sit off centre; the mass may not.
    `[m]`
 7. **radius** — by the preset: shapes of 8 units or more take the larger
    radius, smaller ones the smaller.
 8. **gap** — distinct elements are at least one stroke apart, outer edge to
-   outer edge, or share an edge exactly. Between 0.1 and one stroke is
-   "almost", and rejected. `[m]`
+   outer edge, or touch: touching means centrelines within 0.1; edges that only meet (0 apart) fail. Between 0.1 and one stroke is
+   "almost", and rejected. `[m]` A line that meets a body ends on its
+   edge; it never runs under the body and out the other side, where the
+   fill shows it (read, not measured).
 9. **metaphor** — one object per icon, at most three elements, nameable in
-   one or two words; no letters or digits unless the glyph is the subject
-   (braces for code).
+   one or two words. No letters, digits, logos or initials, ever: a brand is
+   drawn as the thing its name means (ruby → gem); a brand name that means no
+   thing (typescript, go, html) is handed back, as needing the brand's own
+   mark; braces are the one glyph, as an accent inside a body. Settings are
+   sliders, not a gear or a dashed ring. A body carries one
+   accent, the part that names the object; a second mark for realism is
+   dropped. Measured: the details hold at most two subpaths and eight
+   drawing commands between them.
 10. **set** — every icon in a set shares the preset, and a new icon is
     measured against the icons already there, never alone.
 
@@ -118,7 +134,8 @@ hypotheses; the acceptance tests under "What success is" are what fixes them.
 ## The skill
 
 `/pretty-icons [what needs icons]`. Five steps; the SKILL.md ends with a
-"what goes wrong" table as hairline-create's does.
+"what goes wrong" table as hairline-create's does. The drawing step first
+looks at the sheet of `examples/hairline`: that is the finish to draw at.
 
 ### 1. Read
 
@@ -187,15 +204,17 @@ Text (always runs, no dependency):
   `currentColor` at 0.2; lines have `fill="none"` or none (rule 4).
 - `grid` — every number a multiple of 0.25 (rule 1).
 - `radius` — `rx` by the shape's size (rule 7).
-- `count` — at most three elements, at most eight commands per path
-  (rule 9).
+- `contour` — a filled path has at most five straight sides (rule 4).
+- `count` — at most three elements, at most eight commands per path; the
+  details at most two subpaths and eight drawing commands (rule 9).
 
 Measured (needs the rasteriser):
 
 - `live` — ink inside the live area (rule 1).
 - `keyline` — ink box within ±0.5 of one keyline; prints which matched
   (rule 2).
-- `weight` — ink within ±15% of the set's median (rule 5).
+- `weight` — ink within ±15% of the set's median and ±20% of the reference
+  (rule 5).
 - `gravity` — centre of mass within 0.5 of the centre (rule 6).
 - `gap` — for each pair of elements, the distance between their stroked
   outlines: 0 (shared edge, endpoints on the other's outline within 0.1),
@@ -216,6 +235,10 @@ Composes an SVG and rasterises it with the same engine. Two outputs:
   tile per icon with its ink box drawn over the keyline it matched.
 - `pretty-icons-blind.png`, for the reader: icons only, at 2×, in a shuffled
   numbered order. The key (number → name) goes to stdout.
+
+Both go to `<tmp>/pretty-icons/<parent>-<hash>`, the folder's parent name and
+the first 8 hex of the sha1 of its absolute path, unless `--out` moves them:
+two folders never share it, one folder always does. The paths are printed.
 
 The sheet's text uses the system font resvg finds, or resvg's default. The
 sheet is for looking, never delivered.
@@ -250,11 +273,14 @@ names in alphabetical order. The prompt is fixed, in `read.md`:
 > This image shows N numbered icons from one sidebar. Below are N names in
 > alphabetical order. Read no file but the image. For each number, say the
 > name it stands for and, in five words or fewer, the object you see. If two
-> numbers compete for one name, say so.
+> numbers compete for one name, say so. If a number gets its name only
+> because the other names are taken, say so.
 
 An icon passes when the reader gives its name, or names the object the
 concept declared (`security → "shield with a check"` counts). It fails on a
-wrong name, two icons competing for one name, or "don't know". A failed icon
+wrong name, two icons competing for one name, or "don't know"; and, whatever
+name it gave, when the reader got the name by elimination or names an object
+that is neither the declared one nor one that means the name. A failed icon
 goes back to step 3; the whole set is checked again (the median moved) and a
 **new** reader gets the new sheet, because one who saw the old sheet is no
 longer blind. Without a second agent, the hand-over says: **not read blind**.

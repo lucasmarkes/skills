@@ -1,0 +1,4 @@
+node_modules/
+/pretty-icons/
+*.png
+.DS_Store
