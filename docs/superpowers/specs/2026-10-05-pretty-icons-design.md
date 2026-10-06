@@ -19,9 +19,11 @@ cannot see.
 
 1. `check.mjs` rejects the ten current Hairline icons (on `keyline`,
    `construction`, `weight` and `gap`), accepts the corrected ten shipped as
-   `examples/hairline`, and accepts ten Lucide icons at 24 converted to the
-   duotone construction (so the tolerances are not narrower than a known
-   good set).
+   `examples/hairline`, and passes ten Lucide icons at 24 on `live`, `gap`
+   and `gravity`, the three rules Lucide's own guide states (padding 1, 2 px
+   between elements, centred by gravity), so those tolerances are not
+   narrower than a known good set. Keyline, weight and construction are this
+   system's own; Lucide was not drawn to them.
 2. A blind reader given the corrected set, unlabelled, pairs every icon with
    its name.
 3. The corrected set replaces the current one in the Hairline site, in one
@@ -52,14 +54,15 @@ cannot see.
 ### Presets
 
 The person picks the grid the app uses. Everything below scales with it.
-Keylines follow Material's proportions: the circle fills the live area, the
-square is 90% of it, portrait and landscape are 80% on one side.
+Padding is 1 in every grid, as Lucide's and the Hairline set's are. Keylines
+follow Material's proportions: the circle fills the live area, the square is
+90% of it, portrait and landscape are 80% on one side.
 
 | Grid | Stroke | Padding | Live | Circle | Square | Portrait | Landscape | Radius ≥ 8 / < 8 | Min gap |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 16 | 1.5 | 1 | 14 | 14 | 12.5 | 11 × 14 | 14 × 11 | 1.5 / 1 | 1.5 |
 | 20 | 1.5 | 1 | 18 | 18 | 16 | 14 × 18 | 18 × 14 | 2 / 1 | 1.5 |
-| 24 | 2 | 2 | 20 | 20 | 18 | 16 × 20 | 20 × 16 | 2 / 1 | 2 |
+| 24 | 2 | 1 | 22 | 22 | 20 | 18 × 22 | 22 × 18 | 2 / 1 | 2 |
 
 Keyline sizes are sizes of **ink**: the stroke's outer edge, not the
 element's geometry. `rules.md` carries the geometry that lands on each
@@ -69,7 +72,7 @@ keyline, so the agent copies a body instead of inventing coordinates:
 | --- | --- | --- | --- | --- |
 | 16 | `cx 8 cy 8 r 6.25` | `x 2.5 y 2.5 w 11 h 11` | `x 3.25 y 1.75 w 9.5 h 12.5` | `x 1.75 y 3.25 w 12.5 h 9.5` |
 | 20 | `cx 10 cy 10 r 8.25` | `x 2.75 y 2.75 w 14.5 h 14.5` | `x 3.75 y 1.75 w 12.5 h 16.5` | `x 1.75 y 3.75 w 16.5 h 12.5` |
-| 24 | `cx 12 cy 12 r 9` | `x 4 y 4 w 16 h 16` | `x 5 y 3 w 14 h 18` | `x 3 y 5 w 18 h 14` |
+| 24 | `cx 12 cy 12 r 10` | `x 3 y 3 w 18 h 18` | `x 4 y 2 w 16 h 20` | `x 2 y 4 w 20 h 16` |
 
 Fill opacity is 0.2 in every preset. Dashes are allowed (`stroke-dasharray`),
 with dash and gap each at least one stroke.
@@ -279,7 +282,7 @@ skills/
     pretty-icons/
       fixtures/
         hairline-before/    the ten current icons, which check rejects
-        lucide-duotone/     ten Lucide icons at 24, converted, which check accepts
+        lucide/             ten Lucide icons at 24, which pass live, gap and gravity
       check.test.mjs  sheet.test.mjs  emit.test.mjs
   docs/superpowers/specs/   this file
 ```
