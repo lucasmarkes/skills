@@ -1,139 +1,140 @@
 # The ten rules at the filled finish
 
-The grid names the finish: 16, 20 and 24 are duotone (`rules.md`), 48 is filled. The ten rules keep their names and numbers; this file says where each reads differently at 48, and the rest is `rules.md`'s text. An icon at 48 is shown at 32, 48 or 64 by CSS, in a feature grid, a category list or an empty state, never in a sidebar. `examples/pantry`, eight icons for one kitchen app, is the finish; its metaphors are not the bar (rule 09).
+The grid names the finish: 16, 20 and 24 are duotone (`rules.md`), 48 is filled. The ten rules keep their names and numbers; this file says where each reads differently at 48, and the rest is `rules.md`'s text. An icon at 48 is shown at 32, 48 or 64 by CSS, in a feature grid, a category list or an empty state, never in a sidebar. `examples/garage`, ten icons for one car app, is the finish; its metaphors are not the bar (rule 09).
 
-What the finish is: an ink contour over a flat colour, a copy of the silhouette one shade darker set down and right under it, the object's own details drawn in that shade, and one short white highlight on the top-left of a round body. Everything is told apart by paint alone:
+What the finish is: a thin line over a light body, in five neutral tones and no colour. The light comes from the top: the side of the body away from it is shaded inside the body, under the line. No offset shadow, no highlight. A part that is solid and small (a wheel, a terminal, a lamp that is on) is filled in the line tone; glass and a lamp that is off are paper. Everything is told apart by paint and by order:
 
 | Element | What it is | Paint |
 | --- | --- | --- |
-| shadow | the first element: a body's geometry copied exactly, moved by `transform="translate(3 3)"` | `fill` the body's shade, `stroke="none"` |
-| body | the silhouette, or a part of it with its own colour: a closed element | `fill` a palette fill; no `stroke` (the root's ink draws the contour) |
-| detail | what is on the object: seeds, stripes, holes, a label line | `stroke` a shade or paper, no `fill`; or a dot: `fill` a shade and `stroke="none"` |
-| part | what is of the object but not on it: a stem, a handle, a spout | no `fill`, no `stroke` (ink) |
+| tone | a body's colour: a closed element | `fill` the fill tone (or paper), `stroke="none"` |
+| shade | the side away from the light: the lower or right part of the body | `fill` the shade tone, `stroke="none"`, after its tone and before its contour; or an open stroke in the shade |
+| contour | the tone's geometry pasted, nothing else on it | no `fill`, no `stroke` (the root's line) |
+| shape | a closed element filled and drawn in one: a wheel, a cap, a lamp, a base | `fill` a tone; no `stroke` |
+| line | a part (a hose, a needle, a sign) | no `fill`, no `stroke`; `stroke-width` 2 for a mark of weight |
+| mark | what is printed on the object: ticks, treads, a gauge's scale | `stroke` the mark tone |
+| bar and core | a tube (a spoke, a rim, a stick): a bar at `stroke-width="3.5"`, then its path pasted | the core: `stroke` the fill or the shade tone, at the root's width |
+| dot | a circle of r 2 or less: a hub, a rivet | `fill` a tone, `stroke="none"` |
 
 ## The preset
 
-| Grid | Stroke | Padding | Live | Step | Circle | Square | Portrait | Landscape | Radius ≥ 16 / < 16 | Gap ink · detail | Shadow |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 48 | 2.5 | 2 | 44 | 0.25 | 41 | 37 | 33 × 41 | 41 × 33 | 3 / 1.5 | 2.5 · 1.25 | 3, 3 |
+| Grid | Stroke | Weights | Padding | Live | Step | Circle | Square | Portrait | Landscape | Gap line · mark |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 48 | 1.5 | 2, 3.5 | 4 | 40 | 0.25 | 40 | 36 | 32 × 40 | 40 × 32 | 1.5 · 0.75 |
 
-Keylines are sizes of the object's ink without its shadow. The object and its shadow together fill the live area: the keyline is the live area less the shadow's offset, and it is centred at **22.5, 22.5**, half the offset up and left of the canvas centre. The shadow hangs off it down and right to 46. Tolerances: keyline ±1, gravity ±3, weight ±25% of the median and of the reference.
+Keylines are sizes of the object's ink, centred at **24, 24**. Tolerances: keyline ±1, gravity ±3, weight ±25% of the set's median and of the reference.
 
-## The palette
+## The tones
 
-One ink, one paper, fourteen colours in pairs. A body takes a fill; its shadow and its details take the shade of that fill. Nothing in a file is a hex the table does not hold.
+Five tones, nothing else. A file holds the light ones; a dark page swaps each for its twin (`toDark` in `presets.mjs`; the sheet's dark row does it).
 
-| Name | Fill | Shade |
-| --- | --- | --- |
-| ink | `#2e3955` | — |
-| paper | `#ffffff` | — |
-| red | `#d26352` | `#ad4a43` |
-| orange | `#df8f51` | `#b56a3b` |
-| yellow | `#f3d35e` | `#d4ad3c` |
-| tan | `#d5ae73` | `#ad8b55` |
-| brown | `#9b6d49` | `#6b4a30` |
-| cocoa | `#714b33` | `#4b301e` |
-| green | `#8aa968` | `#5f7d47` |
-| leaf | `#c7dd9e` | `#93ad74` |
-| blue | `#9db5db` | `#7288b0` |
-| mist | `#f4f4f2` | `#bcc6d6` |
-| cream | `#efe0b4` | `#d1b67a` |
-| pink | `#e8b4ab` | `#c98a80` |
-| plum | `#a63d5b` | `#7e2f47` |
-| grey | `#c3c0b8` | `#9b9b9b` |
+| Name | Light | Dark | Takes |
+| --- | --- | --- | --- |
+| line | `#25262a` | `#f1f1ee` | every contour, parts, solid small parts |
+| fill | `#ececea` | `#3d3e43` | the body |
+| shade | `#cfcfcb` | `#2c2d31` | the side away from the light, a base, a core |
+| paper | `#ffffff` | `#5a5b61` | glass, a lamp that is off, a hole |
+| mark | `#8b8c90` | `#9d9ea3` | ticks and treads, as a stroke only |
+
+## The radii
+
+A rect's radius says what the object is, then how big: read its smaller side.
+
+| Character | Objects | ≥ 16 | 8 to 16 | < 8 |
+| --- | --- | --- | --- | --- |
+| cut | a sheet, a board, a card, a screen: real edges | 2 | 1.5 | 1 |
+| cased | a box, a can, a battery, a pump | 6 | 2.5 | 1.5 |
+| moulded | a hood, a cap, a knob, a lamp's housing: cast, held in the hand | 8 | 4 | 2.5 |
+| pill | a base, a handle, a slot | half the smaller side | | |
+
+A path's corners take the same radius as arcs: the oil can's body `rx 6` and its shade's `A6 6`. When in doubt, cased.
 
 ## The bodies
 
-Each body's ink lands on its keyline, centred at 22.5. A rect's edge sits half a stroke inside the keyline; a circle's radius is half the keyline less half a stroke. An outline of your own (an egg, a pear, a fish) fits its ink to the keyline's size, as the egg below does at 33 × 41.
+Each body's ink lands on its keyline, centred at 24. A rect's edge sits half a stroke inside the keyline; a circle's radius is half the keyline less half a stroke. An outline of your own (a car, a wrench) fits its ink to the keyline's size.
 
 | Circle | Square | Portrait | Landscape |
 | --- | --- | --- | --- |
-| `cx 22.5 cy 22.5 r 19.25` | `x 5.25 y 5.25 w 34.5 h 34.5 rx 3` | `x 7.25 y 3.25 w 30.5 h 38.5 rx 3` | `x 3.25 y 7.25 w 38.5 h 30.5 rx 3` |
+| `cx 24 cy 24 r 19.25` | `x 6.75 y 6.75 w 34.5 h 34.5 rx 6` | `x 8.75 y 4.75 w 30.5 h 38.5 rx 6` | `x 4.75 y 8.75 w 38.5 h 30.5 rx 6` |
 
-Every icon starts from this root. `examples/pantry/egg.svg`, an egg on the portrait keyline, is the whole construction in six elements: the shadow, the body, the highlight, three speckles in the shade:
+Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded housing on the portrait keyline, is the whole construction in seven elements: the brackets, the tone, the shade, the contour, three lamps:
 
 ```svg
-<svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#2e3955" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M22.5 3.25C13.5 3.25 7.25 16 7.25 27C7.25 36 14 41.75 22.5 41.75C31 41.75 37.75 36 37.75 27C37.75 16 31.5 3.25 22.5 3.25Z" fill="#d1b67a" stroke="none" transform="translate(3 3)" />
-  <path d="M22.5 3.25C13.5 3.25 7.25 16 7.25 27C7.25 36 14 41.75 22.5 41.75C31 41.75 37.75 36 37.75 27C37.75 16 31.5 3.25 22.5 3.25Z" fill="#efe0b4" />
-  <path d="M12.75 30C13 22 15.5 15 19.5 10" stroke="#ffffff" />
-  <circle cx="27" cy="33" r="1.5" stroke="#d1b67a" />
-  <circle cx="31" cy="24" r="1.5" stroke="#d1b67a" />
-  <circle cx="25.5" cy="18.5" r="1.5" stroke="#d1b67a" />
+<svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M8.75 18H13.75M8.75 30H13.75M34.25 18H39.25M34.25 30H39.25" />
+  <rect x="13.75" y="4.75" width="20.5" height="38.5" rx="8" fill="#ececea" stroke="none" />
+  <path d="M26.25 4.75A8 8 0 0 1 34.25 12.75V35.25A8 8 0 0 1 26.25 43.25Z" fill="#cfcfcb" stroke="none" />
+  <rect x="13.75" y="4.75" width="20.5" height="38.5" rx="8" />
+  <circle cx="24" cy="13" r="4" fill="#25262a" />
+  <circle cx="24" cy="24" r="4" fill="#ffffff" />
+  <circle cx="24" cy="35" r="4" fill="#ffffff" />
 </svg>
 ```
 
-The egg's path runs from 7.25 to 37.75 across and 3.25 to 41.75 down: with the stroke, 33 × 41. The shadow is the same `d`, pasted, with the cream's shade and the offset. The speckles are rings of r 1.5 in the shade: at this stroke a ring that small is a dot, and a ring is a line, so it counts for weight (rule 05). A speckle as a shade-filled dot with `stroke="none"` is allowed too, and weighs nothing.
+The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="none"`; the shade is the right third of it, its corners the same arcs, so the contour pasted after it covers the seam; the contour is the tone's rect again, bare. The brackets come first, so the body covers their ends. The lamp that is on is solid line; the two that are off are paper, drawn by the root's line.
 
 ## 01 · grid
 
-`viewBox="0 0 48 48"`, every number a multiple of 0.25, every pixel inside 2–46, the shadow included: an object that reaches 44 pushes its shadow to 47 and fails `live`. The file is flat: `rect`, `circle`, `line` and `path`, self-closing, in the root. `transform` is allowed on one element, the shadow, and only as `translate(3 3)`.
+`viewBox="0 0 48 48"`, every number a multiple of 0.25, every pixel inside 4–44. The file is flat: `rect`, `circle`, `line` and `path`, self-closing, in the root. No `transform`, no `<use>`, no `<defs>`.
 
-- **Rejected when:** `grid  pear  path@3 d[4] 4.125 → a multiple of 0.25`; `live  tomato  ink 2,3–47,46 → inside 2–46`; `construction  tomato  path@4 transform → only on the shadow, the first element`.
+- **Rejected when:** `grid  tyre  path@3 d[1] 10.4 → a multiple of 0.25`; `construction  traffic-light  rect@3 transform → no offset shadow: the shade sits inside the body`.
 
 ## 02 · keyline
 
-The object's ink box, without its shadow, is within 1 of circle 41, square 37, portrait 33 × 41 or landscape 41 × 33. Its centre is 22.5: a circle body runs from 2 to 43, a landscape body from 2 to 43 across and 6 to 39 down. The shadow then runs to 46.
+The object's ink box is within 1 of circle 40, square 36, portrait 32 × 40 or landscape 40 × 32. A part that sticks out of the body (a bracket, a hose, a terminal) is ink and counts. A ring at 3.5 reaches out a bar's half: its radius is 18.25 for the circle, not 19.25.
 
-- **Keep it:** choose the format in the concept, start from the bodies table or fit an outline to the size. A part that sticks out of the silhouette (a stem, a spout, a handle) is ink and counts: the pear's stem reaches 3.5 so the body stops at 41.75, 33 × 41 together. A detail never pushes the box out.
-- **Keep it, for an object that is wider than tall by a little:** a cupcake 39 × 38 fits nothing. Widen the frosting to the circle, or narrow the cup to the square.
-- **Rejected when:** `keyline  cupcake  39.06 × 38.31 → square 37 × 37 ±1`.
+- **Rejected when:** `keyline  steering-wheel  38 × 38 → circle 40 × 40 ±1`.
 
-## 03 · stroke, and the palette
+## 03 · stroke, and the tones
 
-The root is `stroke="#2e3955" stroke-width="2.5"`, round caps and joins, `fill="none"`. No element sets a width, a cap, a join, an opacity or a dash. An element sets `fill` and `stroke` only to say what it is (the table above), and only from the palette.
+The root is `stroke="#25262a" stroke-width="1.5"`, round caps and joins, `fill="none"`. An element sets `stroke-width` only to 2 (a sign, a lug, a mark of weight) or 3.5 (a bar); never a cap, a join, an opacity or a dash. A contour and every filled element keep the root's width. Every `fill` and `stroke` is one of the five tones.
 
-- **Rejected when:** `stroke  apple  stroke currentColor → #2e3955, the ink`; `stroke  apple  path@3 stroke-width 2 → the root's`; `palette  apple  path@3 fill #c0392b → a palette fill, or none`; `palette  apple  path@5 stroke #333 → a palette shade, paper or ink`.
+- **Rejected when:** `stroke  traffic-light  stroke #2e3955 → #25262a, the line tone`; `stroke  traffic-light  stroke-width 2.5 → 1.5`; `palette  traffic-light  rect@3 fill #e8b4ab → one of the five tones: #25262a #ececea #cfcfcb #ffffff #8b8c90`.
 
 ## 04 · construction
 
-One shadow, first in the file; at least one body; details in the shade or in paper; parts in ink. The shadow is a body's geometry pasted, not redrawn and not a `<use>`: `check.mjs` compares it with every body's. A body with two colours (a jar and its lid, a pear and its leaf) is two bodies; one of them casts the shadow, the larger. A body's contour is a rect, a circle, a path of at most five straight sides, or a path shaped by curves (`rules.md` 04).
+Tone, shade, contour, in that order, for every body; at least one body in the fill tone. The contour is the tone's geometry pasted, not redrawn: `check.mjs` matches them. A shade is the lower or right part of its body, its edges on the body's outline, so the contour covers its seam. A body's contour is a rect, a circle, or a path of at most five straight sides; curves between them are free, so round a notched outline's corners with arcs rather than adding sides (`rules.md` 04).
 
-- **Keep it, for the highlight:** one open path in paper, two to four units long, on the top-left of a round body, curving with the contour, a stroke and a half inside it (rule 08). A flat body (a jar, a grater) can carry one too, on its left side. At most one per icon: a second shine is a second accent (rule 09).
-- **Keep it, for a hole, a seed or a speckle:** a shade-filled `circle` with `stroke="none"`, r 1.5 to 2, or a short shade stroke (`M18 17.5H21`). A hole in ink reads as a mark on top of the object, not in it.
-- **Keep it, for a part:** a stem, a handle, a spout or a sprout is an open path in ink, touching the body (rule 08). It casts no shadow.
-- **Rejected when:** `construction  apple  no shadow → the first element: a body's geometry, transform="translate(3 3)", its shade, stroke none`; `construction  apple  path@2 shadow → a body's geometry, copied exactly`; `construction  apple  path@2 fill #c0392b → #ad4a43, the shade of path@3's fill`; `construction  apple  path@2 stroke missing → stroke none on the shadow`; `construction  mug  rect@4 fill #ffffff → paper only as a stroke, the highlight`; `construction  mug  2 highlights → one stroke in paper`; `construction  mug  path@3 stroke none → a contour on every body`.
+- **Keep it, for a tube** (a spoke, a rim, a gear stick): a bar at 3.5 in the line, then the same `d` with `stroke` the fill or the shade tone and no width. The core cuts the bar into two thin lines. A ring as a tube: `circle r 18.25 stroke-width 3.5`, then the circle again with `stroke="#cfcfcb"`.
+- **Keep it, for a solid small part:** a wheel, a terminal, a lamp that is on: a shape filled with the line tone. Glass and a hole: paper.
+- **Keep it, for what is printed:** ticks and treads in the mark tone, at the root's width.
+- **Rejected when:** `construction  traffic-light  rect@3 fill #ececea stroke none → its contour after it: the same geometry, no fill, the root's line`; `construction  traffic-light  path@5 shade → between a body's tone and its contour, so the line covers its edge`; `construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lit lamp)`; `construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke`; `construction  traffic-light  path@9 stroke #ececea → the fill tone as a stroke only on a core: a 3.5 bar's path pasted after it, at the root's width`; `construction  traffic-light  rect@5 stroke-width 2 → the root's line on a contour`; `construction  traffic-light  no body → a closed element in the fill tone, #ececea`.
 
 ## 05 · weight
 
-Ink is the line alone: every fill dropped, the shadow dropped, every stroke read as ink. A solid tomato and a hollow whisk weigh by their contours and their lines, not their area. Within 25% of the set's median and of the reference, 459.6, the median of `examples/pantry`. A unit of line weighs about 2.5; a ring of r 1.5 about 24; a shade-filled dot nothing.
+Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. A tyre filled solid weighs its outline, not its area. Within 25% of the set's median and of the reference, 277.2, the median of `examples/garage`.
 
-- **Keep it, for a light icon:** a single contour with a highlight (the egg, 324) is under the bar. Give it the details the object has: speckles as rings, a band in the shade, a longer highlight.
-- **Keep it, for a heavy icon:** a label line, a third gill, a fourth rib: drop one.
-- **Rejected when:** `weight  egg  ink 324.17 (-28.2%) → within ±25% of the set's median 459.57`.
+- **Keep it, for a light icon:** give it what the object has: a slot as a tube, a hole, a tick. The wrench gained a slot as a tube and passed.
+- **Keep it, for a heavy icon:** a double ring, a third spoke, a fourth tread: thin it to a tube, or drop one.
+- **Rejected when:** `weight  wrench  ink 191.98 (-30.8%) → within ±25% of the set's median 277.24`.
 
 ## 06 · gravity
 
-The object's mass, without its shadow, is within 3 of 22.5 on each axis. A pear, a grater or a cupcake sits low by nature; 3 lets it. Past 3, lift the body a quarter at a time, or lighten what sits low.
-
-- **Rejected when:** `gravity  grater  mass +0, +3.56 → within ±3`.
+The object's mass is within 3 of 24 on each axis. A gearshift sits low by nature; 3 lets it. Past 3, lift the body a quarter at a time, or lighten what sits low. A triangle (a tent, a cone) holds its mass in its base: bow its sides outward.
 
 ## 07 · radius
 
-A rect whose smaller side is 16 or more takes `rx="3"`; below, `rx="1.5"`. A jar's lid 22.5 × 8 takes 1.5.
+By character, by the smaller side: the radii table. A rect whose `rx` is none of its four (cut, cased, moulded, pill) is rejected.
+
+- **Rejected when:** `radius  traffic-light  rect@3 rx 5 → rx 2, 6, 8 or 10.25: cut, cased, moulded or a pill`.
 
 ## 08 · gap
 
-Ink to ink: touch, or one stroke apart, 2.5. Any pair that includes a detail: touch, or half a stroke apart, 1.25, so stripes, holes and a highlight fit inside a body. The shadow is left out; it overlaps everything by design. The subpaths of one path are held to the rule: holes merged into one path are as close as separate ones.
+Line to line: touch, or one stroke apart, 1.5. A mark from anything: touch, or half a stroke apart, 0.75. Tones, shades, dots and cores are paint and are left out. A part touches the body on its centreline or crosses it: the steering wheel's spokes start on the ring's centreline.
 
-- **Keep it, for the highlight:** a stroke and a half inside the contour: the egg's contour at x 7.25 to 9, its highlight at 12.75, outer edges 1.25 apart.
-- **Keep it, for a row of holes:** dashes 2.5 long, 6.5 apart centre to centre, as the grater's.
-- **Keep it, for a part:** it ends on the body's centreline, or crosses it: the pear's stem `M22.5 10V3.5` starts on the body's top.
-- **Rejected when:** `gap  honey  path@3 to path@6 1.13 apart → ≥ 1.25 apart, or crossing`; `gap  fish  path@3 to circle@5 1.88 apart → ≥ 2.5 apart, or crossing` (an ink eye near an ink contour: make it a shade dot, or move it).
+- **Rejected when:** `gap  wrench  path@4 to circle@5 0.07 apart → ≥ 1.5 apart, or crossing`.
 
 ## 09 · metaphor
 
-One object, nameable in one or two words, from at most eight elements: the shadow, one or two bodies, the parts, two or three details, one highlight. A path takes at most twelve commands. No letters, digits, logos or initials. Draw with curves and one asymmetry (a leaf to one side, a spout on the left and a handle on the right): a symmetric rect with a shadow reads as a button.
+One object, nameable in one or two words, from at most eight elements. A path takes at most twelve commands. No letters, digits, logos or initials: a battery's signs are a plus and a minus, two strokes. Shade with the shape of the body, never as a stripe across it.
 
-- **Keep it, for the details:** draw the two or three the object has, in the shade: an onion's bands, a fish's gills, a grater's holes, a jar's label. Not a realistic surface. Not a face.
-- **Keep it, for an object that is wires, a frame or a cage** (a whisk, a basket, a rack): the wires are ink parts, open paths, and the one solid piece (the handle) is the body that casts the shadow. A whisk drawn as a solid balloon with the wires on it in the shade read as garlic.
-- **Keep it, for the examples:** do not copy `examples/pantry`'s metaphors; draw your own objects at its finish.
-- **Rejected when:** `count  grater  9 elements → at most 8`; `count  teapot  path@3 13 commands → at most 12`; or read (`read.md`).
+- **Keep it, for a row of things** (treads, ticks, lugs): one path, its subpaths; two paths if it passes twelve commands.
+- **Keep it, for the examples:** do not copy `examples/garage`'s metaphors; draw your own objects at its finish.
+- **Rejected when:** `count  tyre  path@4 15 commands → at most 12`; or read (`read.md`).
 
 ## 10 · set
 
-One grid, one palette, measured together. A colour may repeat across icons; a fill the palette does not hold may not appear once.
+One grid, five tones, measured together.
 
 ## How check.mjs measures
 
-Keyline, gravity and live are read from a render without the shadow for the first two and with it for the third; weight from a render with every fill removed, the shadow dropped and every stroke in ink; gap from the centrelines of every element but the shadow. `--print` shows the object's box and its line ink.
+Keyline and gravity are read from a render of the icon as drawn; weight from a render of its lines alone (`linesOf` in `filled.mjs`); gap from the centrelines of every element but the paint. `--print` shows the object's box and its line ink.

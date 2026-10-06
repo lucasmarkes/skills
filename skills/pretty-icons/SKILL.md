@@ -1,12 +1,12 @@
 ---
 name: pretty-icons
-description: Use when an app needs a set of icons drawn to match each other, small ones for a sidebar, nav or tabs, or larger illustrated ones with flat colour for feature grids, categories or empty states; or when existing icons look uneven in a row (one bigger, one lighter, one off centre); or when someone runs /pretty-icons with a list of names or a file.
+description: Use when an app needs a set of icons drawn to match each other, small ones for a sidebar, nav or tabs, or larger shaded ones in neutral tones for feature grids, categories or empty states; or when existing icons look uneven in a row (one bigger, one lighter, one off centre); or when someone runs /pretty-icons with a list of names or a file.
 argument-hint: "[names, or a file with the nav]"
 ---
 
 # pretty-icons: a set that sits even
 
-You are drawing a set of icons for one app in one of two finishes. **Duotone**, on 16, 20 or 24: a stroke in `currentColor` with a `currentColor` fill at 20% under every body, for a sidebar. **Filled**, on 48: an ink contour over a flat colour from one palette, a shadow in the colour's shade set down and right, the object's details in that shade and one white highlight, for icons shown at 32–64 px. The grid names the finish. What makes them a set is measurement: `check.mjs` measures every icon against the others and the keylines, and a reader who has seen none of your work names each from the picture alone. `examples/hairline` (ten sidebar icons) and `examples/pantry` (eight kitchen icons) are the finishes; their metaphors are not the bar (rule 09).
+You are drawing a set of icons for one app in one of two finishes. **Duotone**, on 16, 20 or 24: a stroke in `currentColor` with a `currentColor` fill at 20% under every body, for a sidebar. **Filled**, on 48: a thin line over a light body in five neutral tones, the side away from the light shaded inside the body, no shadow and no colour, for icons shown at 32–64 px. The grid names the finish. What makes them a set is measurement: `check.mjs` measures every icon against the others and the keylines, and a reader who has seen none of your work names each from the picture alone. `examples/hairline` (ten sidebar icons) and `examples/garage` (ten car icons) are the finishes; their metaphors are not the bar (rule 09).
 
 Files named below are in this skill's folder, `<skill-dir>`. Draw icons in `pretty-icons/` in the person's working directory; run the scripts from there.
 
@@ -15,7 +15,7 @@ Files named below are in this skill's folder, `<skill-dir>`. Draw icons in `pret
 The argument is names, a file, or nothing. With nothing, find the app's navigation and icons. Before drawing, write back:
 
 - the names to cover;
-- the finish and the grid, from where the icon is shown. In a sidebar, a nav, tabs or a table row, beside text, it is duotone; measure the existing icon's rendered box: 16 beside 13–14px text, 20 beside 15–16px, 24 beside larger. Never draw 24 for a 16px slot. In a feature grid, a category list, a card header or an empty state, at 32 px or more, or when the person asks for colour or an illustrated look, it is filled, on 48, shown at its size by CSS. Never draw filled for a 16–24 px slot, and never duotone for a 48 px one;
+- the finish and the grid, from where the icon is shown. In a sidebar, a nav, tabs or a table row, beside text, it is duotone; measure the existing icon's rendered box: 16 beside 13–14px text, 20 beside 15–16px, 24 beside larger. Never draw 24 for a 16px slot. In a feature grid, a category list, a card header or an empty state, at 32 px or more, or when the person asks for an illustrated look, it is filled, on 48, shown at its size by CSS. Never draw filled for a 16–24 px slot, and never duotone for a 48 px one;
 - how the app takes icons: React (and any wrapper, like `svg(children)`), `.svg` files, or a sprite.
 
 Copy the app's icons in this style into `pretty-icons/` first: they are the set (rule 10).
@@ -26,9 +26,9 @@ One line per name: *name — object, format, elements*, as in `billing — recei
 
 ## 3. Draw
 
-`node <skill-dir>/sheet.mjs <skill-dir>/examples/hairline` (duotone) or `<skill-dir>/examples/pantry` (filled) and look at the sheet: that is the finish. Draw your own objects at that finish (rule 09).
+`node <skill-dir>/sheet.mjs <skill-dir>/examples/hairline` (duotone) or `<skill-dir>/examples/garage` (filled) and look at the sheet: that is the finish. Draw your own objects at that finish (rule 09).
 
-Read `rules.md` first; for the filled finish, then `rules-filled.md`, which says where each rule reads differently at 48 and gives the palette, the bodies and a worked egg. Write one file per icon, `pretty-icons/<name>.svg`, from its root. Start every body from the bodies table. Use only `rect`, `circle`, `line` and short `path`s. At the filled finish, paste the body's geometry as the first element for its shadow; never redraw it.
+Read `rules.md` first; for the filled finish, then `rules-filled.md`, which says where each rule reads differently at 48 and gives the tones, the radii, the bodies and a worked traffic light. Write one file per icon, `pretty-icons/<name>.svg`, from its root. Start every body from the bodies table. Use only `rect`, `circle`, `line` and short `path`s. At the filled finish, draw each body as tone, shade, contour: the contour is the tone's geometry pasted, never redrawn.
 
 ## 4. Check
 
@@ -65,8 +65,8 @@ Edit only that icon's `.svg`. Run steps 4 and 5 for the set.
 | drawing a hexagon, cut gem or stepped body | rule 04: a rect, circle, triangle, house or curved outline |
 | reading the sheet yourself and calling it read | `read.md`: a second agent, or say "not read blind" |
 | drawing cells, nodes or rows as separate elements | rule 09: one path, eight commands at most |
-| picking a colour that "looks closer" than the palette's | `rules-filled.md`: the fourteen pairs, ink and paper, nothing else; the shade comes with the fill |
-| drawing a seed, a hole or a stripe in ink | `rules-filled.md` 04: details take the body's shade; ink is the contour and the parts |
-| redrawing the shadow, or using `<use>` or `<defs>` | `rules-filled.md` 04: the body's `d` pasted, `translate(3 3)`, its shade, `stroke="none"`, first in the file |
-| filling a whisk's balloon, a basket or a rack as a body | `rules-filled.md` 09: wires are ink parts; the solid piece is the body |
-| drawing a filled body on the 44 keyline | `rules-filled.md` 02: the object's keyline is 41 wide, centred at 22.5; the shadow fills the rest |
+| reaching for a colour, or a grey that "looks closer" | `rules-filled.md` 03: the five tones, nothing else; a dark page swaps them, the file never does |
+| shading the top or the left, or a stripe across the body | `rules-filled.md` 04: the light is from the top; the shade is the lower or right part, inside the outline |
+| adding an offset shadow or a white shine | `rules-filled.md` 04: neither; depth is the shade inside the body |
+| doubling a ring or a spoke to make it read thicker | `rules-filled.md` 04: a bar at 3.5 and its core, a tube |
+| rounding every rect the same | `rules-filled.md` 07: cut, cased, moulded or a pill, by what the object is |

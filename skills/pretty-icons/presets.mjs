@@ -6,8 +6,8 @@
  * circle's radius is half the keyline less half a stroke.
  *
  * The grid names the finish. 16, 20 and 24 are duotone: a currentColor stroke
- * over a 20% fill, for a sidebar. 48 is filled: an ink contour over a flat
- * palette colour, a shade copy of the body behind it, for 32–64 px.
+ * over a 20% fill, for a sidebar. 48 is filled: a thin line over a light fill,
+ * shaded inside on the side away from the light, in five neutral tones, for 32–64 px.
  */
 export const PRESETS = {
   16: { stroke: 1.5, radius: [1.5, 1], keylines: { circle: [14, 14], square: [12.5, 12.5], portrait: [11, 14], landscape: [14, 11] } },
@@ -16,36 +16,32 @@ export const PRESETS = {
 };
 export const FILLED_PRESETS = {
   48: {
-    // The object's keylines are the live area less the shadow's offset: object and shadow together fill 44.
-    finish: "filled", stroke: 2.5, pad: 2, radius: [3, 1.5], radiusAt: 16, shadow: [3, 3], elements: 8, commands: 12,
+    // No shadow: the keylines sit in the live area as the duotone's do, centred at 24.
+    // Three weights: the root's line, a mark (2), a bar (3.5). A rect's radius is chosen by what the object is: RADII.
+    finish: "filled", stroke: 1.5, weights: [2, 3.5], pad: 4, elements: 8, commands: 12,
     keylineTol: 1, gravityTol: 3, weightTol: 0.25, referenceTol: 0.25,
-    keylines: { circle: [41, 41], square: [37, 37], portrait: [33, 41], landscape: [41, 33] },
+    keylines: { circle: [40, 40], square: [36, 36], portrait: [32, 40], landscape: [40, 32] },
   },
 };
 export const GRIDS = { ...PRESETS, ...FILLED_PRESETS };
 
 /**
- * The filled finish's colours: ink for contours, paper for the highlight, and pairs
- * of a fill and its shade. A body takes a fill; its shadow and its details take the shade.
+ * The filled finish's five tones, light and dark. The file holds the light ones; a dark
+ * page swaps each for its twin (`toDark`). line draws every contour and the dark parts,
+ * fill is the object, shade the side away from the light, paper glass and lit lamps, mark
+ * the scales and treads printed on the object.
  */
-export const PALETTE = {
-  ink: "#2e3955",
-  paper: "#ffffff",
-  red: ["#d26352", "#ad4a43"],
-  orange: ["#df8f51", "#b56a3b"],
-  yellow: ["#f3d35e", "#d4ad3c"],
-  tan: ["#d5ae73", "#ad8b55"],
-  brown: ["#9b6d49", "#6b4a30"],
-  cocoa: ["#714b33", "#4b301e"],
-  green: ["#8aa968", "#5f7d47"],
-  leaf: ["#c7dd9e", "#93ad74"],
-  blue: ["#9db5db", "#7288b0"],
-  mist: ["#f4f4f2", "#bcc6d6"],
-  cream: ["#efe0b4", "#d1b67a"],
-  pink: ["#e8b4ab", "#c98a80"],
-  plum: ["#a63d5b", "#7e2f47"],
-  grey: ["#c3c0b8", "#9b9b9b"],
-};
+export const PALETTE = { line: "#25262a", fill: "#ececea", shade: "#cfcfcb", paper: "#ffffff", mark: "#8b8c90" };
+export const PALETTE_DARK = { line: "#f1f1ee", fill: "#3d3e43", shade: "#2c2d31", paper: "#5a5b61", mark: "#9d9ea3" };
+export const toDark = (text) => Object.keys(PALETTE).reduce((t, k) => t.replace(new RegExp(PALETTE[k], "gi"), PALETTE_DARK[k]), text);
+
+/**
+ * A rect's radius at the filled finish, by what the object is, then by its smaller side
+ * (≥ 16, 8 to 16, < 8): cut (a sheet, a board, a card: real edges), cased (a box, a can,
+ * a battery, a pump), moulded (a hood, a cap, a knob: cast or soft, held in the hand).
+ * A pill takes half its smaller side.
+ */
+export const RADII = { cut: [2, 1.5, 1], cased: [6, 2.5, 1.5], moulded: [8, 4, 2.5] };
 
 export const PAD = 1;
 export const FILL = 0.2;
@@ -64,19 +60,25 @@ export const FORMATS = ["circle", "square", "portrait", "landscape"];
 export function preset(G) {
   const p = GRIDS[G];
   if (!p) throw new Error(`no preset for grid ${G}`);
-  const pad = p.pad ?? PAD, [sx, sy] = p.shadow ?? [0, 0];
+  const pad = p.pad ?? PAD;
   return {
     G, finish: "duotone", pad, fill: FILL, live: G - 2 * pad, step: GRID_STEP, radiusAt: RADIUS_AT, elements: 3, commands: 8,
-    keylineTol: KEYLINE_TOL, gravityTol: GRAVITY_TOL, weightTol: WEIGHT_TOL, referenceTol: REFERENCE_TOL, shadow: [0, 0],
-    // where the object's keyline is centred: the canvas centre, less half the shadow's offset
-    centre: [(G - sx) / 2, (G - sy) / 2], ...p,
+    keylineTol: KEYLINE_TOL, gravityTol: GRAVITY_TOL, weightTol: WEIGHT_TOL, referenceTol: REFERENCE_TOL, weights: [],
+    centre: [G / 2, G / 2], ...p,
   };
 }
 
-/** The radius a shape of this size (its smaller side) takes on this grid. */
+/** The radius a shape of this size (its smaller side) takes on this grid; at the filled finish, a cased one's. */
 export function radiusFor(G, size) {
-  const { radius: [big, small], radiusAt } = preset(G);
-  return size >= radiusAt ? big : small;
+  return radiiFor(G, size)[preset(G).finish === "filled" ? 1 : 0];
+}
+
+/** Every radius a shape of this size may take: the duotone's one; the filled finish's cut, cased, moulded and pill. */
+export function radiiFor(G, size) {
+  const p = preset(G);
+  if (p.finish !== "filled") return [size >= p.radiusAt ? p.radius[0] : p.radius[1]];
+  const step = size >= 16 ? 0 : size >= 8 ? 1 : 2;
+  return [RADII.cut[step], RADII.cased[step], RADII.moulded[step], size / 2];
 }
 
 /** The element whose ink lands exactly on a keyline. */
@@ -90,7 +92,7 @@ export function body(G, format) {
   return { tag: "rect", x: cx - kw / 2 + stroke / 2, y: cy - kh / 2 + stroke / 2, w, h, rx: radiusFor(G, Math.min(w, h)) };
 }
 
-/** A body as SVG text, with the duotone fill under its stroke. */
+/** A body as SVG text, with the duotone fill under its stroke (the duotone finish's). */
 export function bodySvg(G, format) {
   const b = body(G, format);
   const fill = `fill="currentColor" fill-opacity="${FILL}"`;
@@ -103,6 +105,7 @@ export function bodySvg(G, format) {
  * Median ink of examples/hairline per grid, for a set too small to have a median of its own.
  * On 20 and 24 it is measured from the set scaled from the 16 live area to the grid's, drawn
  * at the grid's own stroke: 20 keeps 16's 1.5, so ink does not grow with the area.
+ * On 48 it is the median line ink of examples/garage: the contours and marks, not the paint.
  */
-export const REFERENCE_INK = { 16: 83.5, 20: 114.2, 24: 181.9, 48: 459.6 };
+export const REFERENCE_INK = { 16: 83.5, 20: 114.2, 24: 181.9, 48: 277.2 };
 export const referenceInk = (G) => REFERENCE_INK[G];

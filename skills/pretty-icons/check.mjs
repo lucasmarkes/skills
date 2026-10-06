@@ -14,7 +14,7 @@
  *   construction  at least one body; a filled element is closed, has a contour and the .2 fill
  *   grid          every number a multiple of 0.25
  *   contour       a filled path has at most five straight sides; a rect, a circle or a curve passes
- *   radius        rx by the shape's size
+ *   radius        rx by the shape's size (at 48, by what the object is: cut, cased, moulded or a pill)
  *   count         at most three elements, at most eight commands in a path (implicit repeats count);
  *                 the details (every element without a fill) at most two subpaths and eight
  *                 drawing commands between them (moves left out)
@@ -25,7 +25,7 @@
 import { readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { preset, radiusFor, FILL, GRIDS } from "./presets.mjs";
+import { preset, radiiFor, FILL, GRIDS } from "./presets.mjs";
 import { parse, num, G as gridOf, ELEMENTS, pathNumbers, pathCommands, moves, isClosed } from "./svg.mjs";
 import { straightSides } from "./geometry.mjs";
 import { filledChecks } from "./filled.mjs";
@@ -90,7 +90,7 @@ export function textChecks(icon, text, expectG) {
   for (const el of parsed.elements) {
     const a = el.attrs, where = el.at;
     for (const k of FORBIDDEN_ATTRS) if (k in a) fail(failures, "stroke", icon, `${where} ${k}`, "not set");
-    if ("stroke-width" in a) fail(failures, "stroke", icon, `${where} stroke-width ${a["stroke-width"]}`, "the root's");
+    if ("stroke-width" in a && !p.weights.includes(num(a, "stroke-width"))) fail(failures, "stroke", icon, `${where} stroke-width ${a["stroke-width"]}`, p.weights.length ? `the root's, or ${p.weights.join(" or ")}` : "the root's");
     for (const k of ROUND_ATTRS) if (k in a && a[k] !== "round") fail(failures, "stroke", icon, `${where} ${k} ${a[k]}`, "round");
     if ("stroke-dasharray" in a) checkDash(failures, icon, where, a["stroke-dasharray"], p.stroke);
   }
@@ -102,8 +102,8 @@ export function textChecks(icon, text, expectG) {
     for (const [k, n] of nums) if (!onGrid(n, p.step)) fail(failures, "grid", icon, `${where} ${k} ${n}`, `a multiple of ${p.step}`);
     if (el.tag === "rect") {
       const size = Math.min(num(a, "width"), num(a, "height"));
-      const want = radiusFor(expectG, size), rx = num(a, "rx", 0);
-      if (rx !== want) fail(failures, "radius", icon, `${where} rx ${rx}`, `rx ${want}`);
+      const want = radiiFor(expectG, size), rx = num(a, "rx", 0);
+      if (!want.includes(rx)) fail(failures, "radius", icon, `${where} rx ${rx}`, want.length > 1 ? `rx ${want.slice(0, 3).join(", ")} or ${want[3]}: cut, cased, moulded or a pill` : `rx ${want[0]}`);
     }
     if (el.tag === "path") {
       const n = pathCommands(a.d ?? "");

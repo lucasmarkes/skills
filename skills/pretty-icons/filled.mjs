@@ -1,105 +1,130 @@
 /**
  * The filled finish: what check.mjs reads from an icon on the 48 grid beyond
- * the rules every grid shares. An icon is a shadow, one or more bodies, details
- * and parts, told apart by paint alone:
- *   shadow   the first element: a body's geometry moved by the preset's offset, filled with the
- *            body's shade, no stroke. The one element that carries a transform.
- *   body     a closed element filled with a palette fill; its contour is the root's ink.
- *   detail   what is on the object: a stroke in a shade or in paper with no fill, or a dot filled
- *            with a shade and no stroke. One detail in paper is the highlight.
- *   part     what is of the object but not on it (a stem, a handle): no fill, the root's ink.
- * It also makes the two texts the measured rules read: the object without its
- * shadow (keyline, gravity) and its lines alone (weight).
+ * the rules every grid shares. Five tones (presets.mjs PALETTE), no colour, no
+ * offset shadow, no highlight: the light comes from the top, and the side away
+ * from it is shaded inside the body. An icon's elements are told apart by paint:
+ *   tone     a body's colour: closed, filled with the fill or paper tone, stroke none.
+ *            Its contour follows it.
+ *   shade    the side away from the light: filled with the shade tone and stroke none, or an open
+ *            stroke in the shade. It sits between a tone and that tone's contour, so the line covers its edge.
+ *   contour  a tone's geometry pasted, no fill: the root's line draws it, over the tone and the shade.
+ *   shape    a closed element filled and drawn in one: a wheel or a cap in the line tone, a window
+ *            in paper, a base in the shade.
+ *   dot      a circle of r 2 or less, filled, stroke none: a hub.
+ *   line     an open stroke in the line tone: a part (a hose, an arm) or a mark of weight (a needle).
+ *   mark     a stroke in the mark tone: ticks, treads, a label. A detail: half a stroke from anything.
+ *   core     a bar's path pasted after it, stroked in the fill or the shade tone at the root's width:
+ *            the bar becomes a tube (a spoke, a rim, a stick).
+ * Tone, shade, dot and core are paint: they are left out of gap and weight.
  */
 import { PALETTE, preset } from "./presets.mjs";
-import { parse, compose, isClosed, geometryKey } from "./svg.mjs";
-import { straightSides } from "./geometry.mjs";
+import { parse, compose, isClosed, geometryKey, num } from "./svg.mjs";
+import { straightSides, sampleParts, bounds } from "./geometry.mjs";
 
-const SIDES = 5;
-const pairs = Object.entries(PALETTE).filter(([, v]) => Array.isArray(v));
-export const FILLS = new Map(pairs.map(([name, [fill, shade]]) => [fill, { name, shade }]));
-export const SHADES = new Map(pairs.map(([name, [fill, shade]]) => [shade, { name, fill }]));
+const SIDES = 5, DOT = 2, BAR = 3.5;
+const TONES = new Map(Object.entries(PALETTE).map(([name, hex]) => [hex, name]));
 const hex = (v) => String(v ?? "").trim().toLowerCase();
 const isNone = (v) => v === undefined || hex(v) === "none";
-const isInk = (v) => hex(v) === PALETTE.ink;
-const isPaper = (v) => hex(v) === PALETTE.paper;
-const inPalette = (v) => isInk(v) || isPaper(v) || FILLS.has(hex(v)) || SHADES.has(hex(v));
+const tone = (v) => TONES.get(hex(v));
 const fail = (list, rule, icon, got, want) => list.push({ rule, icon, got, want });
+const isDot = (el) => el.tag === "circle" && num(el.attrs, "r") <= DOT;
 
-/** The elements sorted by what their paint says they are. An element with a transform is a shadow wherever it sits. */
+/** Each element's role, by its paint and its place. An element with a transform is a shadow, which this finish has none of. */
 export function classify(elements) {
-  const out = { shadow: null, shadows: [], bodies: [], details: [], parts: [] };
+  const out = { shadows: [], tones: [], shades: [], contours: [], shapes: [], dots: [], lines: [], marks: [], cores: [], highlights: [], role: new Map() };
+  const put = (el, role) => { out[role].push(el); out.role.set(el, role); };
+  const open = new Map(), bars = new Set();
   for (const el of elements) {
-    const a = el.attrs;
-    if ("transform" in a) { out.shadows.push(el); continue; }
-    if (!isNone(a.fill)) { (SHADES.has(hex(a.fill)) && isNone(a.stroke) ? out.details : out.bodies).push(el); continue; }
-    if (!isNone(a.stroke) && !isInk(a.stroke)) { out.details.push(el); continue; }
-    out.parts.push(el);
+    const a = el.attrs, fill = isNone(a.fill) ? null : tone(a.fill) ?? "other", stroke = a.stroke === undefined ? "line" : isNone(a.stroke) ? null : tone(a.stroke) ?? "other";
+    if ("transform" in a) put(el, "shadows");
+    else if (fill && !stroke) put(el, fill === "shade" ? "shades" : isDot(el) ? "dots" : "tones");
+    else if (fill) put(el, "shapes");
+    else if (stroke === "fill" || (stroke === "shade" && bars.has(geometryKey(el)))) put(el, "cores");
+    else if (stroke === "shade") put(el, "shades");
+    else if (stroke === "mark") put(el, "marks");
+    else if (stroke === "paper") put(el, "highlights");
+    else if (open.has(geometryKey(el))) { put(el, "contours"); open.delete(geometryKey(el)); }
+    else put(el, "lines");
+    if (out.role.get(el) === "tones") open.set(geometryKey(el), el);
+    if (num(a, "stroke-width") === BAR) bars.add(geometryKey(el));
   }
-  out.shadow = out.shadows[0] ?? null;
+  out.paint = new Set([...out.tones, ...out.shades, ...out.dots, ...out.cores]);
+  out.details = out.marks;
   return out;
 }
 
-/** The finish's own text rules: stroke, palette, construction, contour. Grid, radius and count are check.mjs's. */
+const centre = (el) => { const b = bounds(sampleParts(el, 0.25).flat()); return [(b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2]; };
+
+/** The finish's own text rules: stroke, palette, construction, contour, light. Grid, radius and count are check.mjs's. */
 export function filledChecks(icon, parsed, G) {
-  const failures = [], p = preset(G), root = parsed.attrs, [ox, oy] = p.shadow;
-  const offset = `translate(${ox} ${oy})`;
+  const failures = [], root = parsed.attrs, els = parsed.elements;
+  preset(G);
 
-  if (!isInk(root.stroke)) fail(failures, "stroke", icon, `stroke ${root.stroke ?? "missing"}`, `${PALETTE.ink}, the ink`);
-  for (const el of parsed.elements) {
-    const a = el.attrs, where = el.at;
-    for (const k of ["fill", "stroke"]) if (k in a && !isNone(a[k]) && !inPalette(a[k])) fail(failures, "palette", icon, `${where} ${k} ${a[k]}`, k === "fill" ? "a palette fill, or none" : "a palette shade, paper or ink");
+  if (hex(root.stroke) !== PALETTE.line) fail(failures, "stroke", icon, `stroke ${root.stroke ?? "missing"}`, `${PALETTE.line}, the line tone`);
+  for (const el of els) for (const k of ["fill", "stroke"]) {
+    const v = el.attrs[k];
+    if (v !== undefined && !isNone(v) && !tone(v)) fail(failures, "palette", icon, `${el.at} ${k} ${v}`, `one of the five tones: ${Object.values(PALETTE).join(" ")}`);
   }
 
-  const c = classify(parsed.elements);
-  if (c.bodies.length === 0 && parsed.elements.length > 0) fail(failures, "construction", icon, "no body", "a closed element with a palette fill");
-  const keys = new Map(c.bodies.map((b) => [geometryKey(b), b]));
-  if (!c.shadow && parsed.elements.length > 0) fail(failures, "construction", icon, "no shadow", `the first element: a body's geometry, transform="${offset}", its shade, stroke none`);
-  for (const el of c.shadows) {
-    const a = el.attrs, where = el.at;
-    if (el !== parsed.elements[0]) fail(failures, "construction", icon, `${where} transform`, "only on the shadow, the first element");
-    if (String(a.transform).replace(/\s+/g, " ").trim() !== offset) fail(failures, "construction", icon, `${where} transform ${a.transform}`, `transform="${offset}"`);
-    if (hex(a.stroke) !== "none") fail(failures, "construction", icon, `${where} stroke ${a.stroke ?? "missing"}`, "stroke none on the shadow");
-    const twin = keys.get(geometryKey(el));
-    if (!twin) fail(failures, "construction", icon, `${where} shadow`, "a body's geometry, copied exactly");
-    else {
-      const shade = FILLS.get(hex(twin.attrs.fill))?.shade;
-      if (shade && hex(a.fill) !== shade) fail(failures, "construction", icon, `${where} fill ${a.fill ?? "missing"}`, `${shade}, the shade of ${twin.at}'s fill`);
-    }
+  const c = classify(els), at = (el) => els.indexOf(el);
+  for (const el of c.shadows) fail(failures, "construction", icon, `${el.at} transform`, "no offset shadow: the shade sits inside the body");
+  for (const el of c.highlights) fail(failures, "construction", icon, `${el.at} stroke ${el.attrs.stroke}`, "no highlight: paper only as a fill (glass, a lit lamp)");
+  for (const el of els) if (tone(el.attrs.fill) === "mark") fail(failures, "construction", icon, `${el.at} fill ${el.attrs.fill}`, "the mark tone only as a stroke");
+  if (els.length && ![...c.tones, ...c.shapes].some((el) => tone(el.attrs.fill) === "fill")) fail(failures, "construction", icon, "no body", `a closed element in the fill tone, ${PALETTE.fill}`);
+
+  // a tone and its contour: the tone's geometry pasted after it, no fill
+  const contourOf = new Map();
+  for (const t of c.tones) {
+    const k = geometryKey(t), twin = c.contours.find((x) => at(x) > at(t) && geometryKey(x) === k);
+    if (twin) contourOf.set(t, twin);
+    else fail(failures, "construction", icon, `${t.at} fill ${t.attrs.fill} stroke none`, "its contour after it: the same geometry, no fill, the root's line");
   }
-  for (const el of c.bodies) {
-    const a = el.attrs, where = el.at;
-    if (!FILLS.has(hex(a.fill))) fail(failures, "construction", icon, `${where} fill ${a.fill}`, "a palette fill on a body; a shade only on a detail with no stroke");
-    if (!isNone(a.stroke) && !isInk(a.stroke)) fail(failures, "construction", icon, `${where} stroke ${a.stroke}`, "the root's ink on a body's contour");
-    if (hex(a.stroke) === "none") fail(failures, "construction", icon, `${where} stroke none`, "a contour on every body");
-    if (!isClosed(el)) fail(failures, "construction", icon, `${where} fill ${a.fill}`, "a body is closed; a fill on an open path draws nothing");
-    if (el.tag === "path") {
-      let sides = 0;
-      try { sides = straightSides(a.d ?? ""); } catch {}
-      if (sides > SIDES) fail(failures, "contour", icon, `${where} ${sides} straight sides`, `at most ${SIDES}, or curves`);
-    }
+  for (const el of c.contours) if ("stroke-width" in el.attrs) fail(failures, "construction", icon, `${el.at} stroke-width ${el.attrs["stroke-width"]}`, "the root's line on a contour");
+  // a shade sits inside a body: after its tone, before its contour, below or right of its centre
+  for (const s of c.shades) {
+    const t = [...contourOf.keys()].reverse().find((x) => at(x) < at(s) && at(contourOf.get(x)) > at(s));
+    if (!t) { fail(failures, "construction", icon, `${s.at} shade`, "between a body's tone and its contour, so the line covers its edge"); continue; }
+    try {
+      const [sx, sy] = centre(s), [tx, ty] = centre(t);
+      if (sy <= ty && sx <= tx) fail(failures, "light", icon, `${s.at} shade centred at ${+sx.toFixed(2)}, ${+sy.toFixed(2)}`, `below or right of ${t.at}'s centre ${+tx.toFixed(2)}, ${+ty.toFixed(2)}: the light comes from the top`);
+    } catch {}
   }
-  let highlights = 0;
-  for (const el of c.details) {
-    const a = el.attrs, where = el.at;
-    if (!isNone(a.fill) && !isNone(a.stroke)) fail(failures, "construction", icon, `${where} fill ${a.fill} stroke ${a.stroke}`, "a detail is a stroke with no fill, or a shade dot with no stroke");
-    if (isPaper(a.stroke)) highlights++;
-    if (isPaper(a.fill)) fail(failures, "construction", icon, `${where} fill ${a.fill}`, "paper only as a stroke, the highlight");
+  // a core is a bar's path pasted, at the root's width
+  for (const k of c.cores) {
+    const bar = els.find((x) => at(x) < at(k) && num(x.attrs, "stroke-width") === BAR && geometryKey(x) === geometryKey(k));
+    if (!bar || "stroke-width" in k.attrs) fail(failures, "construction", icon, `${k.at} stroke ${k.attrs.stroke}`, `the fill tone as a stroke only on a core: a ${BAR} bar's path pasted after it, at the root's width`);
   }
-  if (highlights > 1) fail(failures, "construction", icon, `${highlights} highlights`, "one stroke in paper");
+  for (const el of [...c.tones, ...c.shapes, ...c.dots, ...c.shades.filter((x) => !isNone(x.attrs.fill))]) {
+    if (!isClosed(el)) fail(failures, "construction", icon, `${el.at} fill ${el.attrs.fill}`, "a fill only on a closed element");
+    if ("stroke-width" in el.attrs) fail(failures, "construction", icon, `${el.at} stroke-width ${el.attrs["stroke-width"]}`, "the root's line on a filled element; a mark or a bar is an open stroke");
+  }
+  for (const el of [...c.tones, ...c.shapes]) {
+    if (el.tag !== "path") continue;
+    let sides = 0;
+    try { sides = straightSides(el.attrs.d ?? ""); } catch {}
+    if (sides > SIDES) fail(failures, "contour", icon, `${el.at} ${sides} straight sides`, `at most ${SIDES}, or curves`);
+  }
   return failures;
 }
 
-/** The icon without its shadow: what the keyline and gravity are read from. */
+/** The icon as drawn, less any shadow: what the keyline and gravity are read from. */
 export function objectOf(text) {
   const { attrs, elements } = parse(text);
   return compose(attrs, elements.filter((el) => !("transform" in el.attrs)));
 }
 
-/** The icon's lines alone: no shadow, no fill, every stroke in ink. What weight is read from. */
+/**
+ * The icon's lines alone: no fill, no tone, shade or dot, every stroke in the line tone. What weight
+ * is read from. A core is cut out of its bar by a mask: a tube weighs its two edges, as it shows.
+ */
 export function linesOf(text) {
   const { attrs, elements } = parse(text);
-  const lines = elements.filter((el) => !("transform" in el.attrs) && hex(el.attrs.stroke) !== "none")
-    .map((el) => ({ ...el, attrs: { ...Object.fromEntries(Object.entries(el.attrs).filter(([k]) => k !== "fill" && k !== "fill-opacity")), stroke: PALETTE.ink } }));
-  return compose({ ...attrs, stroke: PALETTE.ink }, lines);
+  const { paint, cores } = classify(elements);
+  const lines = elements.filter((el) => !paint.has(el) && !("transform" in el.attrs) && !isNone(el.attrs.stroke ?? attrs.stroke))
+    .map((el) => ({ ...el, attrs: { ...Object.fromEntries(Object.entries(el.attrs).filter(([k]) => k !== "fill" && k !== "fill-opacity")), stroke: PALETTE.line } }));
+  const svg = compose({ ...attrs, stroke: PALETTE.line }, lines);
+  if (!cores.length) return svg;
+  const G = String(attrs.viewBox ?? "0 0 48 48").trim().split(/[\s,]+/)[2];
+  const cut = compose({}, cores.map((el) => ({ ...el, attrs: { ...el.attrs, stroke: "#000" } }))).replace(/^<svg[^>]*>|<\/svg>\s*$/g, "");
+  return svg.replace(/(<svg[^>]*>)([\s\S]*)(<\/svg>)/, `$1<mask id="cores" maskUnits="userSpaceOnUse" x="0" y="0" width="${G}" height="${G}"><rect width="${G}" height="${G}" fill="#fff" stroke="none" />${cut}</mask><g mask="url(#cores)">$2</g>$3`);
 }

@@ -14,14 +14,14 @@ import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkSet, readSet, formatFailure } from "./check.mjs";
-import { preset } from "./presets.mjs";
+import { preset, toDark } from "./presets.mjs";
 import { png } from "./raster.mjs";
 import { parse } from "./svg.mjs";
 
 const FONT = `font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"`;
 const THEMES = { light: { bg: "#fafafa", ink: "#737373", text: "#171717" }, dark: { bg: "#0a0a0a", ink: "#8a8a8a", text: "#ededed" }, grey: { bg: "#edeeee", ink: "#2e3955", text: "#171717" } };
 // The rows each finish is shown in: a sidebar glyph in light and dark at 1× and 2×; a filled icon
-// in light, on the reference's grey and in dark at 1×, then on grey at 2×.
+// in light, on grey and in dark at 1× (each tone swapped for its dark twin), then on grey at 2×.
 const ROWS = { duotone: [["light", 1], ["dark", 1], ["light", 2], ["dark", 2]], filled: [["light", 1], ["grey", 1], ["dark", 1], ["grey", 2]] };
 const rowWidth = (G) => Math.max(180, G + 140);
 const tileScale = (G) => (G > 24 ? 3 : 6);
@@ -36,7 +36,7 @@ const escAttr = (v) => String(v).replace(/&(?!(?:#\d+|#x[0-9a-f]+|[a-z]\w*);)/gi
 // What an element may carry onto a sheet: geometry and paint. Anything else
 // (data-*, aria-*, ids) is dropped, so no name reaches the blind sheet that way.
 const DRAW_ATTRS = new Set(["x", "y", "width", "height", "rx", "ry", "cx", "cy", "r", "x1", "y1", "x2", "y2", "d", "pathLength", "transform",
-  "fill", "fill-opacity", "fill-rule", "stroke", "stroke-dasharray", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "display", "visibility"]);
+  "fill", "fill-opacity", "fill-rule", "stroke", "stroke-width", "stroke-dasharray", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "display", "visibility"]);
 // Inherited paint the root may set beyond stroke-width, caps and joins.
 const ROOT_INHERITED = ["stroke-dasharray", "fill-rule", "stroke-miterlimit"];
 
@@ -62,7 +62,8 @@ function rowsBlock(set, G, scale, theme, x, y) {
   let out = `<g data-theme="${theme}" data-scale="${scale}"><rect x="${x}" y="${y}" width="${w}" height="${set.length * rowH + pad * 2}" rx="${8 * scale}" fill="${t.bg}" />`;
   set.forEach((s, i) => {
     const cy = y + pad + i * rowH + rowH / 2;
-    out += place(s, G, x + pad, cy - icon / 2, icon, t.ink);
+    const glyph = place(s, G, x + pad, cy - icon / 2, icon, t.ink);
+    out += theme === "dark" ? toDark(glyph) : glyph;
     out += `<text x="${x + pad + icon + 10 * scale}" y="${cy + 4.5 * scale}" ${FONT} font-size="${13 * scale}" fill="${t.text}">${esc(s.name)}</text>`;
   });
   return out + "</g>";

@@ -1,11 +1,9 @@
 /**
  * The measured rules, over a set. Each icon is rendered and measured by
  * raster.mjs; gap is read from geometry.mjs, with the stroke added.
- * At the filled finish the shadow is a copy of the body, hung off it by design: live
- * reads the whole file, keyline and gravity the object without its shadow, weight the
- * lines alone (no shadow, no fill), and gap holds every element but the shadow apart:
- * ink from ink by a stroke, a detail from anything by half a stroke (it stops short of
- * the contour, in another colour).
+ * At the filled finish weight reads the lines alone (no paint, no fill), and gap holds
+ * every element but the paint apart (a tone, a shade, a dot, a core: filled.mjs): line
+ * from line by a stroke, a mark from anything by half a stroke.
  */
 import { preset, TOUCH, FORMATS, referenceInk } from "./presets.mjs";
 import { measure, resvg, NO_RASTER } from "./raster.mjs";
@@ -39,30 +37,31 @@ export async function measuredChecks(set, G) {
     try {
       const filled = p.finish === "filled";
       const els = parse(s.text).elements.filter((el) => !(filled && "transform" in el.attrs));
-      const details = new Set(filled ? classify(els).details.map((el) => el.at) : []);
+      const c = filled ? classify(els) : null;
+      const details = new Set(filled ? c.details.map((el) => el.at) : []);
+      const paint = new Set(filled ? [...c.paint].map((el) => el.at) : []);
       const parts = els.map((el) => { try { return sampleParts(el, 0.05); } catch (e) { throw new Error(`${el.at} ${e.message}`); } });
       const whole = await measure(s.text, G);
       const m = filled ? { ...(await measure(objectOf(s.text), G)), live: whole.box, ink: (await measure(linesOf(s.text), G)).ink } : { ...whole, live: whole.box };
-      measures.push({ ...s, els, parts, details, m });
+      measures.push({ ...s, els, parts, details, paint, m });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
     }
   }
 
-  for (const { name, els, parts, details, m } of measures) {
+  for (const { name, els, parts, details, paint, m } of measures) {
     const { box, mass, ink, live } = m;
     // an empty icon has no box or mass to judge; count already reports it
     const inked = live.w > 0;
-    // live: every pixel of the file, the shadow's too
+    // live: every pixel of the file
     const lo = p.pad - 0.05, hi = G - p.pad + 0.05;
     if (inked && (live.x0 < lo || live.y0 < lo || live.x1 > hi || live.y1 > hi)) fail(failures, "live", name, `ink ${r2(live.x0)},${r2(live.y0)}–${r2(live.x1)},${r2(live.y1)}`, `inside ${p.pad}–${G - p.pad}`);
     // keyline
     const k = nearestKeyline(G, box.w, box.h);
     const fits = inked && Math.abs(k.dw) <= p.keylineTol + 1e-9 && Math.abs(k.dh) <= p.keylineTol + 1e-9;
     if (inked && !fits) fail(failures, "keyline", name, `${r2(box.w)} × ${r2(box.h)}`, `${k.format} ${p.keylines[k.format].join(" × ")} ±${p.keylineTol}`);
-    // gravity
-    // gravity: the object's mass about its keyline's centre (the canvas centre, less half the shadow)
+    // gravity: the object's mass about its keyline's centre
     const dx = mass.dx + G / 2 - p.centre[0], dy = mass.dy + G / 2 - p.centre[1];
     if (inked && (Math.abs(dx) > p.gravityTol || Math.abs(dy) > p.gravityTol)) fail(failures, "gravity", name, `mass ${r2(dx) >= 0 ? "+" : ""}${r2(dx)}, ${r2(dy) >= 0 ? "+" : ""}${r2(dy)}`, `within ±${p.gravityTol}`);
     // gap, between every pair of elements, and between the subpaths of one path: merged dots
@@ -74,7 +73,8 @@ export async function measuredChecks(set, G) {
     };
     const whole = parts.map((q) => q.flat());
     for (let i = 0; i < els.length; i++) {
-      for (let j = i + 1; j < els.length; j++) gap(whole[i], whole[j], els[i].at, els[j].at);
+      if (paint.has(els[i].at)) continue;
+      for (let j = i + 1; j < els.length; j++) if (!paint.has(els[j].at)) gap(whole[i], whole[j], els[i].at, els[j].at);
       const sub = parts[i];
       if (sub.length > 1) for (let a = 0; a < sub.length; a++) for (let b = a + 1; b < sub.length; b++) gap(sub[a], sub[b], `${els[i].at}[${a}]`, `${els[i].at}[${b}]`);
     }

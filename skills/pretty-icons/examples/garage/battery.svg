@@ -1,0 +1,8 @@
+<svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="10.75" y="8.75" width="6.5" height="7" rx="2.5" fill="#25262a" />
+  <rect x="30.75" y="8.75" width="6.5" height="7" rx="2.5" fill="#25262a" />
+  <rect x="4.75" y="13.75" width="38.5" height="25.5" rx="6" fill="#ececea" stroke="none" />
+  <path d="M4.75 32.5H43.25V33.25A6 6 0 0 1 37.25 39.25H10.75A6 6 0 0 1 4.75 33.25Z" fill="#cfcfcb" stroke="none" />
+  <rect x="4.75" y="13.75" width="38.5" height="25.5" rx="6" />
+  <path d="M11 24H17.5M14.25 20.75V27.25M30.5 24H37" stroke-width="2" />
+</svg>
