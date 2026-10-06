@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64" width="256" height="256" fill="none" stroke="#2b3354" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<defs><path id="b" d="M32 38C12 32 13 8 32 6C51 8 52 32 32 38Z"/></defs>
+<use xlink:href="#b" transform="translate(3 3)" fill="#9aa8c9" stroke="none"/>
+<use xlink:href="#b" fill="#dfe6f1"/>
+<path d="M32 38C23 30 23 14 32 6C41 14 41 30 32 38Z" fill="#f4f6f8" stroke-width="2.500"/>
+<path d="M32 6V38" stroke-width="2"/>
+<path d="M24 36H40L38 41H26Z" fill="#8fb4e3" stroke-width="2.500"/>
+<rect x="26" y="41" width="12" height="18" rx="5" fill="#d0753f"/>
+<path d="M30 46V54" stroke="#f0b98a" stroke-width="2"/>
+</svg>

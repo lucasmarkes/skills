@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64" width="256" height="256" fill="none" stroke="#2b3354" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<defs><path id="b" d="M32 6C40 6 42 16 46 26C51 38 48 58 32 58C16 58 13 38 18 26C22 16 24 6 32 6Z"/></defs>
+<use xlink:href="#b" transform="translate(3 3)" fill="#3d6b3a" stroke="none"/>
+<use xlink:href="#b" fill="#6d9a4b"/>
+<path d="M32 13C36.500 13 37.500 19 40.500 27C44 36 42.500 52 32 52C21.500 52 20 36 23.500 27C26.500 19 27.500 13 32 13Z" fill="#e3e58f" stroke-width="2.500"/>
+<circle cx="32" cy="41" r="8" fill="#a8693f"/>
+<path d="M28 38C29 36.500 30.500 36 32 36" stroke="#f2d2a8" stroke-width="2"/>
+</svg>

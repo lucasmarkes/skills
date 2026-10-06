@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64" width="256" height="256" fill="none" stroke="#2b3354" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<defs><path id="b" d="M12 16L12 46C12 52 16 56 22 56L36 56C42 56 46 52 46 46L46 16Z"/></defs>
+<path d="M46 23C60 20 60 44 45 41" stroke-width="3"/>
+<use xlink:href="#b" transform="translate(3 3)" fill="#9aa8c9" stroke="none"/>
+<use xlink:href="#b" fill="#f4f6f8"/>
+<path d="M12 30H46V40H12Z" fill="#8fb4e3" stroke-width="2.500"/>
+<ellipse cx="29" cy="16" rx="17" ry="4.500" fill="#8a5a3c"/>
+<path d="M22 9C19 6 25 4 22 1M30 9C27 6 33 4 30 1M38 9C35 6 41 4 38 1" stroke-width="2" stroke="#8d8fa6"/>
+</svg>
