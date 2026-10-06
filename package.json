@@ -1,0 +1,10 @@
+{
+  "name": "@lucasmarkes/skills",
+  "private": true,
+  "type": "module",
+  "description": "Skills for coding agents, each one a command away.",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test 'test/**/*.test.mjs'" },
+  "repository": { "type": "git", "url": "git+https://github.com/lucasmarkes/skills.git" },
+  "license": "MIT"
+}
