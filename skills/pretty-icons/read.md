@@ -10,7 +10,7 @@ After `check.mjs` says `ok` and `sheet.mjs` has written `pretty-icons-blind.png`
 
 Open a fresh agent with no access to this conversation. Give it the blind image and this prompt, with N and the names filled in, the names in alphabetical order:
 
-> This image shows N numbered icons from one sidebar. Below are N names in alphabetical order: <names>. Read no file but the image. For each number, say the name it stands for and, in five words or fewer, the object you see. If two numbers compete for one name, say so. If you read a letter or a digit anywhere, name the icon. If a number gets its name only because the other names are taken, say so.
+> This image shows N numbered icons from one app. Below are N names in alphabetical order: <names>. Read no file but the image. For each number, say the name it stands for and, in five words or fewer, the object you see. If two numbers compete for one name, say so. If you read a letter or a digit anywhere, name the icon. If a number gets its name only because the other names are taken, say so.
 
 Compare its answers with the key `sheet.mjs` printed.
 
