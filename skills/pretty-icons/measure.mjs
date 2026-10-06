@@ -1,11 +1,17 @@
 /**
  * The measured rules, over a set. Each icon is rendered and measured by
  * raster.mjs; gap is read from geometry.mjs, with the stroke added.
+ * At the filled finish the shadow is a copy of the body, hung off it by design: live
+ * reads the whole file, keyline and gravity the object without its shadow, weight the
+ * lines alone (no shadow, no fill), and gap holds every element but the shadow apart:
+ * ink from ink by a stroke, a detail from anything by half a stroke (it stops short of
+ * the contour, in another colour).
  */
-import { preset, KEYLINE_TOL, WEIGHT_TOL, REFERENCE_TOL, GRAVITY_TOL, TOUCH, FORMATS, referenceInk } from "./presets.mjs";
+import { preset, TOUCH, FORMATS, referenceInk } from "./presets.mjs";
 import { measure, resvg, NO_RASTER } from "./raster.mjs";
 import { parse } from "./svg.mjs";
 import { sampleParts, minDistance } from "./geometry.mjs";
+import { objectOf, linesOf, classify } from "./filled.mjs";
 
 // `+ 0` turns -0 into 0, so a centred icon prints 0, not -0.
 const r2 = (n) => Math.round(n * 100) / 100 + 0;
@@ -31,33 +37,40 @@ export async function measuredChecks(set, G) {
     // A file the text layer passed can still be one resvg or the path sampler cannot read
     // (an unclosed quote, an unknown command): one elements line, and it stays out of the median.
     try {
-      const els = parse(s.text).elements;
+      const filled = p.finish === "filled";
+      const els = parse(s.text).elements.filter((el) => !(filled && "transform" in el.attrs));
+      const details = new Set(filled ? classify(els).details.map((el) => el.at) : []);
       const parts = els.map((el) => { try { return sampleParts(el, 0.05); } catch (e) { throw new Error(`${el.at} ${e.message}`); } });
-      measures.push({ ...s, els, parts, m: await measure(s.text, G) });
+      const whole = await measure(s.text, G);
+      const m = filled ? { ...(await measure(objectOf(s.text), G)), live: whole.box, ink: (await measure(linesOf(s.text), G)).ink } : { ...whole, live: whole.box };
+      measures.push({ ...s, els, parts, details, m });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
     }
   }
 
-  for (const { name, els, parts, m } of measures) {
-    const { box, mass, ink } = m;
+  for (const { name, els, parts, details, m } of measures) {
+    const { box, mass, ink, live } = m;
     // an empty icon has no box or mass to judge; count already reports it
-    const inked = ink > 0;
-    // live
+    const inked = live.w > 0;
+    // live: every pixel of the file, the shadow's too
     const lo = p.pad - 0.05, hi = G - p.pad + 0.05;
-    if (inked && (box.x0 < lo || box.y0 < lo || box.x1 > hi || box.y1 > hi)) fail(failures, "live", name, `ink ${r2(box.x0)},${r2(box.y0)}–${r2(box.x1)},${r2(box.y1)}`, `inside ${p.pad}–${G - p.pad}`);
+    if (inked && (live.x0 < lo || live.y0 < lo || live.x1 > hi || live.y1 > hi)) fail(failures, "live", name, `ink ${r2(live.x0)},${r2(live.y0)}–${r2(live.x1)},${r2(live.y1)}`, `inside ${p.pad}–${G - p.pad}`);
     // keyline
     const k = nearestKeyline(G, box.w, box.h);
-    const fits = inked && Math.abs(k.dw) <= KEYLINE_TOL + 1e-9 && Math.abs(k.dh) <= KEYLINE_TOL + 1e-9;
-    if (inked && !fits) fail(failures, "keyline", name, `${r2(box.w)} × ${r2(box.h)}`, `${k.format} ${p.keylines[k.format].join(" × ")} ±${KEYLINE_TOL}`);
+    const fits = inked && Math.abs(k.dw) <= p.keylineTol + 1e-9 && Math.abs(k.dh) <= p.keylineTol + 1e-9;
+    if (inked && !fits) fail(failures, "keyline", name, `${r2(box.w)} × ${r2(box.h)}`, `${k.format} ${p.keylines[k.format].join(" × ")} ±${p.keylineTol}`);
     // gravity
-    if (inked && (Math.abs(mass.dx) > GRAVITY_TOL || Math.abs(mass.dy) > GRAVITY_TOL)) fail(failures, "gravity", name, `mass ${r2(mass.dx) >= 0 ? "+" : ""}${r2(mass.dx)}, ${r2(mass.dy) >= 0 ? "+" : ""}${r2(mass.dy)}`, `within ±${GRAVITY_TOL}`);
+    // gravity: the object's mass about its keyline's centre (the canvas centre, less half the shadow)
+    const dx = mass.dx + G / 2 - p.centre[0], dy = mass.dy + G / 2 - p.centre[1];
+    if (inked && (Math.abs(dx) > p.gravityTol || Math.abs(dy) > p.gravityTol)) fail(failures, "gravity", name, `mass ${r2(dx) >= 0 ? "+" : ""}${r2(dx)}, ${r2(dy) >= 0 ? "+" : ""}${r2(dy)}`, `within ±${p.gravityTol}`);
     // gap, between every pair of elements, and between the subpaths of one path: merged dots
     // are as "almost" as separate ones. Touching (a shared end, a crossing) passes.
     const gap = (A, B, a, b) => {
+      const min = details.has(a.replace(/\[\d+\]$/, "")) || details.has(b.replace(/\[\d+\]$/, "")) ? p.stroke / 2 : p.stroke;
       const centre = minDistance(A, B), outer = centre - p.stroke;
-      if (centre > TOUCH && outer < p.stroke - 1e-9) fail(failures, "gap", name, `${a} to ${b} ${outer < 0 ? `overlapping, centrelines ${r2(centre)} apart` : `${r2(outer)} apart`}`, `≥ ${p.stroke} apart, or crossing`);
+      if (centre > TOUCH && outer < min - 1e-9) fail(failures, "gap", name, `${a} to ${b} ${outer < 0 ? `overlapping, centrelines ${r2(centre)} apart` : `${r2(outer)} apart`}`, `≥ ${min} apart, or crossing`);
     };
     const whole = parts.map((q) => q.flat());
     for (let i = 0; i < els.length; i++) {
@@ -65,7 +78,7 @@ export async function measuredChecks(set, G) {
       const sub = parts[i];
       if (sub.length > 1) for (let a = 0; a < sub.length; a++) for (let b = a + 1; b < sub.length; b++) gap(sub[a], sub[b], `${els[i].at}[${a}]`, `${els[i].at}[${b}]`);
     }
-    rows.push({ icon: name, x0: r2(box.x0), y0: r2(box.y0), w: r2(box.w), h: r2(box.h), keyline: fits ? k.format : "—", ink: r2(ink), dx: r2(mass.dx), dy: r2(mass.dy) });
+    rows.push({ icon: name, x0: r2(box.x0), y0: r2(box.y0), w: r2(box.w), h: r2(box.h), keyline: fits ? k.format : "—", ink: r2(ink), dx: r2(dx), dy: r2(dy) });
   }
 
   // weight: a set of three or more against its own median and, looser, the reference, so a set
@@ -81,8 +94,8 @@ export async function measuredChecks(set, G) {
     if (Math.abs(off) > tol) fail(failures, "weight", name, `ink ${r2(ink)} (${off > 0 ? "+" : ""}${(off * 100).toFixed(1)}%)`, `within ±${pct(tol)}% of ${what} ${r2(against)}`);
   };
   for (const { name, m } of measures) {
-    weigh(name, m.ink, median, WEIGHT_TOL, own ? "the set's median" : "the reference");
-    if (own) weigh(name, m.ink, ref, REFERENCE_TOL, "the reference");
+    weigh(name, m.ink, median, p.weightTol, own ? "the set's median" : "the reference");
+    if (own) weigh(name, m.ink, ref, p.referenceTol, "the reference");
   }
   return { failures, rows };
 }

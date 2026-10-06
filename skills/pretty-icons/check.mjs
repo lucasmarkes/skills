@@ -6,7 +6,7 @@
  * the measured rules did not run; the last line then says `not measured`.
  * `--print` also prints every icon's measures as a table, before the failures.
  *
- * Text rules, read from the file:
+ * Text rules, read from the file (the duotone finish, grids 16–24; filled.mjs has the 48 grid's):
  *   canvas        viewBox="0 0 G G", the same G in every file, G a preset
  *   elements      only rect, circle, line, path; nothing nested, no text
  *   stroke        the preset's width, round caps and joins, currentColor, nothing else coloured,
@@ -25,19 +25,21 @@
 import { readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { preset, radiusFor, FILL, GRID_STEP, PRESETS } from "./presets.mjs";
-import { parse, num, G as gridOf, ELEMENTS } from "./svg.mjs";
+import { preset, radiusFor, FILL, GRIDS } from "./presets.mjs";
+import { parse, num, G as gridOf, ELEMENTS, pathNumbers, pathCommands, moves, isClosed } from "./svg.mjs";
 import { straightSides } from "./geometry.mjs";
+import { filledChecks } from "./filled.mjs";
+
+export { pathCommands, isClosed };
 
 const COLOUR_ATTRS = ["stroke", "fill", "color", "stop-color"];
-const FORBIDDEN_ATTRS = ["style", "transform", "opacity", "stroke-opacity", "filter", "class", "id", "mask", "clip-path", "stroke-dashoffset", "vector-effect", "paint-order"];
-const ROOT_FORBIDDEN = [...FORBIDDEN_ATTRS, "fill-opacity"];
+const FORBIDDEN_ATTRS = ["style", "opacity", "stroke-opacity", "filter", "class", "id", "mask", "clip-path", "stroke-dashoffset", "vector-effect", "paint-order"];
+const ROOT_FORBIDDEN = [...FORBIDDEN_ATTRS, "transform", "fill-opacity"];
 const ROUND_ATTRS = ["stroke-linecap", "stroke-linejoin"];
 const DASH_RE = /^\s*(\d+(?:\.\d+)?)[\s,]+(\d+(?:\.\d+)?)\s*$/;
-// Numbers each command takes; extra numbers after it are implicit repeats (after M, implicit L).
-const ARITY = { m: 2, l: 2, t: 2, h: 1, v: 1, s: 4, q: 4, c: 6, a: 7, z: 1 };
 // A body's straight sides past this are facets (a hexagon, a cut stone); five is a house. The details' cap, over all of them.
 const SIDES = 5, DETAIL_SUBPATHS = 2, DETAIL_COMMANDS = 8;
+const GEOMETRY = ["x", "y", "width", "height", "rx", "ry", "cx", "cy", "r", "x1", "y1", "x2", "y2"];
 
 const fail = (list, rule, icon, got, want) => list.push({ rule, icon, got, want });
 const keyword = (v) => String(v).trim().toLowerCase();
@@ -51,27 +53,13 @@ export function readSet(folder) {
     .map((f) => ({ name: basename(f, ".svg"), path: join(dir, f), text: readFileSync(join(dir, f), "utf8") }));
 }
 
-/** Whether an element draws a closed shape (a body) or an open stroke (a line). */
-export function isClosed(el) {
-  if (el.tag === "rect" || el.tag === "circle") return true;
-  if (el.tag === "line") return false;
-  return /[zZ]/.test(el.attrs.d ?? "");
-}
-
-const pathNumbers = (d) => (d.match(/-?\d*\.?\d+(?:e-?\d+)?/gi) ?? []).map(Number);
-/** Commands in a path, implicit repeats included: `M1 1 2 2` is a move and a line. */
-export const pathCommands = (d) => (d.match(/[a-df-z][^a-df-z]*/gi) ?? []).reduce((n, g) => {
-  const arity = ARITY[g[0].toLowerCase()] ?? 1;
-  return n + Math.max(1, Math.ceil(pathNumbers(g.slice(1)).length / arity));
-}, 0);
-const moves = (d) => (d.match(/[mM]/g) ?? []).length;
 /** A detail's subpaths and drawing commands: a circle, rect or line is one of each; a path's moves are not drawing. */
 export function detailCounts(el) {
   if (el.tag !== "path") return { subpaths: 1, drawing: 1 };
   const d = el.attrs.d ?? "";
   return { subpaths: Math.max(1, moves(d)), drawing: pathCommands(d) - moves(d) };
 }
-const onGrid = (n) => Math.abs(n / GRID_STEP - Math.round(n / GRID_STEP)) < 1e-9;
+const onGrid = (n, step) => Math.abs(n / step - Math.round(n / step)) < 1e-9;
 
 function checkDash(failures, icon, where, v, stroke) {
   const m = DASH_RE.exec(v);
@@ -86,31 +74,61 @@ export function textChecks(icon, text, expectG) {
 
   if (G === null) fail(failures, "canvas", icon, `viewBox ${root.viewBox ?? "missing"}`, `0 0 ${expectG} ${expectG}`);
   else if (G !== expectG) fail(failures, "canvas", icon, `viewBox ${root.viewBox}`, `0 0 ${expectG} ${expectG}`);
-  if (!PRESETS[expectG]) { fail(failures, "canvas", icon, `grid ${expectG}`, `one of ${Object.keys(PRESETS).join(", ")}`); return { G, failures, parsed }; }
+  if (!GRIDS[expectG]) { fail(failures, "canvas", icon, `grid ${expectG}`, `one of ${Object.keys(GRIDS).join(", ")}`); return { G, failures, parsed }; }
   const p = preset(expectG);
 
   for (const e of parsed.errors) fail(failures, "elements", icon, e, `only ${ELEMENTS.join(", ")}, flat`);
 
-  // stroke: the root carries it once; no element may set another colour, width or opacity
+  // stroke: the root carries it once; no element may set another width, cap, join or opacity
   const sw = num(root, "stroke-width");
   if (sw !== p.stroke) fail(failures, "stroke", icon, `stroke-width ${root["stroke-width"] ?? "missing"}`, `${p.stroke}`);
-  if (!isCurrent(root.stroke)) fail(failures, "stroke", icon, `stroke ${root.stroke ?? "missing"}`, "currentColor");
   if (root["stroke-linecap"] !== "round") fail(failures, "stroke", icon, `stroke-linecap ${root["stroke-linecap"] ?? "missing"}`, "round");
   if (root["stroke-linejoin"] !== "round") fail(failures, "stroke", icon, `stroke-linejoin ${root["stroke-linejoin"] ?? "missing"}`, "round");
   for (const a of ROOT_FORBIDDEN) if (a in root) fail(failures, "stroke", icon, `root ${a}`, "not set");
   if ("fill" in root && !isNone(root.fill)) fail(failures, "stroke", icon, `fill ${root.fill}`, "none");
-  for (const k of ["color", "stop-color"]) if (k in root && !isCurrent(root[k]) && !isNone(root[k])) fail(failures, "stroke", icon, `root ${k} ${root[k]}`, "currentColor or none");
   if ("stroke-dasharray" in root) checkDash(failures, icon, "root", root["stroke-dasharray"], p.stroke);
-
-  let bodies = 0, subpaths = 0, drawing = 0;
   for (const el of parsed.elements) {
     const a = el.attrs, where = el.at;
     for (const k of FORBIDDEN_ATTRS) if (k in a) fail(failures, "stroke", icon, `${where} ${k}`, "not set");
     if ("stroke-width" in a) fail(failures, "stroke", icon, `${where} stroke-width ${a["stroke-width"]}`, "the root's");
     for (const k of ROUND_ATTRS) if (k in a && a[k] !== "round") fail(failures, "stroke", icon, `${where} ${k} ${a[k]}`, "round");
-    for (const k of COLOUR_ATTRS) if (k in a && !isCurrent(a[k]) && !isNone(a[k])) fail(failures, "stroke", icon, `${where} ${k} ${a[k]}`, "currentColor or none");
     if ("stroke-dasharray" in a) checkDash(failures, icon, where, a["stroke-dasharray"], p.stroke);
+  }
 
+  // grid, radius and the per-path count, on every finish
+  for (const el of parsed.elements) {
+    const a = el.attrs, where = el.at;
+    const nums = el.tag === "path" ? pathNumbers(a.d ?? "").map((n, i) => [`d[${i}]`, n]) : Object.entries(a).filter(([k]) => GEOMETRY.includes(k)).map(([k, v]) => [k, Number(v)]);
+    for (const [k, n] of nums) if (!onGrid(n, p.step)) fail(failures, "grid", icon, `${where} ${k} ${n}`, `a multiple of ${p.step}`);
+    if (el.tag === "rect") {
+      const size = Math.min(num(a, "width"), num(a, "height"));
+      const want = radiusFor(expectG, size), rx = num(a, "rx", 0);
+      if (rx !== want) fail(failures, "radius", icon, `${where} rx ${rx}`, `rx ${want}`);
+    }
+    if (el.tag === "path") {
+      const n = pathCommands(a.d ?? "");
+      if (n > p.commands) fail(failures, "count", icon, `${where} ${n} commands`, `at most ${p.commands}`);
+    }
+  }
+  if (p.finish === "filled") failures.push(...filledChecks(icon, parsed, expectG));
+  else duotoneChecks(failures, icon, parsed, p);
+
+  if (parsed.elements.length > p.elements) fail(failures, "count", icon, `${parsed.elements.length} elements`, `at most ${p.elements}`);
+  if (parsed.elements.length === 0) fail(failures, "count", icon, "0 elements", "at least 1");
+
+  return { G, failures, parsed };
+}
+
+/** The duotone finish's own rules: currentColor everywhere, the .2 fill under a contour, three elements, the details' cap. */
+function duotoneChecks(failures, icon, parsed, p) {
+  const root = parsed.attrs;
+  if (!isCurrent(root.stroke)) fail(failures, "stroke", icon, `stroke ${root.stroke ?? "missing"}`, "currentColor");
+  for (const k of ["color", "stop-color"]) if (k in root && !isCurrent(root[k]) && !isNone(root[k])) fail(failures, "stroke", icon, `root ${k} ${root[k]}`, "currentColor or none");
+  let bodies = 0, subpaths = 0, drawing = 0;
+  for (const el of parsed.elements) {
+    const a = el.attrs, where = el.at;
+    if ("transform" in a) fail(failures, "stroke", icon, `${where} transform`, "not set");
+    for (const k of COLOUR_ATTRS) if (k in a && !isCurrent(a[k]) && !isNone(a[k])) fail(failures, "stroke", icon, `${where} ${k} ${a[k]}`, "currentColor or none");
     // construction: a filled element is a closed body with a contour and the .2 fill;
     // a closed element with a contour and no fill (a ring, a hub) is allowed
     if (isCurrent(a.fill)) {
@@ -129,31 +147,10 @@ export function textChecks(icon, text, expectG) {
       const c = detailCounts(el);
       subpaths += c.subpaths; drawing += c.drawing;
     }
-
-    // grid
-    const nums = el.tag === "path" ? pathNumbers(a.d ?? "").map((n, i) => [`d[${i}]`, n]) : Object.entries(a).filter(([k]) => ["x", "y", "width", "height", "rx", "ry", "cx", "cy", "r", "x1", "y1", "x2", "y2"].includes(k)).map(([k, v]) => [k, Number(v)]);
-    for (const [k, n] of nums) if (!onGrid(n)) fail(failures, "grid", icon, `${where} ${k} ${n}`, `a multiple of ${GRID_STEP}`);
-
-    // radius
-    if (el.tag === "rect") {
-      const size = Math.min(num(a, "width"), num(a, "height"));
-      const want = radiusFor(expectG, size), rx = num(a, "rx", 0);
-      if (rx !== want) fail(failures, "radius", icon, `${where} rx ${rx}`, `rx ${want}`);
-    }
-
-    // count, per path
-    if (el.tag === "path") {
-      const n = pathCommands(a.d ?? "");
-      if (n > 8) fail(failures, "count", icon, `${where} ${n} commands`, "at most 8");
-    }
   }
   if (bodies === 0 && parsed.elements.length > 0) fail(failures, "construction", icon, "no filled element", "at least one body");
-  if (parsed.elements.length > 3) fail(failures, "count", icon, `${parsed.elements.length} elements`, "at most 3");
-  if (parsed.elements.length === 0) fail(failures, "count", icon, "0 elements", "at least 1");
   if (subpaths > DETAIL_SUBPATHS) fail(failures, "count", icon, `details ${subpaths} subpaths`, `at most ${DETAIL_SUBPATHS}`);
   if (drawing > DETAIL_COMMANDS) fail(failures, "count", icon, `details ${drawing} drawing commands`, `at most ${DETAIL_COMMANDS}`);
-
-  return { G, failures, parsed };
 }
 
 /** The set's grid: the one most files declare, so one odd file fails canvas rather than all the others. */
@@ -182,7 +179,7 @@ export async function checkSet(folder, { grid, measure = true, loadMeasure = () 
     failures.push(...f);
   }
   // A grid with no preset has nothing to measure against; canvas has failed every icon.
-  if (!PRESETS[G]) return { G, failures, measured: true, why: "", rows: [] };
+  if (!GRIDS[G]) return { G, failures, measured: true, why: "", rows: [] };
   let measured = false, rows = [], why = "";
   if (measure) {
     try {
@@ -200,7 +197,7 @@ export async function checkSet(folder, { grid, measure = true, loadMeasure = () 
 export async function main(argv) {
   const folder = argv.find((a) => !a.startsWith("--"));
   const grid = argv.find((a) => a.startsWith("--grid="))?.slice(7);
-  if (!folder) { console.error("usage: node check.mjs <folder> [--grid=16|20|24] [--print]"); process.exit(1); }
+  if (!folder) { console.error("usage: node check.mjs <folder> [--grid=16|20|24|48] [--print]"); process.exit(1); }
   let isDir = false;
   try { isDir = statSync(folder).isDirectory(); } catch {}
   if (!isDir) { console.log(formatFailure({ rule: "set", icon: folder, got: "not a folder", want: "an existing folder" })); process.exit(1); }

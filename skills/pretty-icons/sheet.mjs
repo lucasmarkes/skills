@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Two sheets for a set that passes check.mjs: `node sheet.mjs <folder>`.
- *   pretty-icons-sheet.png   for the author: the set in sidebar rows at 1× and 2×, light and dark,
+ *   pretty-icons-sheet.png   for the author: the set in rows at 1× and 2×, light and dark (and on grey at the filled finish),
  *                            then a tile per icon with its ink box (solid) over the keyline it matched (dashed)
  *   pretty-icons-blind.png   for the reader: icons only, 2×, shuffled and numbered
  * The key (number → name) is printed, for the author alone. `--seed=<n>`
@@ -19,7 +19,13 @@ import { png } from "./raster.mjs";
 import { parse } from "./svg.mjs";
 
 const FONT = `font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"`;
-const THEMES = { light: { bg: "#fafafa", ink: "#737373", text: "#171717" }, dark: { bg: "#0a0a0a", ink: "#8a8a8a", text: "#ededed" } };
+const THEMES = { light: { bg: "#fafafa", ink: "#737373", text: "#171717" }, dark: { bg: "#0a0a0a", ink: "#8a8a8a", text: "#ededed" }, grey: { bg: "#edeeee", ink: "#2e3955", text: "#171717" } };
+// The rows each finish is shown in: a sidebar glyph in light and dark at 1× and 2×; a filled icon
+// in light, on the reference's grey and in dark at 1×, then on grey at 2×.
+const ROWS = { duotone: [["light", 1], ["dark", 1], ["light", 2], ["dark", 2]], filled: [["light", 1], ["grey", 1], ["dark", 1], ["grey", 2]] };
+const rowWidth = (G) => Math.max(180, G + 140);
+const tileScale = (G) => (G > 24 ? 3 : 6);
+const isCurrent = (v) => String(v ?? "").trim().toLowerCase() === "currentcolor";
 
 /** A name made safe for <text>: a file name may hold &, < or >. */
 const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -29,7 +35,7 @@ const escAttr = (v) => String(v).replace(/&(?!(?:#\d+|#x[0-9a-f]+|[a-z]\w*);)/gi
 
 // What an element may carry onto a sheet: geometry and paint. Anything else
 // (data-*, aria-*, ids) is dropped, so no name reaches the blind sheet that way.
-const DRAW_ATTRS = new Set(["x", "y", "width", "height", "rx", "ry", "cx", "cy", "r", "x1", "y1", "x2", "y2", "d", "pathLength",
+const DRAW_ATTRS = new Set(["x", "y", "width", "height", "rx", "ry", "cx", "cy", "r", "x1", "y1", "x2", "y2", "d", "pathLength", "transform",
   "fill", "fill-opacity", "fill-rule", "stroke", "stroke-dasharray", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "display", "visibility"]);
 // Inherited paint the root may set beyond stroke-width, caps and joins.
 const ROOT_INHERITED = ["stroke-dasharray", "fill-rule", "stroke-miterlimit"];
@@ -39,18 +45,20 @@ const ROOT_INHERITED = ["stroke-dasharray", "fill-rule", "stroke-miterlimit"];
  * rebuilt from the parsed elements, the ones check.mjs validated, so comments
  * and stray text in the file never reach the sheet. Every currentColor
  * becomes the colour itself, so nothing rests on the rasteriser resolving
- * `color` (and png() would otherwise turn it black).
+ * `color` (and png() would otherwise turn it black). A colour written in
+ * the file (the filled finish's ink and palette) stays as written.
  */
 function place(s, G, x, y, size, colour) {
   const { attrs: root, elements } = parse(s.text);
   const paint = (v) => escAttr(String(v).replace(/currentColor/gi, colour));
   const inner = elements.map((el) => `<${el.tag}${Object.entries(el.attrs).filter(([k]) => DRAW_ATTRS.has(k)).map(([k, v]) => ` ${k}="${paint(v)}"`).join("")} />`).join("");
   const inherited = ROOT_INHERITED.filter((k) => k in root).map((k) => ` ${k}="${paint(root[k])}"`).join("");
-  return `<g transform="translate(${x} ${y}) scale(${size / G})" fill="none" stroke="${colour}" stroke-width="${escAttr(root["stroke-width"])}" stroke-linecap="round" stroke-linejoin="round"${inherited}>${inner}</g>`;
+  const stroke = isCurrent(root.stroke) || !root.stroke ? colour : escAttr(root.stroke);
+  return `<g transform="translate(${x} ${y}) scale(${size / G})" fill="none" stroke="${stroke}" stroke-width="${escAttr(root["stroke-width"])}" stroke-linecap="round" stroke-linejoin="round"${inherited}>${inner}</g>`;
 }
 
 function rowsBlock(set, G, scale, theme, x, y) {
-  const t = THEMES[theme], icon = G * scale, rowH = 28 * scale, w = 180 * scale, pad = 10 * scale;
+  const t = THEMES[theme], icon = G * scale, rowH = (G + 12) * scale, w = rowWidth(G) * scale, pad = 10 * scale;
   let out = `<g data-theme="${theme}" data-scale="${scale}"><rect x="${x}" y="${y}" width="${w}" height="${set.length * rowH + pad * 2}" rx="${8 * scale}" fill="${t.bg}" />`;
   set.forEach((s, i) => {
     const cy = y + pad + i * rowH + rowH / 2;
@@ -61,7 +69,7 @@ function rowsBlock(set, G, scale, theme, x, y) {
 }
 
 function keylineTiles(set, G, rows, x, y) {
-  const S = 6, tile = G * S + 24, pitch = Math.max(tile + 12, 168), perRow = 5;
+  const S = tileScale(G), tile = G * S + 24, pitch = Math.max(tile + 12, 168), perRow = 5;
   let out = `<g data-keyline="tiles">`;
   set.forEach((s, i) => {
     const row = rows.find((r) => r.icon === s.name) ?? {};
@@ -70,8 +78,8 @@ function keylineTiles(set, G, rows, x, y) {
     for (let g = 1; g < G; g++) out += `<path d="M${tx + g * S} ${ty}v${G * S}M${tx} ${ty + g * S}h${G * S}" stroke="#f0f0f0" />`;
     out += place(s, G, tx, ty, G * S, "#262626");
     if (row.keyline && row.keyline !== "—") {
-      const [kw, kh] = preset(G).keylines[row.keyline];
-      out += `<rect x="${tx + (G - kw) / 2 * S}" y="${ty + (G - kh) / 2 * S}" width="${kw * S}" height="${kh * S}" fill="none" stroke="#3b82f6" stroke-opacity=".9" stroke-dasharray="4 3" />`;
+      const { keylines, centre: [cx, cy] } = preset(G), [kw, kh] = keylines[row.keyline];
+      out += `<rect x="${tx + (cx - kw / 2) * S}" y="${ty + (cy - kh / 2) * S}" width="${kw * S}" height="${kh * S}" fill="none" stroke="#3b82f6" stroke-opacity=".9" stroke-dasharray="4 3" />`;
     }
     // the ink box, thin and solid, over the keyline: an off-centre body shows as the gap between them
     if (row.w > 0) out += `<rect data-ink-box="${escAttr(s.name)}" x="${tx + row.x0 * S}" y="${ty + row.y0 * S}" width="${row.w * S}" height="${row.h * S}" fill="none" stroke="#f97316" stroke-width=".75" />`;
@@ -83,14 +91,14 @@ function keylineTiles(set, G, rows, x, y) {
 }
 
 export function composeSheet(set, G, rows) {
-  const left = 24, top = 24, gapX = 24;
-  const h1 = set.length * 28 + 20, h2 = set.length * 56 + 40;
-  const tilesY = top + Math.max(h1, h2) + 48, tilesH = Math.ceil(set.length / 5) * (G * 6 + 60);
-  const W = 24 + 180 + gapX + 180 + gapX + 360 + gapX + 360 + 24, H = tilesY + tilesH + 24;
+  const left = 24, top = 24, gapX = 24, blocks = ROWS[preset(G).finish], rw = rowWidth(G), S = tileScale(G);
+  const rowsH = Math.max(...blocks.map(([, scale]) => set.length * (G + 12) * scale + 20 * scale));
+  const tilesY = top + rowsH + 48, tilesH = Math.ceil(set.length / 5) * (G * S + 60);
+  const W = 24 + blocks.reduce((w, [, scale]) => w + rw * scale + gapX, 0) - gapX + 24, H = tilesY + tilesH + 24;
+  let x = left, out = "";
+  for (const [theme, scale] of blocks) { out += rowsBlock(set, G, scale, theme, x, top); x += rw * scale + gapX; }
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fff" />`
-    + rowsBlock(set, G, 1, "light", left, top) + rowsBlock(set, G, 1, "dark", left + 180 + gapX, top)
-    + rowsBlock(set, G, 2, "light", left + 2 * (180 + gapX), top) + rowsBlock(set, G, 2, "dark", left + 2 * (180 + gapX) + 360 + gapX, top)
-    + keylineTiles(set, G, rows, left, tilesY) + "</svg>";
+    + out + keylineTiles(set, G, rows, left, tilesY) + "</svg>";
 }
 
 /** mulberry32: a small seeded shuffle so a test can pin the order. */
@@ -103,9 +111,9 @@ function shuffled(items, seed) {
 }
 
 export function composeBlind(set, G, seed = Date.now()) {
-  const order = shuffled(set, seed), icon = G * 2, cell = icon + 48, perRow = 5;
+  const order = shuffled(set, seed), icon = G * 2, cell = icon + 48, perRow = 5, bg = THEMES[preset(G).finish === "filled" ? "grey" : "light"].bg;
   const W = 24 * 2 + perRow * cell, H = 24 * 2 + Math.ceil(order.length / perRow) * cell;
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fafafa" />`;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="${bg}" />`;
   const key = order.map((s, i) => {
     const x = 24 + (i % perRow) * cell + 24, y = 24 + Math.floor(i / perRow) * cell + 8;
     svg += place(s, G, x, y, icon, "#737373");

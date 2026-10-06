@@ -51,6 +51,35 @@ export function parse(text) {
   return out;
 }
 
+// Numbers each command takes; extra numbers after it are implicit repeats (after M, implicit L).
+const ARITY = { m: 2, l: 2, t: 2, h: 1, v: 1, s: 4, q: 4, c: 6, a: 7, z: 1 };
+export const pathNumbers = (d) => (d.match(/-?\d*\.?\d+(?:e-?\d+)?/gi) ?? []).map(Number);
+/** Commands in a path, implicit repeats included: `M1 1 2 2` is a move and a line. */
+export const pathCommands = (d) => (d.match(/[a-df-z][^a-df-z]*/gi) ?? []).reduce((n, g) => {
+  const arity = ARITY[g[0].toLowerCase()] ?? 1;
+  return n + Math.max(1, Math.ceil(pathNumbers(g.slice(1)).length / arity));
+}, 0);
+export const moves = (d) => (d.match(/[mM]/g) ?? []).length;
+
+/** Whether an element draws a closed shape (a body) or an open stroke (a line). */
+export function isClosed(el) {
+  if (el.tag === "rect" || el.tag === "circle") return true;
+  if (el.tag === "line") return false;
+  return /[zZ]/.test(el.attrs.d ?? "");
+}
+
+/** The attributes that place an element; two elements with the same ones draw the same shape. */
+export const GEOMETRY_ATTRS = ["x", "y", "width", "height", "rx", "ry", "cx", "cy", "r", "x1", "y1", "x2", "y2", "d"];
+/** An element's geometry as one string, numbers and spacing normalised, for comparing two. */
+export const geometryKey = (el) => el.tag + "|" + GEOMETRY_ATTRS.filter((k) => k in el.attrs).map((k) => `${k}=${String(el.attrs[k]).replace(/\s+/g, " ").replace(/-?\d*\.?\d+(?:e-?\d+)?/gi, (n) => String(Number(n))).trim()}`).join("|");
+
+/** An icon's text rebuilt from its root and the elements given: the way sheet and the measuring variants compose one. */
+export const compose = (root, elements) => {
+  const attr = (k, v) => ` ${k}="${String(v).replace(/&(?!(?:#\d+|#x[0-9a-f]+|[a-z]\w*);)/gi, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;")}"`;
+  const tag = (name, attrs) => `<${name}${Object.entries(attrs).map(([k, v]) => attr(k, v)).join("")}`;
+  return `${tag("svg", root)}>${elements.map((el) => `${tag(el.tag, el.attrs)} />`).join("")}</svg>`;
+};
+
 export function num(attrs, name, fallback = NaN) {
   const v = attrs[name];
   if (v === undefined || v === "") return fallback;

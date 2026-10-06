@@ -1,0 +1,7 @@
+<svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#2e3955" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M8.5 24.25H36.5L33.5 41.75H11.5Z" fill="#d1b67a" stroke="none" transform="translate(3 3)" />
+  <path d="M8.5 24.25H36.5L33.5 41.75H11.5Z" fill="#efe0b4" />
+  <path d="M6.5 24.25C2 24.25 2 18 8 17C7.5 10.5 12.5 7.5 16.75 9.5C18.75 1.25 26.25 1.25 28.25 9.5C32.5 7.5 37.5 10.5 37 17C43 18 43 24.25 38.5 24.25Z" fill="#e8b4ab" />
+  <path d="M15 29V37M22.5 29V37M30 29V37" stroke="#d1b67a" />
+  <path d="M12 20C12.5 17 14.5 14.5 17 13.5" stroke="#ffffff" />
+</svg>

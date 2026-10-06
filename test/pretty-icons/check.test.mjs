@@ -135,7 +135,7 @@ test("measure cannot crash check: --grid=32 is a canvas line per icon", () => {
   const r = run([new URL("./fixtures/good-16/", import.meta.url).pathname, "--grid=32"]);
   assert.equal(r.status, 1, r.out);
   assert.equal(r.stack, false, r.out);
-  assert.ok(r.lines.includes("canvas  card  grid 32 → one of 16, 20, 24"), r.out);
+  assert.ok(r.lines.includes("canvas  card  grid 32 → one of 16, 20, 24, 48"), r.out);
   assert.ok(!r.out.includes("not measured"), r.out);
 });
 
