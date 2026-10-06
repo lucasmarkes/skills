@@ -1,0 +1,8 @@
+<svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#2e3955" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M3.25 30C3.25 22 8 21 12 20.25C14 12 15.5 7.25 22.5 7.25C29.5 7.25 31 12 33 20.25C37 21 41.75 22 41.75 30C41.75 32 40.5 32.5 39 32.5H6C4.5 32.5 3.25 32 3.25 30Z" fill="#ad4a43" stroke="none" transform="translate(3 3)" />
+  <path d="M3.25 30C3.25 22 8 21 12 20.25C14 12 15.5 7.25 22.5 7.25C29.5 7.25 31 12 33 20.25C37 21 41.75 22 41.75 30C41.75 32 40.5 32.5 39 32.5H6C4.5 32.5 3.25 32 3.25 30Z" fill="#d26352" />
+  <path d="M18.25 19.25C18.75 15.5 20 13 22.5 13C25 13 26.25 15.5 26.75 19.25Z" fill="#9db5db" />
+  <circle cx="12" cy="33.25" r="4.5" fill="#c3c0b8" />
+  <circle cx="33" cy="33.25" r="4.5" fill="#c3c0b8" />
+  <path d="M18.5 26.5H26.5" stroke="#ffffff" />
+</svg>

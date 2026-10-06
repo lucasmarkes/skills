@@ -1,0 +1,7 @@
+<svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#2e3955" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="8.25" y="3.25" width="22.5" height="38.5" rx="3" fill="#7288b0" stroke="none" transform="translate(3 3)" />
+  <rect x="8.25" y="3.25" width="22.5" height="38.5" rx="3" fill="#9db5db" />
+  <rect x="13.25" y="8.25" width="12.5" height="9" rx="1.5" fill="#f4f4f2" />
+  <path d="M30.75 13C35 13 37.75 15 37.75 19.5V31C37.75 33 37 34 35.75 34" />
+  <path d="M12 27.5V36.5" stroke="#ffffff" />
+</svg>

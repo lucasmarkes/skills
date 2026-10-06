@@ -198,3 +198,11 @@ test("the GREEN set: six icons a fresh agent drew with the skill pass every rule
   assert.deepEqual(r.failures.map((f) => `${f.rule} ${f.icon} ${f.got}`), []);
   assert.deepEqual(r.rows.map((x) => x.icon).sort(), ["apple", "avocado", "bread", "mug", "mushroom", "whisk"]);
 });
+
+test("the automotive set: ten icons outside the kitchen pass every rule", async () => {
+  const r = await checkSet(fix("filled-automotive"));
+  assert.equal(r.G, 48);
+  assert.equal(r.measured, true);
+  assert.deepEqual(r.failures.map((f) => `${f.rule} ${f.icon} ${f.got}`), []);
+  assert.deepEqual(r.rows.map((x) => x.icon).sort(), ["bateria", "cambio", "carro", "combustivel", "ferramenta", "oleo", "pneu", "semaforo", "velocimetro", "volante"]);
+});

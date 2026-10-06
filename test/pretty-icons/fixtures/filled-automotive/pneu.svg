@@ -1,0 +1,7 @@
+<svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#2e3955" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="22.5" cy="22.5" r="19.25" fill="#9b9b9b" stroke="none" transform="translate(3 3)" />
+  <circle cx="22.5" cy="22.5" r="19.25" fill="#c3c0b8" />
+  <circle cx="22.5" cy="22.5" r="9.5" fill="#f4f4f2" />
+  <path d="M22.5 9.25V7M35.75 22.5H38M22.5 35.75V38M9.25 22.5H7" stroke="#9b9b9b" />
+  <path d="M22.5 17.5h0M27.25 21h0M25.5 26.5h0M19.5 26.5h0M17.75 21h0" stroke="#bcc6d6" />
+</svg>
