@@ -147,6 +147,6 @@ test("follow: no pointer under reduced motion; the pointer leaving is null", () 
 
 test("README lists the skill", () => {
   const readme = readFileSync(new URL("../../README.md", import.meta.url), "utf8");
-  assert.match(readme, /^\| `svg-animate` \| .+ \|$/m);
+  assert.match(readme, /^- \*\*\[svg-animate\]\(\.\/skills\/svg-animate\/SKILL\.md\)\*\* — .+$/m);
   assert.doesNotMatch(readme, /the scripts it runs/);
 });
