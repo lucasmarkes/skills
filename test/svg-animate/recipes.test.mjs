@@ -111,3 +111,15 @@ test("beads draw every body alone: each path's area is its circles'", async () =
     assert.ok(Math.abs(Math.abs(area) - want) < 0.01 * want, `path ${i}: ${Math.abs(area).toFixed(1)} vs ${want.toFixed(1)}`);
   }
 });
+
+test("rig and beads leave a path no bone owns where it is", async () => {
+  assert.equal(run("normalize.mjs", [join(FIX, "scene.svg"), join(tmp, "scene")]).status, 0);
+  const kit = await import(pathToFileURL(join(tmp, "kit.mjs")).href);
+  const d = kit.load(join(tmp, "scene")), sun = d.inv.paths.filter((p) => p.group === "sun").map((p) => p.i);
+  const bs = [{ c: d.inv.circles[0].c, r: d.inv.circles[0].r, paths: sun }], id = [kit.M.id()];
+  const posed = kit.rig(d, bs)(id), apart = kit.beads(d, bs, [])(id);
+  for (const [i, p] of d.paths.entries()) if (!sun.includes(i)) {
+    assert.deepEqual(posed[i], p.pts, `rig: path ${i}`);
+    assert.deepEqual(apart[i], p.pts, `beads: path ${i}`);
+  }
+});

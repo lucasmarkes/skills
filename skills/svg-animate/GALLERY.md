@@ -29,7 +29,9 @@ title, the intent line, and one `<article>` per proposal.
 - An entrance or a loop is the SMIL `.svg` its build wrote, with
   `begin="indefinite"` on every `<animate>`. The page begins them: an entrance
   at load, on Replay and on hover; a loop at load.
-- An interaction registers itself in a `<script>` after the card:
+- An interaction's card holds `norm/source.svg`, the drawing its factory
+  was built on, and the factory registers under the card's `data-name`, in a
+  `<script>` after the card:
   `interactions["Magnet"] = (svg) => ({ point(p) { … } })`. The page calls
   `point` with the pointer in the SVG's own units, and with `null` when the
   pointer leaves. An interaction that only plays (a bell that rings when
@@ -86,7 +88,7 @@ as `gallery.html` in the scratch directory and give the path.
   @media (min-width: 980px) { .grid { grid-template-columns: repeat(3, 1fr); } }
   .card { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
   .stage { position: relative; display: grid; place-items: center; aspect-ratio: 4 / 3; overflow: hidden; background: var(--stage); color: var(--mark); touch-action: pan-y; transition: background-color 250ms ease; }
-  .stage svg { width: 62%; max-height: 80%; height: auto; overflow: visible; }
+  .stage svg { width: 62%; max-height: 80%; height: auto; }
   .stage svg.fade { animation: fade 300ms ease-out; }
   @keyframes fade { from { opacity: 0; } }
   .tag { position: absolute; left: 12px; top: 12px; font: 500 11px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.55; }

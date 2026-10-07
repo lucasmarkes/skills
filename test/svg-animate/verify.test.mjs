@@ -78,8 +78,9 @@ test("normalize reads fill and stroke from a style attribute", { skip }, () => {
 
 test("normalize takes the canvas from width and height when there is no viewBox", { skip }, () => {
   const bell = readFileSync(join(FIX, "bell.svg"), "utf8").replace(/\sviewBox="[^"]*"/, "");
-  const { src, inv } = normalize("bell-bare", bell);
+  const { src, inv, svg } = normalize("bell-bare", bell);
   assert.deepEqual(inv.viewBox, [0, 0, 24, 24]);
+  assert.match(svg, /<svg\b[^>]*\sviewBox="0 0 24 24"/);
   assert.equal(roundTrip("bell-bare", src).status, 0);
 });
 
@@ -91,6 +92,40 @@ test("normalize keeps gradients and clip paths working", { skip }, () => {
   assert.match(svg, /url\(#glow\)/);
   assert.match(svg, /<clipPath id="card"><path /);
   assert.equal(roundTrip("scene-defs", src).status, 0);
+});
+
+test("normalize finds bodies and necks drawn as cubics", () => {
+  normalize("lobes");
+  const r = run("normalize.mjs", [join(tmp, "lobes", "source.svg"), join(tmp, "lobes-cubic")]);
+  assert.equal(r.status, 0, r.stderr);
+  const inv = JSON.parse(readFileSync(join(tmp, "lobes-cubic", "inventory.json"), "utf8"));
+  assert.deepEqual(inv.circles.map((c) => +c.r.toFixed(1)).sort(), [5, 8, 8, 8]);
+  assert.equal(inv.necks.length, 2);
+});
+
+test("normalize scales the stroke width with the transform it bakes", { skip }, () => {
+  const bell = readFileSync(join(FIX, "bell.svg"), "utf8").replace(/(<svg[^>]*>)([\s\S]*)<\/svg>/, '$1<g transform="translate(6 6) scale(0.5)" stroke-width="3">$2</g></svg>');
+  const { src } = normalize("bell-scaled", bell);
+  const r = roundTrip("bell-scaled", src);
+  assert.equal(r.status, 0, r.stdout);
+});
+
+test("normalize exits 2 on what a baked transform would move", () => {
+  const scene = readFileSync(join(FIX, "scene.svg"), "utf8"), bell = readFileSync(join(FIX, "bell.svg"), "utf8");
+  const defs = (s) => scene.replace(/(<svg[^>]*>)/, `$1<defs>${s}</defs>`);
+  const cases = {
+    clip: [defs('<clipPath id="card"><rect width="96" height="60" /></clipPath>').replace('<g id="hill"', '<g id="hill" transform="translate(0 2)" clip-path="url(#card)"'), /url\(#card\)/],
+    paint: [defs('<linearGradient id="glow" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="60"><stop offset="0" stop-color="#fff" /><stop offset="1" stop-color="#000" /></linearGradient>')
+      .replace("</svg>", '<rect transform="translate(4 0)" width="10" height="10" fill="url(#glow)" /></svg>'), /url\(#glow\)/],
+    stretch: [bell.replace(/(<svg[^>]*>)([\s\S]*)<\/svg>/, '$1<g transform="scale(1 0.5)">$2</g></svg>'), /stroke/],
+    text: [scene.replace("</svg>", '<g transform="translate(2 0)"><text x="4" y="10">Hi</text></g></svg>'), /<text>/],
+  };
+  for (const [name, [text, why]] of Object.entries(cases)) {
+    writeFileSync(join(tmp, `refuse-${name}.svg`), text);
+    const r = run("normalize.mjs", [join(tmp, `refuse-${name}.svg`), join(tmp, `refuse-${name}`)]);
+    assert.equal(r.status, 2, name);
+    assert.match(r.stderr, why, name);
+  }
 });
 
 test("check accepts the three worked animations", { skip }, () => {
@@ -139,6 +174,39 @@ test("check rejects a transform left in a frame, a change of structure, and a lo
   assert.match(l.stdout, /^loop {2}frame-000 {2}\d+ px differ from the last frame → 0$/m);
 });
 
+test("check finds a sliver between shapes painted by class", { skip }, () => {
+  const svg = (x) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 12" width="22" height="12"><style>.a{fill:#c33}.b{fill:#36c}</style>` +
+    `<path class="a" d="M1 1H11V11H1Z"/><path class="b" d="M${x} 1H${x + 10}V11H${x}Z"/></svg>`;
+  const dir = fresh("classes");
+  mkdirSync(dir);
+  writeFileSync(join(tmp, "classes.svg"), svg(11));
+  writeFileSync(frame(dir, 0), svg(11.3));
+  writeFileSync(frame(dir, 1), svg(11));
+  const r = run("check.mjs", [dir, join(tmp, "classes.svg")]);
+  assert.equal(r.status, 1, r.stdout);
+  assert.match(r.stdout, /^sliver {2}frame-000 /m);
+});
+
+test("check measures a drawing that covers its whole canvas", { skip }, () => {
+  const full = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10" width="20" height="10"><path fill="#c33" d="M0 0H20V10H0Z"/></svg>';
+  const dir = fresh("full-bleed");
+  mkdirSync(dir);
+  writeFileSync(join(tmp, "full-bleed.svg"), full);
+  for (const n of [0, 1]) writeFileSync(frame(dir, n), full);
+  const r = run("check.mjs", [dir, join(tmp, "full-bleed.svg")]);
+  assert.equal(r.status, 0, r.stdout);
+});
+
+test("check accepts a transform the source has itself", { skip }, () => {
+  const text = readFileSync(join(FIX, "bell.svg"), "utf8").replace("</svg>", '<text transform="matrix(1 0 0 1 2 22)" font-size="4">Hi</text></svg>');
+  const dir = fresh("own-transform");
+  mkdirSync(dir);
+  writeFileSync(join(tmp, "own-transform.svg"), text);
+  for (const n of [0, 1]) writeFileSync(frame(dir, n), text);
+  const r = run("check.mjs", [dir, join(tmp, "own-transform.svg")]);
+  assert.equal(r.status, 0, r.stdout);
+});
+
 test("check exits 2 with a reason when it cannot measure", () => {
   const one = fresh("one");
   mkdirSync(one);
@@ -165,4 +233,14 @@ test("frames writes a contact sheet and a zoom of the critical frames", { skip }
   assert.equal(zoom.match(/<svg x=/g).length, 6);
   assert.match(zoom, /viewBox="4 6 66 38"/);
   assert.match(zoom, />017</);
+});
+
+test("frames keeps the paint the root svg carries in its style", { skip }, () => {
+  const bell = readFileSync(join(FIX, "bell.svg"), "utf8").replace(/fill="none"\s+stroke="currentColor"/, 'style="fill:none;stroke:#000"');
+  const dir = fresh("root-style");
+  mkdirSync(dir);
+  for (const n of [0, 1]) writeFileSync(frame(dir, n), bell);
+  const r = run("frames.mjs", [dir]);
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(readFileSync(join(dir, "sheet.svg"), "utf8"), /<svg x=[^>]*\sstyle="fill:none;stroke:#000"/);
 });

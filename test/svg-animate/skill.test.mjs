@@ -49,6 +49,7 @@ test("the gallery page gates hover, honours reduced motion, and handles the thre
   assert.ok(page.includes('matchMedia("(prefers-reduced-motion: reduce)")'));
   assert.match(page, /@media \(prefers-reduced-motion: reduce\)/);
   for (const kind of ["entrance", "loop", "interaction"]) assert.ok(page.includes(`kind === "${kind}"`), kind);
+  assert.doesNotMatch(page, /overflow:\s*visible/, "a part that leaves the stage is clipped, as it is in place");
   const script = [...page.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).at(-1);
   assert.doesNotThrow(() => new Function(script));
 });
@@ -57,7 +58,27 @@ test("the React template plays, pauses, honours reduced motion, and imports only
   const tsx = block(SKILL, "tsx", "Name.tsx");
   assert.ok(tsx, "SKILL.md has a tsx Name.tsx block");
   assert.deepEqual([...tsx.matchAll(/^import .* from "([^"]+)";$/gm)].map((m) => m[1]), ["react"]);
-  for (const s of ["forwardRef", "useImperativeHandle", "prefers-reduced-motion: reduce", "beginElement()", "pauseAnimations()", "unpauseAnimations()", "getScreenCTM()", "live.point(null)"]) assert.ok(tsx.includes(s), s);
+  for (const s of ["forwardRef", "useImperativeHandle", "prefers-reduced-motion: reduce", "beginElement()", "endElement()", "getScreenCTM()", "live.point(null)"]) assert.ok(tsx.includes(s), s);
+  assert.ok(!tsx.includes("pauseAnimations()"), "a paused loop rests on the source, not frozen mid-motion");
+});
+
+test("an interaction's factory is kept as a TypeScript module the component imports", () => {
+  const keep = section(SKILL, "6. Keep"), tsx = block(SKILL, "tsx", "Name.tsx");
+  assert.ok(keep.includes("`<Name>.motion.ts`"), "the file is .ts");
+  assert.ok(keep.includes("`// @ts-nocheck`"), "its first line turns the checker off");
+  assert.ok(tsx.includes('import motion from "./Name.motion";'), "the import has no extension");
+});
+
+test("an interaction is shown and kept on the normalised drawing, its factory named after the proposal", () => {
+  for (const [where, text] of [["Gallery", section(SKILL, "5. Gallery")], ["Keep", section(SKILL, "6. Keep")], ["GALLERY.md", GALLERY]]) assert.ok(text.includes("`norm/source.svg`"), where);
+  assert.match(section(SKILL, "5. Gallery"), /proposal's name as `magnet\.mjs`'s third argument/);
+  assert.match(read("RECIPES.md"), /`node magnet\.mjs norm magnet\.js Magnet`/);
+});
+
+test("Read checks the normalised drawing against the source before any idea", () => {
+  const read1 = section(SKILL, "1. Read");
+  assert.match(read1, /normalize` exits 2/);
+  assert.ok(read1.includes("`node check.mjs rt <source.svg>`"), "the round trip");
 });
 
 // wire.js against a stub page: matchMedia answers from a table, the svg records what was asked of it
@@ -72,7 +93,7 @@ const stub = (waiting = []) => {
     calls, on,
     pauseAnimations: () => calls.push("pause"), unpauseAnimations: () => calls.push("unpause"),
     setCurrentTime: (t) => calls.push(`time ${t}`), animate: () => calls.push("fade"),
-    querySelectorAll: () => waiting.map(() => ({ beginElement: () => calls.push("begin") })),
+    querySelectorAll: () => waiting.map(() => ({ beginElement: () => calls.push("begin"), endElement: () => calls.push("end") })),
     addEventListener: (type, f) => { on[type] = f; }, getScreenCTM: () => null,
   };
 };
@@ -83,19 +104,22 @@ test("wire: under reduced motion the drawing rests on the source and replay is a
   assert.deepEqual(entrance.calls, ["pause", "time 1.4"]);
   e.replay();
   e.pause(false);
-  assert.deepEqual(entrance.calls.slice(2), ["fade", "pause"]);
+  assert.deepEqual(entrance.calls.slice(2), ["fade"]);
   const loop = stub();
   wire(loop, { loop: true, duration: 2400 });
   assert.deepEqual(loop.calls, ["pause", "time 0"]);
 });
 
-test("wire: replay restarts the clock, pause toggles it, a verb plays on hover only with a mouse and only at rest", () => {
+test("wire: replay restarts the clock, pause ends a loop on the source, a verb plays on hover only with a mouse and only at rest", () => {
   media({});
   const svg = stub(), w = wire(svg, { duration: 1400 });
   w.replay();
   w.pause(true);
-  w.pause(false);
-  assert.deepEqual(svg.calls, ["time 0", "pause", "unpause"]);
+  assert.deepEqual(svg.calls, ["time 0"]);
+  const looping = stub([1, 2]), l = wire(looping, { loop: true, duration: 2400 });
+  l.pause(true);
+  l.pause(false);
+  assert.deepEqual(looping.calls, ["end", "end", "begin", "begin"]);
   const touch = stub([1]);
   wire(touch, { duration: 900, hover: true });
   touch.on.pointerenter();

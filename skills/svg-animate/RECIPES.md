@@ -139,6 +139,7 @@ export function rig(drawing, bs, necks = []) {
       return p;
     };
     return drawing.paths.map((p, i) => {
+      if (!owned[i].length) return p.pts.map((q) => [...q]); // no bone owns it: it stays where it is
       const at = p.pts.map((q, j) => {
         if (p.owner[j] !== j) return null;
         const h = 1e-3, o = field(owned[i], q), x = field(owned[i], [q[0] + h, q[1]]), y = field(owned[i], [q[0], q[1] + h]);
@@ -160,6 +161,7 @@ export function beads(drawing, bs, necks) {
   const neckOf = (x, y) => necks.find(([a, b]) => (a === x && b === y) || (a === y && b === x));
   const plan = drawing.paths.map((p, i) => {
     const ks = bs.map((b, k) => (!b.paths || b.paths.includes(i) ? k : -1)).filter((k) => k >= 0);
+    if (!ks.length) return null;
     // first pass: on its body's circle, or in the neck whose two bodies hold it most evenly
     const plan = p.pts.map((q, j) => {
       if (p.owner[j] !== j) return null;
@@ -202,8 +204,10 @@ export function beads(drawing, bs, necks) {
       return [A.c[0] + ax[0] * t, A.c[1] + ax[1] * t];
     };
     return drawing.paths.map((p, i) => {
+      if (!plan[i]) return p.pts.map((q) => [...q]);
       const pts = p.pts.map((q, j) => (plan[i][j] ? place(plan[i][j]) : null));
-      for (let j = 1; j + 2 < pts.length; j += 3) {
+      // every cubic's two handles, whichever subpath it is in: the first handle belongs to the anchor before it
+      for (let j = 1; j + 2 < pts.length; j++) if (p.owner[j] === j - 1) {
         const P0 = pts[j - 1], P3 = pts[j + 2], k = circleOf(plan[i][j - 1]);
         if (k >= 0 && k === circleOf(plan[i][j + 2])) {
           const { c, r } = cur[k], t0 = Math.atan2(P0[1] - c[1], P0[0] - c[0]), t3 = Math.atan2(P3[1] - c[1], P3[0] - c[0]);
@@ -596,7 +600,8 @@ ${live(dr, bs, dr.inv.necks.map((n) => n.between))}
 An interaction has no frames of its own. `probe.mjs` drives any factory
 along the gallery's Demonstrate path, without a browser, and writes what it
 draws as frames, so `frames` and `check` see an interaction like any other
-proposal: `node magnet.mjs norm magnet.js`, then
+proposal: `node magnet.mjs norm magnet.js Magnet`, the third argument being
+the proposal's name, then
 `node probe.mjs norm magnet.js magnet Magnet`. The last frame is the sleeping
 drawing, so `check` holds it to the source.
 

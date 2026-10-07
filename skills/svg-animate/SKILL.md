@@ -34,7 +34,7 @@ Files named below are in this skill's folder, `<skill-dir>`. Work in a scratch d
 
 Find the drawing: the path given, the markup pasted, or, from a phrase like "the website logo", the component or file in the project (`Logo`, `public/*.svg`, the `<svg>` in the header). Ask when there are two candidates.
 
-Copy `normalize.mjs`, `frames.mjs` and `check.mjs` from `<skill-dir>/VERIFY.md` into scratch, then `node normalize.mjs <source.svg> norm`. Its `inventory.json` lists bodies (circles and near-circles), necks, strokes in order, and groups. Then write back, before any idea:
+Copy `normalize.mjs`, `frames.mjs` and `check.mjs` from `<skill-dir>/VERIFY.md` into scratch, then `node normalize.mjs <source.svg> norm`. If `normalize` exits 2, stop and tell the person what it printed: the drawing has something that baking its transforms would move. Otherwise copy `norm/source.svg` as `rt/frame-000.svg` and `rt/frame-001.svg` and run `node check.mjs rt <source.svg>`; if it fails, stop and tell the person, because every check after this one compares against that drawing. Its `inventory.json` lists bodies (circles and near-circles), necks, strokes in order, and groups. Then write back, before any idea:
 
 - **the role**, from the intent or its absence: entrance, loop, interaction, or all three;
 - **where it lives**, which sets the budget: an icon in a button stays under 300 ms; a hero logo may take 1.5 s; a loop needs a rest in it;
@@ -73,7 +73,7 @@ An interaction has no frames until `probe.mjs` (in `RECIPES.md`, under Magnet) d
 
 ## 5. Gallery
 
-Build the page from `<skill-dir>/GALLERY.md`: one card per proposal, the SVG inline as its build wrote it, the interaction's factory in a script after its card. Publish it as an artifact when the harness has one; otherwise write `gallery.html` in scratch and give its path.
+Build the page from `<skill-dir>/GALLERY.md`: one card per proposal, the SVG inline as its build wrote it, the interaction's factory in a script after its card. An interaction's card holds `norm/source.svg`, the drawing its factory was built on, and the factory is built with the proposal's name as `magnet.mjs`'s third argument, so it registers under the card's `data-name`. Publish it as an artifact when the harness has one; otherwise write `gallery.html` in scratch and give its path.
 
 Then reply with the table and stop; the choice is the person's:
 
@@ -89,11 +89,11 @@ Then reply with the table and stop; the choice is the person's:
 
 `keep <name>` writes the chosen animation where the source drawing is used, following the project's naming. The gallery stays in scratch.
 
-**In a React project**, `<Name>.tsx`: the SVG inline with its attributes in camelCase, every `<animate>` at `begin="indefinite"`. An interaction's factory goes beside it as `<Name>.motion.js`, its first line `interactions["<Name>"] =` replaced by `export default`.
+**In a React project**, `<Name>.tsx`: the SVG inline with its attributes in camelCase, every `<animate>` at `begin="indefinite"`. An interaction's factory goes beside it as `<Name>.motion.ts`, its first line `// @ts-nocheck`, then `interactions["<Name>"] =` replaced by `export default`.
 
 ```tsx Name.tsx
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef } from "react";
-// import motion from "./Name.motion.js"; // an interaction only
+// import motion from "./Name.motion"; // an interaction only
 
 export type NameHandle = { play(): void };
 type Props = { paused?: boolean; className?: string };
@@ -111,12 +111,13 @@ export const Name = forwardRef<NameHandle, Props>(function Name({ paused = false
   };
   useImperativeHandle(ref, () => ({ play }), []);
   useLayoutEffect(play, []);
-  // a loop pauses on request and never runs under reduced motion
+  // a loop paused ends its animations, so it rests on the source; under reduced motion it never began
+  const was = useRef(false);
   useEffect(() => {
     const el = svg.current;
-    if (!el) return;
-    if (paused || reduced()) el.pauseAnimations();
-    else el.unpauseAnimations();
+    if (!el || reduced() || paused === was.current) return;
+    was.current = paused;
+    el.querySelectorAll("animate").forEach((a) => (paused ? a.endElement() : a.beginElement()));
   }, [paused]);
   // an interaction only: the pointer in the SVG's own units, nothing under reduced motion
   // useEffect(() => {
@@ -137,7 +138,7 @@ export const Name = forwardRef<NameHandle, Props>(function Name({ paused = false
 });
 ```
 
-Keep what the kind needs and delete the rest: an entrance keeps `play`; a loop keeps `play` and `paused`; an interaction keeps its effect and drops both, unless it also plays (a verb on hover keeps `play` and calls it from `onPointerEnter` under `(hover: hover) and (pointer: fine)`). An interaction's `<svg>` takes the `ref` and no `<animate>`.
+Keep what the kind needs and delete the rest: an entrance keeps `play`; a loop keeps `play` and `paused`; an interaction keeps its effect and drops both, unless it also plays (a verb on hover keeps `play` and calls it from `onPointerEnter` under `(hover: hover) and (pointer: fine)`). An interaction's `<svg>` is `norm/source.svg`, takes the `ref` and no `<animate>`.
 
 **Otherwise**, `<name>.svg`: rebuild it with `smil(drawing, all, { dur, loop, begin: "0s" })` so it plays on its own, or `begin: "indefinite"` for a verb that plays on hover. An `<img>` cannot honour reduced motion; when the project shows it inline, add `wire.js` beside it:
 
@@ -157,7 +158,8 @@ export function wire(svg, { loop = false, duration = 1000, hover = false } = {})
       if (waiting.length) for (const a of waiting) a.beginElement();
       else svg.setCurrentTime(0);
     },
-    pause(on) { if (on || reduce) svg.pauseAnimations(); else svg.unpauseAnimations(); },
+    // a loop paused ends its animations, so it rests on the source
+    pause(on) { if (!loop || reduce) return; for (const a of svg.querySelectorAll("animate")) on ? a.endElement() : a.beginElement(); },
   };
   // a verb plays on hover, only with a mouse, only at rest
   if (hover && !reduce) svg.addEventListener("pointerenter", () => {
