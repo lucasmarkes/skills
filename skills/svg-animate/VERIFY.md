@@ -306,7 +306,8 @@ function runs(svg, width) {
   scan(h, w, (r, c) => r * w + c); scan(w, h, (r, c) => c * w + r);
   return out;
 }
-const differ = (a, b) => { let n = 0; for (let i = 0; i < a.px.length; i += 4) if ([0, 1, 2, 3].some((j) => Math.abs(a.px[i + j] - b.px[i + j]) > 96)) n++; return a.w === b.w && a.h === b.h ? n : Infinity; };
+// colour weighed by alpha: an edge pixel that barely shows carries no colour worth comparing
+const differ = (a, b) => { let n = 0; for (let i = 0; i < a.px.length; i += 4) if ([0, 1, 2, 3].some((j) => Math.abs(j < 3 ? (a.px[i + j] * a.px[i + 3] - b.px[i + j] * b.px[i + 3]) / 255 : a.px[i + 3] - b.px[i + 3]) > 96)) n++; return a.w === b.w && a.h === b.h ? n : Infinity; };
 const files = readdirSync(dir).filter((f) => /^frame-\d+\.svg$/.test(f)).sort();
 if (files.length < 2) { console.error(`check: ${dir} needs frame-000.svg and at least one more frame`); process.exit(2); }
 const frames = files.map((f) => readFileSync(join(dir, f), "utf8")), name = (i) => files[i].replace(".svg", ""), src = readFileSync(source, "utf8");

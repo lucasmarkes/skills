@@ -197,6 +197,18 @@ test("check measures a drawing that covers its whole canvas", { skip }, () => {
   assert.equal(r.status, 0, r.stdout);
 });
 
+test("check weighs an edge pixel's colour by how much of it shows", { skip }, () => {
+  // coordinates at five decimals, as design tools export them: normalize rounds them to three, which moves no visible pixel
+  const fine = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20"><path fill="#0c8c5e" d="M4.9434 9.50941C4.95221 7.76347 5.64849 6.08807 6.87361 4.83594L2.14058 9.57113C0.933084 10.7615 0.23681 12.2959 0.122231 13.9183C0.0164654 15.435 0.413078 16.934 1.2592 18.1862L4.58202 15.338C5.48985 14.4298 5.7719 13.0806 5.34002 11.8726C5.06679 11.1231 4.93459 10.3207 4.9434 9.50941Z"/><path fill="#18e299" d="M18.4725 9.60528V3.91396C18.4725 3.30323 17.977 2.81641 17.3754 2.81641H11.6867C10.7931 2.81641 9.90842 2.99342 9.08564 3.32977C8.26285 3.67497 7.51085 4.17064 6.88271 4.80793C9.71378 8.12713 13.7392 14.8629 13.3942 16.1817C15.5883 15.2878 18.4636 10.4993 18.4636 9.60528H18.4725Z"/></svg>';
+  const dir = fresh("fine");
+  writeFileSync(join(tmp, "fine.svg"), fine);
+  assert.equal(run("normalize.mjs", [join(tmp, "fine.svg"), join(tmp, "fine-norm")]).status, 0);
+  mkdirSync(dir);
+  for (const n of [0, 1]) cpSync(join(tmp, "fine-norm", "source.svg"), frame(dir, n));
+  const r = run("check.mjs", [dir, join(tmp, "fine.svg")]);
+  assert.equal(r.status, 0, r.stdout);
+});
+
 test("check accepts a transform the source has itself", { skip }, () => {
   const text = readFileSync(join(FIX, "bell.svg"), "utf8").replace("</svg>", '<text transform="matrix(1 0 0 1 2 22)" font-size="4">Hi</text></svg>');
   const dir = fresh("own-transform");
