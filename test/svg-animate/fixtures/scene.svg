@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 64" width="96" height="64">
+  <g id="sun" fill="#f2b33d">
+    <circle cx="74" cy="16" r="7" />
+    <path d="M74 4.5v-2.5M85.5 16h2.5M74 27.5v2.5M62.5 16h-2.5" stroke="#f2b33d" stroke-width="2" stroke-linecap="round" />
+  </g>
+  <g id="hill" fill="#6aa361">
+    <path d="M0 48C20 40 44 40 64 44S88 50 96 48V64H0Z" />
+  </g>
+  <g id="house">
+    <rect x="22" y="30" width="18" height="14" fill="#e8dcc8" />
+    <path d="M19 31L31 21L43 31Z" fill="#b5523b" />
+    <rect x="28" y="36" width="6" height="8" fill="#6b4a3a" />
+  </g>
+  <g id="tree">
+    <rect x="53" y="32" width="3" height="12" fill="#6b4a3a" />
+    <circle cx="54.5" cy="28" r="7" fill="#3f7a45" />
+  </g>
+</svg>
