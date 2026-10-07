@@ -1,6 +1,6 @@
 # The ten rules at the filled finish
 
-The grid names the finish: 16, 20 and 24 are duotone (`rules.md`), 48 is filled. The ten rules keep their names and numbers; this file says where each reads differently at 48, and the rest is `rules.md`'s text. An icon at 48 is shown at 32, 48 or 64 by CSS, in a feature grid, a category list or an empty state, never in a sidebar. `examples/garage`, ten icons for one car app, is the finish; its metaphors are not the bar (rule 09).
+The grid names the finish: 16, 20 and 24 are duotone (`rules.md`), 48 is filled. The ten rules keep their names and numbers; this file says where each reads differently at 48, and the rest is `rules.md`'s text. An icon at 48 is shown at 16 to 64 px by CSS, wherever the person chose the filled finish. It is sharpest from 32 up, where the line is a whole pixel; below 32 it softens on a 1× screen. `examples/garage`, ten icons for one car app, is the finish; its metaphors are not the bar (rule 09).
 
 What the finish is: a thin line over a light body, in five neutral tones and no colour. The light comes from the top: the side of the body away from it is shaded inside the body, under the line. No offset shadow, no highlight. A part that is solid and small (a wheel, a terminal, a lamp that is on) is filled in the line tone; glass and a lamp that is off are paper. Everything is told apart by paint and by order:
 

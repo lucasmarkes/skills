@@ -7,7 +7,7 @@
  *
  * The grid names the finish. 16, 20 and 24 are duotone: a currentColor stroke
  * over a 20% fill, for a sidebar. 48 is filled: a thin line over a light fill,
- * shaded inside on the side away from the light, in five neutral tones, for 32–64 px.
+ * shaded inside on the side away from the light, in five neutral tones, shown at 16–64 px by CSS.
  */
 export const PRESETS = {
   16: { stroke: 1.5, radius: [1.5, 1], keylines: { circle: [14, 14], square: [12.5, 12.5], portrait: [11, 14], landscape: [14, 11] } },

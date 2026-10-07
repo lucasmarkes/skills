@@ -6,7 +6,7 @@ argument-hint: "[names, or a file with the nav]"
 
 # pretty-icons: a set that sits even
 
-You are drawing a set of icons for one app in one of two finishes. **Duotone**, on 16, 20 or 24: a stroke in `currentColor` with a `currentColor` fill at 20% under every body, for a sidebar. **Filled**, on 48: a thin line over a light body in five neutral tones, the side away from the light shaded inside the body, no shadow and no colour, for icons shown at 32–64 px. The grid names the finish. What makes them a set is measurement: `check.mjs` measures every icon against the others and the keylines, and a reader who has seen none of your work names each from the picture alone. `examples/hairline` (ten sidebar icons) and `examples/garage` (ten car icons) are the finishes; their metaphors are not the bar (rule 09).
+You are drawing a set of icons for one app in one of two finishes. **Duotone**, on 16, 20 or 24: a stroke in `currentColor` with a `currentColor` fill at 20% under every body, for a sidebar. **Filled**, on 48: a thin line over a light body in five neutral tones, the side away from the light shaded inside the body, no shadow and no colour, for icons shown at 16–64 px by CSS. The person chooses the finish; the grid follows from it. What makes them a set is measurement: `check.mjs` measures every icon against the others and the keylines, and a reader who has seen none of your work names each from the picture alone. `examples/hairline` (ten sidebar icons) and `examples/garage` (ten car icons) are the finishes; their metaphors are not the bar (rule 09).
 
 Files named below are in this skill's folder, `<skill-dir>`. Draw icons in `pretty-icons/` in the person's working directory; run the scripts from there.
 
@@ -15,7 +15,8 @@ Files named below are in this skill's folder, `<skill-dir>`. Draw icons in `pret
 The argument is names, a file, or nothing. With nothing, find the app's navigation and icons. Before drawing, write back:
 
 - the names to cover;
-- the finish and the grid, from where the icon is shown. In a sidebar, a nav, tabs or a table row, beside text, it is duotone; measure the existing icon's rendered box: 16 beside 13–14px text, 20 beside 15–16px, 24 beside larger. Never draw 24 for a 16px slot. In a feature grid, a category list, a card header or an empty state, at 32 px or more, or when the person asks for an illustrated look, it is filled, on 48, shown at its size by CSS. Never draw filled for a 16–24 px slot, and never duotone for a 48 px one;
+- the finish, which the person chooses: duotone (one colour, the text's, that follows hover and active states) or filled (neutral tones, light and shade, the same in every state). Ask, and recommend from where the icon is shown: duotone in a sidebar, a nav, tabs or a table row, beside text; filled in a feature grid, a category list, a card header or an empty state. With nobody to ask, take the recommendation and say so;
+- the grid, from the finish. Duotone is drawn at the size it is shown: measure the existing icon's rendered box, 16 beside 13–14px text, 20 beside 15–16px, 24 beside larger; never draw 24 for a 16px slot. Filled is drawn on 48 and shown at 16–64 px by CSS; below 32 its line is under one pixel on a 1× screen, so say so when the slot is that small. Never draw duotone for a 48 px slot;
 - how the app takes icons: React (and any wrapper, like `svg(children)`), `.svg` files, or a sprite.
 
 Copy the app's icons in this style into `pretty-icons/` first: they are the set (rule 10).
