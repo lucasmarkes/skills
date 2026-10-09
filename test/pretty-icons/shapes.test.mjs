@@ -7,7 +7,8 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { curveFailures, joins } from "../../skills/pretty-icons/curve.mjs";
-import { pathCommands } from "../../skills/pretty-icons/svg.mjs";
+import { pathCommands, parse } from "../../skills/pretty-icons/svg.mjs";
+import { filledChecks } from "../../skills/pretty-icons/filled.mjs";
 
 const SCRIPT = fileURLToPath(new URL("../../skills/pretty-icons/shapes.mjs", import.meta.url));
 const ANCHORED = ["drop", "leaf", "lens", "bean", "crescent", "taper"];
@@ -156,4 +157,29 @@ test("an unknown grid is refused on stderr with the grids that exist, no stack t
 
 test("a scoop's rx is bounded by half its shorter side, and the refusal says the most", () => {
   refused(() => shape("scoop", { grid: 48, rx: 30 }), "--rx 30: at most 19");
+});
+
+test("the kit's shade passes the light check at every turn: a leaf and a lens from -90° to 90°", () => {
+  const icon = (lines) => parse(`<svg viewBox="0 0 48 48" fill="none" stroke="#25262a" stroke-width="1.5">\n${lines.join("\n")}\n</svg>`);
+  const dark = [];
+  for (const name of ["leaf", "lens"]) for (const box of [{}, { w: 36, h: 16 }, { w: 36, h: 24 }, { w: 16, h: 8, at: [16, 12] }])
+    for (const shade of ["right", "lower"]) for (let rot = -90; rot <= 90; rot += 15) {
+      const o = { ...box, rot, shade };
+      let lines;
+      try { lines = finishOf(name, o); } catch (e) { dark.push(`${name} ${JSON.stringify(o)} refused: ${e.message}`); continue; }
+      const sh = lines[1].match(/ d="([^"]+)"/)[1];
+      assert.match(lines[1], /fill="#cfcfcb"/, `${name} ${JSON.stringify(o)}`);
+      assert.ok(onGrid(sh), `${name} ${JSON.stringify(o)}: ${sh}`);
+      assert.deepEqual(clean(sh), [], `${name} ${JSON.stringify(o)}`);
+      const f = filledChecks(name, icon(lines), 48).filter((x) => x.rule === "light");
+      if (f.length) dark.push(`${name} ${JSON.stringify(o)}`);
+    }
+  assert.deepEqual(dark, []);
+  // rules-filled.md 04's hand shade is the kit's own: the lower belly to the tip on the right
+  assert.match(finishOf("leaf", { w: 16, h: 8, at: [16, 12], rot: -45 })[1], / d="M21 7C19.25 9 20.5 11.75 18.5 13.75Z"/);
+});
+
+test("where the shade already passed, the kit prints it as before", () => {
+  assert.equal(finishOf("leaf", { w: 36, h: 16, rot: 15 })[1], '<path d="M27.5 17.75C35 19.75 34.25 26.5 40.5 28.5C34 27 31.25 33.25 23.75 31.25Z" fill="#cfcfcb" stroke="none" />');
+  assert.equal(finishOf("lens", { w: 36, h: 16 })[1], '<path d="M24 17C29.75 17 34.25 26.25 41 24C34.25 21.75 29.75 31 24 31Z" fill="#cfcfcb" stroke="none" />');
 });

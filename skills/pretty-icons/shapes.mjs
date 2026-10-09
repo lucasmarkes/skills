@@ -27,6 +27,7 @@ import { preset, PALETTE, FILL } from "./presets.mjs";
 import { pathParts, bounds } from "./geometry.mjs";
 import { segments, joins, curveFailures, SMOOTH, CORNER } from "./curve.mjs";
 import { pathCommands, parse } from "./svg.mjs";
+import { filledChecks } from "./filled.mjs";
 
 // --lean takes -1..1; a full lean slides the belly by 0.3 of the box
 const STEP = 0.25, SQ = Math.SQRT1_2, D = Math.PI / 180, BOX_TOL = 0.05, LEAN = 0.3;
@@ -121,7 +122,7 @@ const UNIT = {
 /** Unit anchors placed in a w × h box at `at`, an inset in from its edge, leaned and turned. */
 function place(unitAnchors, { w, h, at, inset, rot: deg = 0, lean = 0 }) {
   const sx = (w / 2 - inset) / (1 + Math.abs(lean)), sy = h / 2 - inset;
-  const swap = deg % 180 === 90 ? { x: "y", y: "x" } : { x: "x", y: "y" };
+  const swap = Math.abs(deg % 180) === 90 ? { x: "y", y: "x" } : { x: "x", y: "y" };
   return unitAnchors.map((a) => {
     const [x, y] = a.p, edge = deg % 90 || lean ? undefined : Math.abs(x) === 1 ? swap.x : Math.abs(y) === 1 ? swap.y : undefined;
     return { ...a, edge, p: add(at, rot([(x - lean * y) * sx, y * sy], deg)) };
@@ -200,7 +201,7 @@ export function shape(name, o = {}) {
   if (failures.length) refuse(`${name}: ${failures.map((f) => `${f.rule} ${f.got.replace("path@1 ", "")}`).join("; ")}: change --bulge or the box`);
   if (name !== "blob") {
     const b = bounds(pathParts(d).flat()), half = [box.w / 2 - inset, box.h / 2 - inset], [cx, cy] = box.at;
-    const r = box.rot % 180 === 90 ? [half[1], half[0]] : half;
+    const r = Math.abs(box.rot % 180) === 90 ? [half[1], half[0]] : half;
     const over = Math.max(cx - r[0] - b.x0, b.x1 - cx - r[0], cy - r[1] - b.y0, b.y1 - cy - r[1]);
     if (!(box.rot % 90) && over > BOX_TOL) refuse(`${name}: overshoots its box by ${fmt(over)}: lower --bulge`);
   }
@@ -217,39 +218,95 @@ export const wedge = (o) => shape("wedge", o), scoop = (o) => shape("scoop", o),
  * "right" runs from the top anchor to the bottom one through the right; "lower" from the leftmost to the
  * rightmost through the bottom. The seam is the chord back, or with "curved" a cubic bowed into the shade.
  */
-export function shadeOf({ P, segs }, { side = "right", seam = "straight" } = {}) {
+export function shadeOf(s, { side = "right", seam = "straight" } = {}) {
   if (side !== "right" && side !== "lower") refuse(`--shade ${side}: right, lower or none`);
   if (seam !== "straight" && seam !== "curved") refuse(`--seam ${seam}: straight or curved`);
-  const n = P.length, along = side === "right" ? 1 : 0, out = 1 - along;
-  // the extreme anchors along the light; of two level ones, the one further into the shade (a crescent's right cusp)
-  const pick = (better) => P.reduce((b, p, i) => (better(p[along], P[b][along]) || (p[along] === P[b][along] && p[out] > P[b][out]) ? i : b), 0);
-  const a = pick((x, y) => x < y), z = pick((x, y) => x > y);
+  return closeRun(s, sideRun(s, side), seam === "curved" && side);
+}
+
+// the anchor furthest along axis `ax`, or least with `least`; of two level ones, the one further along the other axis
+const extreme = (P, ax, least = false) => P.reduce((b, p, i) => ((least ? p[ax] < P[b][ax] : p[ax] > P[b][ax]) || (p[ax] === P[b][ax] && p[1 - ax] > P[b][1 - ax]) ? i : b), 0);
+
+/** The two runs of segments between a side's extreme anchors (top and bottom for "right", leftmost and rightmost for "lower"). */
+function halves({ P }, side) {
+  const n = P.length, along = side === "right" ? 1 : 0;
+  // of two level extremes, the one further into the shade (a crescent's right cusp)
+  const a = extreme(P, along, true), z = extreme(P, along);
   const runFrom = (s, e) => { const r = []; for (let i = s; i !== e; i = (i + 1) % n) r.push(i); return r; };
-  const mean = (r) => r.reduce((s, i) => s + segs[i].to[out], 0) / r.length;
-  const [r0, r1] = [runFrom(a, z), runFrom(z, a)], run = mean(r0) >= mean(r1) ? r0 : r1;
+  return [runFrom(a, z), runFrom(z, a)];
+}
+
+/** The indices of the segments a side's shade runs along: the half further into the shade. */
+function sideRun(s, side) {
+  const out = side === "right" ? 0 : 1, mean = (r) => r.reduce((t, i) => t + s.segs[i].to[out], 0) / r.length;
+  const [r0, r1] = halves(s, side);
+  return mean(r0) >= mean(r1) ? r0 : r1;
+}
+
+/** A run of segments closed: by its chord, or, with `bowSide`, by a cubic bowed that way (right or lower) into the shade. */
+function closeRun({ P, segs }, run, bowSide = false) {
   const start = P[run[0]], end = segs[run.at(-1)].to;
   let d = `M${pt(start)}${run.map((i) => segText(segs[i])).join("")}`;
-  if (seam === "curved") {
-    const chord = sub(start, end), bow = side === "right" ? [0.15 * len(chord), 0] : [0, 0.15 * len(chord)];
+  if (bowSide) {
+    const chord = sub(start, end), bow = bowSide === "right" ? [0.15 * len(chord), 0] : [0, 0.15 * len(chord)];
     d += `C${pt(add(add(end, mul(chord, 1 / 3)), bow).map(snap))} ${pt(add(add(end, mul(chord, 2 / 3)), bow).map(snap))} ${pt(start)}`;
   }
   return d + "Z";
+}
+
+// the three paths of a body at the filled finish
+const toneLine = (d) => `<path d="${d}" fill="${PALETTE.fill}" stroke="none" />`;
+const shadeLine = (d) => `<path d="${d}" fill="${PALETTE.shade}" stroke="none" />`;
+const contourLine = (d, p) => `<path d="${d}" stroke-width="${p.contour}" />`;
+
+/** Whether check.mjs's light rule passes this shade on this tone: the check itself, run on the three paths alone. */
+export function lit(toneD, shadeD, G = 48) {
+  const p = preset(G), svg = `<svg viewBox="0 0 ${G} ${G}" fill="none" stroke="${PALETTE.line}" stroke-width="${p.stroke}">\n${toneLine(toneD)}\n${shadeLine(shadeD)}\n${contourLine(toneD, p)}\n</svg>`;
+  return !filledChecks("shade", parse(svg), G).some((f) => f.rule === "light");
+}
+
+/**
+ * The shades to try when the asked one fails the light, nearest first: the other side's run, then the parts
+ * of the halves between either side's extremes. Longest first; then a part that reaches the asked side's
+ * extreme (the rightmost anchor for "right", the lowest for "lower"); then the lowest, then furthest right.
+ * A slanted leaf's half has the tone's own box; a part of it, from the lower belly to a tip, sits off its centre.
+ * A part is closed by its chord: a bowed seam can cross the belly it runs beside.
+ */
+function fallbacks(s, side, seam) {
+  const other = side === "right" ? "lower" : "right", tip = extreme(s.P, side === "right" ? 0 : 1);
+  const parts = [], seen = new Set();
+  for (const run of [...halves(s, side), ...halves(s, other)]) for (let k = run.length - 1; k >= 1; k--) for (let i = 0; i + k <= run.length; i++) {
+    const r = run.slice(i, i + k), key = r.join(",");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const at = [r[0], ...r.map((j) => (j + 1) % s.P.length)], mean = (ax) => at.reduce((t, j) => t + s.P[j][ax], 0) / at.length;
+    parts.push({ k, reach: at.includes(tip) ? 1 : 0, y: mean(1), x: mean(0), d: closeRun(s, r) });
+  }
+  parts.sort((a, b) => b.k - a.k || b.reach - a.reach || b.y - a.y || b.x - a.x);
+  return [closeRun(s, sideRun(s, other), seam === "curved" && other), ...parts.map((p) => p.d)];
 }
 
 /** The elements a body takes at its grid's finish, as lines of SVG; `given` a body already drawn (--from), unshaded unless asked. */
 export function finishOf(name, o = {}, given = null) {
   const G = o.grid ?? 48, p = preset(G), s = given ?? shape(name, o);
   if (p.finish !== "filled") return [`<path d="${s.d}" fill="currentColor" fill-opacity="${FILL}" />`];
-  const out = [`<path d="${s.d}" fill="${PALETTE.fill}" stroke="none" />`];
+  const out = [toneLine(s.d)];
   const side = o.shade ?? (s.P ? "right" : "none");
   if (side !== "none") {
     if (!s.P) refuse(`${name}: no --shade for wedge and scoop yet; draw the shade by hand, or --shade none`);
-    const sh = shadeOf(s, { side, seam: o.seam ?? "straight" });
-    const f = curveFailures(name, { tag: "path", attrs: { d: sh }, at: "path@1" });
-    if (f.length) refuse(`${name}: the shade has a ${f[0].rule} (${f[0].got.replace("path@1 ", "")}): try --seam ${o.seam === "curved" ? "straight" : "curved"} or --shade ${side === "right" ? "lower" : "right"}`);
-    out.push(`<path d="${sh}" fill="${PALETTE.shade}" stroke="none" />`);
+    const seam = o.seam ?? "straight", kinks = (d) => curveFailures(name, { tag: "path", attrs: { d }, at: "path@1" });
+    let sh = shadeOf(s, { side, seam });
+    if (lit(s.d, sh, G)) {
+      const f = kinks(sh);
+      if (f.length) refuse(`${name}: the shade has a ${f[0].rule} (${f[0].got.replace("path@1 ", "")}): try --seam ${seam === "curved" ? "straight" : "curved"} or --shade ${side === "right" ? "lower" : "right"}`);
+    } else {
+      // the asked side's run fails the light (a body turned 30° to 60°): the nearest run that passes it, and is clean
+      sh = fallbacks(s, side, seam).find((d) => lit(s.d, d, G) && !kinks(d).length)
+        ?? refuse(`${name}: no shade the kit can draw passes the light check: use --shade none, or shade it by hand (rules-filled.md 04)`);
+    }
+    out.push(shadeLine(sh));
   }
-  out.push(`<path d="${s.d}" stroke-width="${p.contour}" />`);
+  out.push(contourLine(s.d, p));
   return out;
 }
 
