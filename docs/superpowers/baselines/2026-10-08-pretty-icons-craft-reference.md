@@ -1478,3 +1478,15 @@ The trial passes, and the loop stops here, as ruled. What the agent reported wor
 - A hole needs its subpath wound the other way under the nonzero rule; nothing says so.
 - A hedged craft answer ("none (… minor)") has no rule for pass or fail, and the craft read has no stopping rule; it stopped after three rounds and named the rest.
 - `read.md` said `pretty-icons-sheet.png` numbers the icons; it names them. Fixed in the same commit as this record: the drawer numbers them for the reader in the sheet's order.
+
+## Final verification
+
+Run on 2026-10-09 at e118fcc. The suite: 211 of 211 pass, 0 fail. `check.mjs` prints `ok` on `examples/garage`, `examples/hairline`, `test/pretty-icons/fixtures/tonal-green`, `craft-after/car` and `craft-after/bakery`. The bakery proof's reference row is `examples/garage` (car, traffic-light, wrench), and no join on it is red.
+
+The spec's "What success is", line by line:
+
+1. **The before has at least one kink.** Met. "The before": 15 kinks (car 12, bakery 3) and 3 double inflections (rosquinha).
+2. **The after: 0 kinks, 0 double inflections, 20 of 20 blind, no defect named for at least 18.** Met in part. "The after", "Both sets", "Totals": 0 kinks, 0 double inflections, 20 of 20 blind with no elimination. The craft read names a defect for 13 of 20, against the spec's at most 2 and the calibrated at most 12 (ledger rulings: the gate is calibrated against the reference sets, which fail it at 60% and 77%; Task 12 is accepted at 13 because the before reads 13 of 20 under the same prompt). The craft read does not separate before from after; the geometry and the blind read do.
+3. **garage and hairline pass the three gates; at least three hairline icons carry a modifier.** Met in part. "The bar: examples/garage": `ok`, no kink, blind 10 of 10; the craft read names 7 of 10, two on the frozen traffic-light and steering-wheel (accepted at 7, ledger). "The bar: examples/hairline": `ok`, no kink; three modifiers (on all, connectivity and machines; Task 11, f252e2f); blind 8 of 10, the two eliminations on the abstract names empty and all (accepted at 8, ledger).
+4. **Duotone passes with the hierarchy off; the hierarchy applies only at 48.** Met. `check.mjs` runs `filledChecks`, which holds the hierarchy (`filled.mjs:91`), only when the preset's finish is filled (`check.mjs:119`), and 48 is the only filled preset; the duotone sets and their tests pass (Task 5, step 8; `filled.test.mjs:126` tests the hierarchy at 48).
+5. **A fresh agent composes with the kit and passes `check.mjs` on run 1 or 2.** Met on the third trial. "The trial": trial 1 passed first on run 5, trial 2 on run 3, trial 3 on run 2 (bike shop, blind 6 of 6). Each failed trial's stumbles became doc and code fixes (3d6164d, 43ea650, 88a57a5, b0a19c4); trial 3 used the kit's `blob` and `--from`, and wrote some bodies by hand.
