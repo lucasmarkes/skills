@@ -92,9 +92,12 @@ The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="no
 
 ## 02 · keyline
 
-The object's ink box is within 1 of circle 40, square 36, portrait 32 × 40 or landscape 40 × 32. A part that sticks out of the body (a bracket, a hose, a terminal) is ink and counts. A ring at 3.5 reaches out a bar's half: its radius is 18.25 for the circle, not 19.25.
+The object's ink box is within 1 of circle 40, square 36, portrait 32 × 40 or landscape 40 × 32. Ink runs to each stroke's outer edge: 1 past a contour's geometry, 0.75 past a line's, 1.75 past a bar's. A part that sticks out of the body (a bracket, a hose, a terminal) is ink and counts. A ring at 3.5 reaches out a bar's half: its radius is 18.25 for the circle, not 19.25.
 
-- **Rejected when:** `keyline  steering-wheel  38 × 38 → circle 40 × 40 ±1`.
+- **Keep it:** write the box before you draw: portrait x 8 to 40, y 4 to 44; landscape x 4 to 44, y 8 to 40; square 6 to 42; circle 4 to 44. Name the element that reaches each of its four sides, and put that element's outermost geometry inside the side by its half stroke: a contour at x 9 and 39 on the portrait keyline. A curve reaches a side only at an anchor whose handles run along that side, so put an anchor there. `shapes.mjs --w --h` take the ink's size, before `--rot`; `blob --anchors` takes the geometry, so its outermost anchors sit 1 inside the box, as the croissant's at x 5 and 43.
+- **Keep it, for an object with its own proportions:** draw it to the keyline, not true. A watering can 40 wide stands 31 to 33 tall, from the top of its handle to its base; a glove 40 tall is 31 to 33 wide. The row compares sizes (`rules.md` 02).
+- **Keep it, after a run:** `check.mjs --print` gives the ink box as x0, y0, w and h. Move the element on the short side by what is missing.
+- **Rejected when:** `keyline  steering-wheel  38 × 38 → circle 40 × 40 ±1`; `keyline  watering-can  39.5 × 29.28 → landscape 40 × 32 ±1`, a can drawn true, 29 tall.
 
 ## 03 · stroke, and the tones
 
@@ -104,7 +107,7 @@ The root is `stroke="#25262a" stroke-width="1.5"`, round caps and joins, `fill="
 
 ## 04 · construction
 
-Tone, shade, contour, in that order, for every body; at least one body in the fill tone. The contour is the tone's geometry pasted, not redrawn: `check.mjs` matches them. A shade is the lower or right part of its body, its edges on the body's outline, so the contour covers its seam. A body's contour is a rect, a circle, or a path of at most five straight sides; curves between them are free, so round a notched outline's corners with arcs rather than adding sides (`rules.md` 04).
+Tone, shade, contour, in that order, for every body (a small part may leave its shade out: the light, below); at least one body in the fill tone. The contour is the tone's geometry pasted, not redrawn: `check.mjs` matches them. A shade is the lower or right part of its body, its edges on the body's outline, so the contour covers its seam. A body's contour is a rect, a circle, or a path of at most five straight sides; curves between them are free, so round a notched outline's corners with arcs rather than adding sides (`rules.md` 04).
 
 - **Keep it, for an organic body** (bread, a fruit, a leaf, a drop): take it from the kit. `node <skill-dir>/shapes.mjs <primitive> --w 40 --h 32` prints the three elements, tone, shade and contour, the contour at 2. The shade is the outline's own stretch from one anchor to another, closed by a seam (`--shade right|lower|none`, `--seam straight|curved`), so the contour covers it. Then add the one gesture (`rules.md` 09) by hand. The croissant, on the landscape keyline, is `node <skill-dir>/shapes.mjs blob --anchors "12,39,c 5,25.5 24,8.5 43,25.5 36,39,c 24,30"` pasted, and two seams for its folds:
 
@@ -118,10 +121,11 @@ Tone, shade, contour, in that order, for every body; at least one body in the fi
 ```
 
 Its horns are the two cusps (`c`), and they turn in: a crescent whose horns point straight down reads as a bell. The seams stop clear of the contour, 3 from its centreline, so they do not touch it by almost (08). Its ink is 40 × 32.5, its mass 1.5 high, its line ink 279.6.
+- **Keep it, for the light:** `check.mjs` compares the centre of the shade's box with the centre of its tone's box. The shade passes when its centre is lower, or further right. A shade run from end to end of a slanted body (a leaf or a lens at 30° to 60°) has the tone's own box, centre on centre, and fails on either side. Never shade a body with a copy of its whole tone. The kit's shade passes at `--rot` 0, ±15, ±75 and 90. At a slant between, shade one segment: copy, from the contour the kit printed, the segment from the lower belly to the tip on the right, and close it with `Z`. For `leaf --w 16 --h 8 --at 16,12 --rot -45` that is `M21 7C19.25 9 20.5 11.75 18.5 13.75Z`. A small part beside a larger body (a leaf on a stem, a grain on an ear) may take `--shade none`; the larger body carries the light.
 - **Keep it, for a tube** (a spoke, a rim, a gear stick): a bar at 3.5 in the line, then the same `d` with `stroke` the fill or the shade tone and no width. The core cuts the bar into two thin lines. A ring as a tube: `circle r 18.25 stroke-width 3.5`, then the circle again with `stroke="#cfcfcb"`.
 - **Keep it, for a solid small part:** a wheel, a terminal, a lamp that is on: a shape filled with the line tone. Glass and a hole: paper.
 - **Keep it, for what is printed:** ticks and treads in the mark tone, at the root's width.
-- **Rejected when:** `construction  traffic-light  rect@3 fill #ececea stroke none → its contour after it: the same geometry, no fill, at 2`; `construction  traffic-light  path@5 shade → between a body's tone and its contour, so the line covers its edge`; `construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lit lamp)`; `construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke`; `construction  traffic-light  path@9 stroke #ececea → the fill tone as a stroke only on a core: a 3.5 bar's path pasted after it, at the root's width`; `stroke  traffic-light  rect@5 contour at 1.5 → 2`; `construction  traffic-light  circle@9 contour without a tone → a tone before it with the same geometry, or the root's line`; `construction  traffic-light  no body → a closed element in the fill tone, #ececea`.
+- **Rejected when:** `light  seedling  path@5 shade centred at 16.25, 12.5 → below or right of path@4's centre 16.25, 12.5: the light comes from the top`; `construction  traffic-light  rect@3 fill #ececea stroke none → its contour after it: the same geometry, no fill, at 2`; `construction  traffic-light  path@5 shade → between a body's tone and its contour, so the line covers its edge`; `construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lit lamp)`; `construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke`; `construction  traffic-light  path@9 stroke #ececea → the fill tone as a stroke only on a core: a 3.5 bar's path pasted after it, at the root's width`; `stroke  traffic-light  rect@5 contour at 1.5 → 2`; `construction  traffic-light  circle@9 contour without a tone → a tone before it with the same geometry, or the root's line`; `construction  traffic-light  no body → a closed element in the fill tone, #ececea`.
 
 ## 05 · weight
 
@@ -133,7 +137,12 @@ Ink is the line alone: tones, shades, dots and cores dropped, every other stroke
 
 ## 06 · gravity
 
-The object's mass is within 3 of 24 on each axis. A gearshift sits low by nature; 3 lets it. Past 3, lift the body a quarter at a time, or lighten what sits low. A triangle (a tent, a cone) holds its mass in its base: bow its sides outward.
+The object's mass is within 3 of 24 on each axis. The mass is the centre of every painted pixel, tone and shade as much as line: the centre of the silhouette's area. Weight (05) reads the lines alone; gravity does not. So a wide part (a brim, a rake's head, a can's body) holds the mass, and a handle, a stem or a spout weighs little however long: a line 20 long, 1.5 wide, is 30 of area; a head 30 × 4 is 120. `check.mjs --print` gives the offset as dx and dy. A gearshift sits low by nature; 3 lets it.
+
+- **Keep it, on the keyline's short side:** a landscape box is 32 tall in a live area 40 tall, and a portrait box 32 wide in 40: it can slide 4 that way. Slide the whole drawing against the offset, a quarter at a time.
+- **Keep it, on the long side:** the box fills the live area, 4 to 44, and cannot slide. Move area instead, before you draw: put the widest part across the middle, not at an end; give the light end area, a handle as a body or a bar at 3.5 rather than a line; shorten what sits at the heavy end. A long-handled tool (a rake, a broom, a spade) needs its handle given area and its head shortened.
+- **Keep it, for a triangle** (a tent, a cone): it holds its mass in its base: bow its sides outward.
+- **Rejected when:** `gravity  rake  mass +0, +5.46 → within ±3`: the head, the widest part, at the bottom end.
 
 ## 07 · radius
 
@@ -143,9 +152,11 @@ By character, by the smaller side: the radii table. A rect whose `rx` is none of
 
 ## 08 · gap
 
-Line to line: touch, or one stroke apart, 1.5. A mark from anything: touch, or half a stroke apart, 0.75. Tones, shades, dots and cores are paint and are left out. A part touches the body on its centreline or crosses it: the steering wheel's spokes start on the ring's centreline.
+Line to line: touch, or one stroke apart, 1.5, outer edge to outer edge. A mark from anything: touch, or half a stroke apart, 0.75. `check.mjs` measures centrelines, and counts every stroke as 1.5, a contour's 2 too: two touch at 0.1 or less, and sit a stroke apart at 3 or more, 2.25 from a mark. Between is almost. Tones, shades, dots and cores are paint and are left out.
 
-- **Rejected when:** `gap  wrench  path@4 to circle@5 0.07 apart → ≥ 1.5 apart, or crossing`.
+- **Keep it, for a part that meets a body:** end it on the contour's centreline at an anchor or on a straight side, where the point is on the grid: the steering wheel's spokes start on the ring's centreline. Or cross it: run the part on into the body and draw it before the body's tone, so the tone covers its end, as the traffic light's brackets. Ending near a curve between anchors is a guess: a stem that stops 0.25 short of a leaf's edge is already almost.
+- **Keep it, for two bodies that meet** (two leaves on a stem, a lid on a pot): give both contours the same anchor, or let one cross the other.
+- **Rejected when:** `gap  wrench  path@4 to circle@5 0.07 apart → ≥ 1.5 apart, or crossing`; `gap  seedling  path@2 to path@6 overlapping, centrelines 0.5 apart → ≥ 1.5 apart, or crossing`: a part stopped near a leaf's edge, neither on it nor through it.
 
 ## 09 · metaphor
 
@@ -161,4 +172,4 @@ One grid, five tones, measured together.
 
 ## How check.mjs measures
 
-Keyline and gravity are read from a render of the icon as drawn; weight from a render of its lines alone (`linesOf` in `filled.mjs`); gap from the centrelines of every element but the paint. `--print` shows the object's box and its line ink.
+Keyline and gravity are read from a render of the icon as drawn, every painted pixel at full weight; light from the boxes of a shade and its tone; weight from a render of its lines alone (`linesOf` in `filled.mjs`); gap from the centrelines of every element but the paint. `--print` shows the object's box and its line ink.

@@ -1249,3 +1249,70 @@ forno (5) is close behind: its tiny dots and bar are hard to read at small sizes
 The calibrated gate is at most 12 of 20. The after is at 13, one over, and it is no lower than the before. The craft read does not separate the two sets. With one reader per set, its count moves about ±15% between reads. The geometry does separate them: every kink and every double inflection is gone, and the blind read holds at 20 of 20 with no elimination. The icons the readers name in every round are extintor, semaforo and banco in the car set, and croissant in the bakery set.
 
 ## The trial
+
+### Trial 1
+
+A fresh agent, handed only the skill, drew six icons for a garden shop app in the filled finish: watering can, seedling, glove, pot, rake, sun hat.
+
+`check.mjs` printed `ok` first on run 5. The gate is `ok` on run 1 or 2, so the trial fails. The blind and craft reads then asked for redraws, and the final set was `ok` on run 32.
+
+The agent used `shapes.mjs`, partly: `blob` for the hat's crown and brim, the leaves and the early glove; later curves were written by hand and checked only with `--from`. It ran `sheet.mjs --proof` on every icon it changed. Both reads were done, each by a fresh reader.
+
+#### Runs 1 to 4, as printed
+
+Run 1 (exit 1):
+
+```
+light  seedling  path@5 shade centred at 16.25, 12.5 → below or right of path@4's centre 16.25, 12.5: the light comes from the top
+light  seedling  path@8 shade centred at 31.75, 13.5 → below or right of path@7's centre 31.75, 13.5: the light comes from the top
+keyline  glove  30.25 × 39.75 → portrait 32 × 40 ±1
+gravity  rake  mass +0, +5.46 → within ±3
+keyline  seedling  32 × 38.75 → portrait 32 × 40 ±1
+gap  seedling  path@2 to path@6 overlapping, centrelines 0.5 apart → ≥ 1.5 apart, or crossing
+gap  seedling  path@2 to path@9 overlapping, centrelines 0.5 apart → ≥ 1.5 apart, or crossing
+gap  seedling  path@6 to path@9 overlapping, centrelines 1 apart → ≥ 1.5 apart, or crossing
+gravity  sun-hat  mass +0, +4.42 → within ±3
+keyline  watering-can  39.5 × 29.28 → landscape 40 × 32 ±1
+```
+
+Run 2:
+
+```
+light  seedling  path@8 shade centred at 31.5, 11 → below or right of path@7's centre 31.5, 11: the light comes from the top
+keyline  watering-can  38.75 × 31.06 → landscape 40 × 32 ±1
+```
+
+Run 3:
+
+```
+light  seedling  path@8 shade centred at 31.5, 11 → below or right of path@7's centre 31.5, 11: the light comes from the top
+```
+
+Run 4:
+
+```
+keyline  seedling  32 × 37.97 → portrait 32 × 40 ±1
+```
+
+Run 5: `ok`.
+
+#### Later runs, by rule
+
+After the reads asked for redraws: gravity on watering-can (runs 8, 9, 10, 14, 15, 17) and rake (20, 21, 22, 27, 29, 30, 31); live, glove and watering-can ink outside 4–44 (8, 14, 18, 24); keyline on glove, sun-hat, watering-can and rake (6, 17, 25, 27, 28); gap on sun-hat and rake (6, 20, 28, 29, 31); weight, glove and rake over +25% (12, 27); contour, glove 6 straight sides (24); count, seedling 9 elements (24); join, glove 29.7° and watering-can 24.1° (27); radius, sun-hat rx 0 (27).
+
+#### The reads on the final set
+
+Blind: 6 of 6. An earlier read failed the rake by elimination ("fork or a comb"); a wide head and four bold tines fixed it.
+
+Craft, word for word as recorded in the trial's notes:
+
+> Craft read 6 named a defect for 5 of 6 (all but pot): glove "thumb/finger silhouette slightly confused"; rake "handle too thin versus tines"; seedling "leaves thin, uneven weight"; sun-hat "crown shading band hard to read"; watering-can "floating handle, confused silhouette". Readers contradicted each other round to round (rake: "thin tines" then, after thickening, "handle too thin versus tines"; seedling: "stem too thin" then "leaves thin"). Watering-can is "floating" in every round although spout and handle cross into the body.
+
+#### The rules that held it back, and the fix
+
+Four rules held runs 1 to 4: light, keyline, gravity and gap. Each is a defect in the docs: the check was right, and the doc did not say what it measures or the move that satisfies it.
+
+- **light.** `rules-filled.md` said a shade is "the lower or right part of its body" and never quoted the `light` line. The check compares the centres of the shade's box and the tone's box. A shade run from tip to tip of a slanted leaf has the leaf's own box, and fails on either side; the kit's own shade does this at `--rot` 30° to 60°. Task 12's bakery hit the same wall on trigo and gave the shade up. Fix: rule 04 gains "Keep it, for the light": what is compared, the rotations at which the kit's shade passes, the one-segment shade for a slant between (with a worked `d`), and `--shade none` for a small part; the `light` line is quoted under "Rejected when", and the opening lets a small part leave its shade out. `SKILL.md`'s table gains a row.
+- **keyline.** Rule 02 gave the sizes and said a part counts as ink, but not how far each stroke reaches past its geometry, where the box sits, or that an object is stretched to the keyline rather than drawn true. Fix: rule 02 gives the half strokes (1, 0.75, 1.75), the four boxes in coordinates, the move (name the element that reaches each side; an anchor there), what `shapes.mjs --w --h` and `blob --anchors` each take, the stretch (a can 40 wide stands 31 to 33 tall), and `--print`'s box. `SKILL.md`'s table gains a row.
+- **gravity.** Rule 06 said "lift the body a quarter at a time, or lighten what sits low". It did not say the mass counts every painted pixel, tones at full weight, while weight reads the lines alone; nor that a box on the long side of its keyline fills the live area and cannot be lifted. Fix: rule 06 says what the mass is, compares a handle's area with a head's, and splits the move: slide on the keyline's short side; move area on the long side (widest part across the middle, the light end given area, the heavy end shortened). `SKILL.md`'s table gains a row.
+- **gap.** Rule 08 said "touch, or one stroke apart, 1.5" without saying that the check measures centrelines (touch at 0.1 or less, apart at 3 or more), or how to make a part touch a curve. Fix: rule 08 gives the centreline numbers, and the moves: end on an anchor or a straight side, or cross on into the body drawn before its tone; two bodies that meet share an anchor or cross. The seedling's line is quoted. `SKILL.md`'s table gains a row.
