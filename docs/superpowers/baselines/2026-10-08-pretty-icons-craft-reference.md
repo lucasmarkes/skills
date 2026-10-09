@@ -461,6 +461,8 @@ Across the four craft reads, the count of icons with a list defect went 9, 8, 8,
 - the fuel hose;
 - the wrench's weight, the lightest icon at 259.
 
+After the reads, a re-review found the wrench's solid hole broke rules-filled.md ("Glass and a hole: paper"). The hole is now paper with the line contour, at r 2.5. Wrench ink is 261.47, check is `ok`, and the median is unchanged at 341.25. No reader saw this change.
+
 ## The bar: examples/hairline
 
 ## The after
