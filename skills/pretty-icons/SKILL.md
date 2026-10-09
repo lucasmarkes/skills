@@ -82,7 +82,7 @@ Edit only that icon's `.svg`. Run steps 4 and 5 for the set.
 | drawing cells, nodes or rows as separate elements | rule 09: one path, eight commands at most |
 | reaching for a colour, or a grey that "looks closer" | `rules-filled.md` 03: the five tones, nothing else; a dark page swaps them, the file never does |
 | shading the top or the left, or a stripe across the body | `rules-filled.md` 04: the light is from the top; the shade is the lower or right part, inside the outline |
-| shading a slanted leaf from tip to tip, or with a copy of its tone | `rules-filled.md` 04: the shade's box must sit lower or right of the tone's; shade one segment, or turn the leaf to 15° or 75° |
+| shading a slanted leaf from tip to tip, or with a copy of its tone | `rules-filled.md` 04: the shade's box must sit lower or right of the tone's; print the body from `shapes.mjs`, or shade one segment by hand |
 | adding an offset shadow or a white shine | `rules-filled.md` 04: neither; depth is the shade inside the body. The one sheen allowed is a paper fill on glass, a gesture from rule 09 |
 | doubling a ring or a spoke to make it read thicker | `rules-filled.md` 04: a bar at 3.5 and its core, a tube |
 | rounding every rect the same | `rules-filled.md` 07: cut, cased, moulded or a pill, by what the object is |
