@@ -465,6 +465,337 @@ After the reads, a re-review found the wrench's solid hole broke rules-filled.md
 
 ## The bar: examples/hairline
 
+Three icons carry a modifier, added with `modifiers.mjs --add`: `all`, `connectivity` and `machines`, each a dot. None was refused. `data`, `devices` and `security` (the proof's reference row) and `coding` carry none. Redrawn from the reads: `marks` (a triangle over a circle, read as generic shapes) is a bookmark; `machines` (a disc with a hub, paired by elimination) is a robot head with an antenna and a visor; `interfaces` (a window with a top bar, read as a card) is a pointer on an open window; `empty` (a dashed box with a plus, paired by elimination) is a plain square; `data` (two bars, read as uneven) is a cylinder. `check.mjs` prints `ok`, no kink. The 16 median of the seven plain icons is 83.48; the references are 83.5 on 16, 115.4 on 20 and 183 on 24.
+
+Gates: **not met.** The craft gate, at most 6 of 10 icons with a defect (fix round 1's bar), is met: 6 on the committed set. The blind gate, 10 of 10 with no elimination, is not: the best read on a committable set scored 8 of 10 (fix round 1, redraw 2, the committed set). Stopped after three more redraw rounds.
+
+Each read was a fresh agent given only the image and the prompt from `read.md`, N = 10.
+
+### Round 1 (step 3's set, unchanged bases)
+
+Key: 1 machines · 2 marks · 3 data · 4 devices · 5 security · 6 interfaces · 7 connectivity · 8 empty · 9 all · 10 coding.
+
+Blind read, word for word:
+
+> | # | Name | Object seen |
+> |---|------|-------------|
+> | 1 | machines | Disc or drive with a dot |
+> | 2 | marks | Triangle and circle shapes |
+> | 3 | data | Bar chart |
+> | 4 | devices | Phone |
+> | 5 | security | Shield with a check |
+> | 6 | interfaces | Card or window panel |
+> | 7 | connectivity | Chain link with a check |
+> | 8 | empty | Dashed empty box with a plus |
+> | 9 | all | Four-pane grid |
+> | 10 | coding | Code brackets in a box |
+>
+> - **Competition:** Numbers 1 and 3 both fit "data". The disc could be storage, but the bar chart is the stronger fit, so 3 gets "data".
+> - **Names given by elimination:** Number 1 gets "machines" only because the other names are taken. A disc does not clearly say machine. Number 6 gets "interfaces" and number 9 gets "all" mostly by elimination too. The card could also be a payment object, and the grid could also be an interface.
+> - **Letters and digits:** I read none inside any icon. The only digits are the 1 to 10 captions under the icons.
+
+Score: 5 of 10. Fail: machines (elimination), marks (generic shapes), interfaces (card; elimination), all (elimination), data (competes with 1).
+
+### Round 2 (marks, machines, interfaces redrawn)
+
+Key: 1 interfaces · 2 data · 3 empty · 4 marks · 5 security · 6 coding · 7 devices · 8 all · 9 connectivity · 10 machines.
+
+Blind read, word for word:
+
+> Each number gets its own name, so no two numbers compete for one name. I read only the image.
+>
+> 1 = interfaces: window with two title-bar dots
+> 2 = data: bar chart on a baseline
+> 3 = empty: dashed selection box with plus
+> 4 = marks: bookmark ribbon
+> 5 = security: shield with checkmark
+> 6 = coding: panel with code brackets
+> 7 = devices: phone or tablet
+> 8 = all: four-square grid
+> 9 = connectivity: chain link with check
+> 10 = machines: small robot with antenna
+>
+> Letters and digits: I read none. Icon 6 has a bracket-like glyph ({} or </>), which is a symbol, not a letter. I named it coding from the brackets.
+>
+> Named by elimination:
+> - Icon 3 gets "empty" mostly because the other nine names are taken. A dashed placeholder box fits "empty" loosely, but it could also read as a selection tool.
+> - Icon 1 ("interfaces") is a milder case. It is a generic window, and it could be mistaken for 6, which is a window with code in it.
+
+Score: 8 of 10. Fail: empty (elimination), interfaces (elimination, milder).
+
+Craft read on the same sheet, word for word:
+
+> Defects by icon, going by the proof row in the image:
+>
+> 1. all: none
+> 2. coding: braces slightly cramped, tiny
+> 3. connectivity: confused silhouette, floating check
+> 4. data: uneven weight, baseline heavier
+> 5. devices: none
+> 6. empty: plus floats off the body, uneven dashes
+> 7. interfaces: dots too small to read
+> 8. machines: floating badge dot, confused silhouette
+> 9. marks: none
+> 10. security: check too small
+>
+> Three weakest:
+> - **machines (8):** the robot head, antenna and corner badge dot don't read as one object. The badge floats off the body and the stroke weight is inconsistent. It has the lowest ink coverage (70.8) and the largest mass offset (-0.4, -0.36).
+> - **connectivity (3):** the two chain links tangle into a confusing silhouette, and the grey check floats off the body. It also has a visible curve kink where the links cross.
+> - **empty (6):** the "+" is detached from the dashed square and is lighter than the dashes. The dash lengths and gaps are uneven. It has the lowest ink (61.2) and the worst mass offset (-0.72, -0.71), so it sits visibly off-balance.
+
+Defects named for 7 icons.
+
+### Round 3 (empty's dash `3 3`): the set committed before fix round 1
+
+Key: 1 security · 2 empty · 3 all · 4 coding · 5 marks · 6 interfaces · 7 data · 8 connectivity · 9 machines · 10 devices.
+
+Blind read, word for word:
+
+> 1. security: shield with a checkmark.
+> 2. empty: dashed empty box with a plus. This is a placeholder or empty-state look, and it's the least certain of the ten.
+> 3. all: a 2x2 grid of squares.
+> 4. coding: window with angle brackets (<>).
+> 5. marks: bookmark ribbon.
+> 6. interfaces: plain window or card with two dots.
+> 7. data: bar chart on a baseline.
+> 8. connectivity: chain link with a check.
+> 9. machines: small robot with an antenna.
+> 10. devices: smartphone.
+>
+> Competing names: none. Number 4 could pass for interfaces because it is a window, but the brackets make it coding. That leaves 6 for interfaces.
+>
+> Letters or digits: I read none. The <> in number 4 is a symbol, not a letter, so no icon is named for one.
+>
+> Names given only by elimination: number 2 gets "empty" mostly because no other name fits a dashed placeholder box. Number 6 gets "interfaces" mainly because the window-like names were already taken. Number 3 gets "all" fairly naturally.
+
+Score: 8 of 10. Fail: empty (elimination), interfaces (elimination).
+
+Craft read on the committed set (a new reader, after round 4), word for word:
+
+> Defects per icon, numbered in the sheet's reading order: all, coding, connectivity, data, devices, empty, interfaces, machines, marks, security.
+>
+> 1. all: none
+> 2. coding: braces too small
+> 3. connectivity: confused silhouette, floating check
+> 4. data: uneven bar heights, weight
+> 5. devices: none
+> 6. empty: floating plus, dashes uneven
+> 7. interfaces: dots too small to read
+> 8. machines: floating dot, confused silhouette
+> 9. marks: none
+> 10. security: none
+>
+> Three weakest:
+> - connectivity (3): the chain links tangle into an unclear shape, and the grey check floats detached at the corner.
+> - machines (8): the robot head is hard to read, the antenna is tiny, and the dark dot at the bottom right floats off the body.
+> - empty (6): the dashes are uneven and the plus hangs off the corner. It also has the least ink (54%), so it looks weak next to the others.
+>
+> Close runner-ups are interfaces (7), whose two dots barely read, and coding (2), whose braces are small.
+
+Defects named for 6 icons: coding, connectivity, data, empty, interfaces, machines.
+
+### Round 4 (interfaces as sliders; reverted)
+
+Key: 1 all · 2 empty · 3 devices · 4 coding · 5 marks · 6 machines · 7 data · 8 connectivity · 9 security · 10 interfaces.
+
+Blind read, word for word:
+
+> Read from the image alone. I saw no letters or digits inside any icon, only the caption numbers under them.
+>
+> 1. all: four-square grid in a rounded square. It's the only whole-set icon, so the match is clear.
+> 2. empty: dashed selection box with a plus. A dashed empty slot fits "empty".
+> 3. devices: phone or tablet outline.
+> 4. coding: code brackets "<>" in a rounded rectangle. They are shapes, not letters.
+> 5. marks: bookmark.
+> 6. machines: small robot or bot head with antenna and a dot.
+> 7. data: bar chart.
+> 8. connectivity: chain link with a check mark.
+> 9. security: shield with a check mark.
+> 10. interfaces: slider or toggle controls.
+>
+> Conflicts: no two numbers compete for one name. Number 8 and number 9 both have check marks, but their objects (link versus shield) separate them cleanly.
+>
+> Names taken only by elimination:
+> - 10 gets "interfaces" mostly because it is the name left over; sliders are a plausible UI-controls icon, but not a strong match.
+> - 2 gets "empty" partly by elimination too, though the dashed placeholder does fit.
+> - 6 gets "machines" because the bot is the best remaining fit.
+
+Score: 7 of 10. Fail: interfaces, empty, machines (elimination). Sliders scored below the window, and rule 09 keeps sliders for settings, so `interfaces` went back to the window with a dot pair (round 3's set).
+
+### Fix round 1
+
+The controller's rulings for this round:
+
+1. "Floating" said of a modifier alone is not a defect, since the halo is its gap (rule 08). Said of a body part, it counts, and a confused silhouette counts on any icon. `read.md` says so.
+2. Leaving `coding`, `data`, `devices` and `security` without a modifier forbids a modifier, not a redraw.
+3. The blind gate stays at 10 of 10 with no elimination. The craft gate became: a fresh reader names a defect for at most 6 of 10 icons, scored per ruling 1.
+
+Calibration for the craft gate: the controller ran the same craft prompt with fresh sonnet readers on the references. A reader named a defect for 24 of 40 filled-reference icons (60%) and for 20 of 26 line-reference icons (77%).
+
+Three redraws, each read by two new sonnet readers, one at a time, given only the PNG path and the prompt. The craft readers numbered the sheet in its order: all, coding, connectivity, data, devices, empty, interfaces, machines, marks, security.
+
+#### Redraw 1 (empty a plain square, interfaces a toggle, data a cylinder, machines plain)
+
+The set: `empty` is a plain square, `x2.25 y2.25 w11.5 h11.5 rx1.5`, ink 85.07. `interfaces` is a toggle: a pill `M6.25 3.5H9.75A4.5 4.5 0 0 1 9.75 12.5H6.25A4.5 4.5 0 0 1 6.25 3.5Z` and a knob of r 1.5 at (9.75, 8). `data` is a cylinder, `M2.75 4.5V11.5A5.25 2.25 0 0 0 13.25 11.5V4.5A5.25 2.25 0 0 0 2.75 4.5Z` with its rim `M2.75 4.5A5.25 2.25 0 0 0 13.25 4.5`. `machines` is a robot head with a visor slot and no modifier. `all` and `connectivity` take a dot. Only two icons carried a modifier, under the three the brief asks for, and the toggle refuses `badge:plus` at br (a stub 1.43 from the pill), which `modifiers.test.mjs` needs. So this set could not be committed as it stood.
+
+Key: 1 coding · 2 marks · 3 interfaces · 4 data · 5 security · 6 all · 7 connectivity · 8 machines · 9 devices · 10 empty.
+
+Blind read, word for word:
+
+> Image read alone. No letter or digit appears inside any icon. The small numerals 1-10 are only the captions below them.
+>
+> 1. coding. A code-brackets window `{/}`. Clear fit.
+> 2. marks. A bookmark ribbon. Clear fit.
+> 3. connectivity? A pill-shaped toggle or switch. Weaker fit. It could be "interfaces" (a UI switch).
+> 4. data. A database cylinder. Clear fit.
+> 5. security. A shield with a checkmark. Clear fit.
+> 6. all. A four-cell grid with a dot. Reasonable fit, since the grid reads as "everything".
+> 7. connectivity. Chain links with a dot. This competes with 3 for the name "connectivity". Links are the stronger match, so 7 takes it.
+> 8. machines. A robot face with an antenna. Clear fit.
+> 9. devices. A phone or tablet. Clear fit.
+> 10. empty. A blank rounded square. Clear fit.
+>
+> Competition: 3 and 7 both compete for "connectivity". 7 wins, so 3 is left with "interfaces".
+>
+> Name by elimination: 3 gets "interfaces" only because the other names are taken. A toggle is a plausible UI-control icon, but nothing in the image says so on its own. 6 getting "all" is a mild case of the same thing.
+>
+> Final mapping: 1 coding, 2 marks, 3 interfaces (by elimination), 4 data, 5 security, 6 all, 7 connectivity, 8 machines, 9 devices, 10 empty.
+
+Score: 9 of 10, or 8 if the "mild case" counts. Fail: interfaces (elimination, competes with connectivity); all (mild elimination).
+
+Craft read, word for word:
+
+> Defects per icon (from the image alone):
+> 1. all: dot floats off the body (it also breaks the grid corner).
+> 2. coding: braces too small to read.
+> 3. connectivity: confused silhouette (chain link reads as a diagonal).
+> 4. data: none (the lower rim curve may be slightly flat).
+> 5. devices: none (the home-bar detail is small).
+> 6. empty: none.
+> 7. interfaces: knob detail small, but it reads. Weight is uneven (thick outline against a thin inner ring).
+> 8. machines: antenna is tiny and detached-looking, and the face detail is too small.
+> 9. marks: none (the notch is slightly sharp, not a real kink).
+> 10. security: uneven weight (the check is heavier than the outline).
+>
+> Three weakest:
+> 1. all: the detached dot floats off the grid corner, and the bottom-right corner of the grid has a gap.
+> 2. connectivity: the silhouette is confused. The two rings, the link and the stray dot don't read as one object, and its ink is the lowest in the set (72.08).
+> 3. machines: the antenna and the eyes/mouth are too small to read at 16px, and the head is a confused shape. Coding is a close fourth, since its braces are cramped.
+
+Scored per ruling 1: defects for 5 icons (coding, connectivity, interfaces, machines, security). `all`'s floating dot is the modifier and does not count. Passes the craft gate (at most 6).
+
+#### Redraw 2 (interfaces a pointer on a window, machines with a dot): the committed set
+
+The set: `interfaces` is a pointer on an open window, the window `M13.5 7V4A1.5 1.5 0 0 0 12 2.5H4A1.5 1.5 0 0 0 2.5 4V12A1.5 1.5 0 0 0 4 13.5H7` and the pointer `M7.5 7.5 14 10.75 11.25 11.25 10.75 14Z`, ink 72.95. `machines` is the robot head (rect `x2.5 y4 w11 h9`, antenna `M8 4V1.75`, visor `x5.5 y7 w5 h3 rx1`) with a dot. `all`, `connectivity` and `machines` carry a dot. `empty` and `data` are as in redraw 1.
+
+Key: 1 data · 2 interfaces · 3 empty · 4 marks · 5 devices · 6 machines · 7 connectivity · 8 coding · 9 all · 10 security.
+
+Blind read, word for word:
+
+> Reading from the image alone. I saw no letters or digits inside any icon. The only digits are the caption numbers 1-10.
+>
+> 1. data: a database cylinder.
+> 2. interfaces: a cursor arrow on a window.
+> 3. empty: a plain blank rounded square.
+> 4. marks: a bookmark ribbon.
+> 5. devices: a phone or tablet.
+> 6. machines: a robot or bot head with an antenna. It has a small dot badge at lower right.
+> 7. connectivity: two linked chain rings, with a dot at lower right.
+> 8. coding: a code-brackets "{ }" or "<>" chip. The brackets are glyphs, not letters.
+> 9. all: a four-pane grid (window or apps), with a dot badge at lower right.
+> 10. security: a shield with a check mark.
+>
+> Competition and leftovers:
+> - No two numbers compete for one name. The one near-tie is 2 against 8 for "interfaces" and "coding". I gave 2 to interfaces (cursor on a window) and 8 to coding (brackets).
+> - Number 3 gets "empty" only because the other names are taken. A blank square has no content, so it reads as empty by elimination.
+> - Number 9 gets "all" partly by elimination too. A grid fits "all", but it could also be "interfaces".
+> - Numbers 6, 7 and 9 share a dot badge at lower right, while 1-5, 8 and 10 have none. The dot may mark a group, but I can't tell what it means.
+
+Score: 8 of 10. Fail: empty (elimination), all (partly by elimination).
+
+Craft read, word for word:
+
+> Defects by icon (from the image alone):
+> 1. all: dot overlaps the grid corner
+> 2. coding: braces too small, cramped
+> 3. connectivity: confused silhouette; link reads unclear
+> 4. data: none
+> 5. devices: home-bar detail too small
+> 6. empty: none
+> 7. interfaces: uneven weight; cursor thinner than frame
+> 8. machines: floating dot; busy, confused silhouette
+> 9. marks: none
+> 10. security: check small, thin vs shield
+>
+> Three weakest:
+> - machines (8): the antenna, face, ear dot and corner dot crowd a small body. The dot floats off the body, and the silhouette doesn't read as one object.
+> - connectivity (3): the two rings and bar make a muddled shape, and the corner dot floats away from the link. At small sizes it blurs into a blob.
+> - all (1): the corner dot collides with the grid's lower-right edge and breaks the square. The dot also looks tacked on rather than part of the form.
+>
+> Close runners-up are coding (braces are tiny) and interfaces (the cursor is lighter than the thick frame).
+
+Scored per ruling 1: defects for 6 icons (coding, connectivity, devices, interfaces, machines, security). `machines` counts for its confused silhouette, not its dot. `all`'s "dot overlaps the grid corner" is said of the modifier and names no defect from the list, so it is not counted; counted, the total is 7. Passes the craft gate at 6.
+
+#### Redraw 3 (empty a slashed circle, all plain, a larger check and home bar)
+
+The set: `empty` is a circle `cx8 cy8 r6.25` with `--add slash`, read as the empty set. `all` drops its dot. The three modifiers are `connectivity` (dot), `machines` (dot) and `empty` (slash). `security`'s check is `M6.5 8l1.5 1.5L9.75 6.25`, and `devices`' home bar is `M6.5 11.25h3`.
+
+Key: 1 empty · 2 machines · 3 data · 4 connectivity · 5 security · 6 marks · 7 devices · 8 coding · 9 all · 10 interfaces.
+
+Blind read, word for word:
+
+> Readings from the image alone. No letters or digits appear inside any icon. The only digits are the caption numbers 1 to 10 under each icon.
+>
+> 1. empty: a circle with a diagonal slash (a "none" or null sign).
+> 2. machines: a small robot head with an antenna and a status dot.
+> 3. data: a database cylinder.
+> 4. connectivity: two linked nodes with a small dot.
+> 5. security: a shield with a checkmark.
+> 6. marks: a bookmark ribbon.
+> 7. devices: a phone or tablet.
+> 8. coding: a rounded box with a code-bracket glyph.
+> 9. all: a 2x2 grid or window.
+> 10. interfaces: a square with a cursor arrow.
+>
+> Competing numbers: none. Each name maps to exactly one number.
+>
+> Names given only because the others were taken: 9 (all) and 10 (interfaces). Both are the weakest matches. A 2x2 grid could also mean interfaces or "all". A cursor in a box fits interfaces, but it is the leftover name. Number 1 (empty) is a mild case too, since the slashed circle reads as "none".
+
+Score: 7 of 10. Fail: all, interfaces (elimination), empty (mild elimination).
+
+Craft read, word for word:
+
+> Defects per icon, judged from the image alone:
+>
+> 1. all: none
+> 2. coding: braces too small
+> 3. connectivity: floating dot; uneven link weight
+> 4. data: none (slightly thin ellipse rim)
+> 5. devices: none (tiny slot detail)
+> 6. empty: slash heavier than ring
+> 7. interfaces: cursor detached from frame; confused silhouette
+> 8. machines: floating dot; detail too small
+> 9. marks: none
+> 10. security: check detail slightly small
+>
+> Three weakest:
+> - **machines (8):** The robot reads as a small, cluttered form. The antenna, eyes and mouth are too small at list size. The detached dot at lower right floats off the body and confuses the silhouette. It has the largest mass offset on the sheet (-0.39).
+> - **connectivity (3):** The two rings and the link are tangled, and the dot at lower right floats away from the group. The silhouette is hard to parse at small size. It has low ink coverage (72%), so it looks lighter than the others.
+> - **interfaces (7):** The frame has an open gap, and the cursor sits half-detached from it. The corner reads as a broken stroke and the weight is uneven. The sheet does not show whether the cursor is meant to be a separate element.
+>
+> The "empty" icon (6) is a close fourth. Its heavy gray slash against the thinner ring looks like uneven weight, and it has the lowest ink coverage (64%).
+
+Scored per ruling 1: defects for 6 icons (coding, connectivity for its link weight, empty, interfaces, machines for its small detail, security). The floating dots do not count. Passes the craft gate at 6.
+
+Redraw 3 read worse blind than redraw 2, so redraw 2's set is committed. Its references: the 16 median of the seven plain icons is 83.48 (reference 83.5, unchanged); 20 is 115.4 (was 113.7) and 24 is 183 (was 180.8).
+
+### What stands
+
+- Every craft read before fix round 1 named the modifiers as floating (`floating check`, `plus floats off the body`, `floating dot`). The halo is the modifier's gap by design (rule 08), and `read.md` now says that "floating" said of a modifier alone is not a defect.
+- `coding` is named for small braces in every read. Its braces fill the landscape body's inner box (3 from each edge, rule 08), and a square body makes them read as parentheses. `security`'s check and `devices`' home bar were named small. Redraw 3's larger check and home bar did not lift the blind read and were not kept.
+- `empty` and `interfaces` are the names left to elimination. Across fix round 1, `empty` was named directly once as a plain square ("Clear fit") and by elimination once, and the slashed circle was a "mild case". `interfaces` was named directly once as a pointer on a window and by elimination once; the toggle competed with `connectivity`. `all` is a "mild", "partial" or full elimination in all three blind reads of fix round 1, with or without its dot.
+- Readers disagree: the same plain square and the same pointer were named directly by one reader and by elimination by the next.
+
 ## The after
 
 ### car

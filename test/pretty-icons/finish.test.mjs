@@ -90,7 +90,7 @@ test("count: the examples' details fit the cap (coding: two braces, eight comman
 test("weight: the tolerances", () => {
   assert.equal(WEIGHT_TOL, 0.15);
   assert.equal(REFERENCE_TOL, 0.2);
-  assert.deepEqual(Object.fromEntries(Object.entries(REFERENCE_INK).filter(([g]) => g !== "48")), { 16: 83.5, 20: 114.2, 24: 181.9 });
+  assert.deepEqual(Object.fromEntries(Object.entries(REFERENCE_INK).filter(([g]) => g !== "48")), { 16: 83.5, 20: 115.4, 24: 183 });
 });
 
 test("weight: a set uniformly over the reference fails it, though even with itself", async (t) => {
@@ -99,7 +99,7 @@ test("weight: a set uniformly over the reference fails it, though even with itse
   for (const n of ["javascript", "badge", "box"]) writeFileSync(join(dir, `${n}.svg`), badge);
   const r = await checkSet(dir);
   assert.equal(r.measured, true);
-  assert.deepEqual(lines(r).filter((l) => l.startsWith("weight  javascript")), ["weight  javascript  ink 226.95 (+24.8%) → within ±20% of the reference 181.9"]);
+  assert.deepEqual(lines(r).filter((l) => l.startsWith("weight  javascript")), ["weight  javascript  ink 226.95 (+24.0%) → within ±20% of the reference 183"]);
   assert.deepEqual(of(r, "weight"), ["badge", "box", "javascript"]);
   assert.ok(!r.failures.some((f) => /median/.test(f.want)), "each is the median");
 });
@@ -110,7 +110,7 @@ test("languages fails weight on the badges and contour on the faceted bodies", a
   const r = await checkSet(fix("languages"));
   assert.equal(r.measured, true);
   const l = lines(r);
-  assert.ok(l.includes("weight  javascript  ink 226.95 (+24.8%) → within ±20% of the reference 181.9"), l.join("\n"));
+  assert.ok(l.includes("weight  javascript  ink 226.95 (+24.0%) → within ±20% of the reference 183"), l.join("\n"));
   assert.ok(l.includes("contour  node  path@2 6 straight sides → at most 5, or curves"), l.join("\n"));
   for (const n of ["go", "javascript", "php", "typescript"]) assert.ok(of(r, "weight").includes(n), `${n} in ${of(r, "weight")}`);
   // ruby's gem has five straight sides and now passes contour; it is left to the reader (rule 04).

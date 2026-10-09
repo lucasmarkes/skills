@@ -2,4 +2,5 @@
   <circle cx="4.75" cy="11.25" r="3" fill="currentColor" fill-opacity=".2" />
   <circle cx="11.25" cy="4.75" r="3" fill="currentColor" fill-opacity=".2" />
   <path d="M4.75 11.25 11.25 4.75" />
+  <circle cx="13.5" cy="13.5" r="1.5" fill="currentColor" stroke="none" data-modifier="dot" />
 </svg>

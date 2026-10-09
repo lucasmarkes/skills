@@ -72,7 +72,7 @@ test("addModifier: a duotone body is split into its paint, whole, and its contou
 });
 
 test("addModifier: every example takes a badge, the cut arcs and curves pass check", async () => {
-  for (const name of ["all", "coding", "connectivity", "data", "devices", "empty", "interfaces", "machines", "marks", "security"]) {
+  for (const name of ["all", "coding", "connectivity", "data", "devices", "empty", "interfaces", "machines", "marks", "security"].filter((n) => !/data-modifier=/.test(ex("hairline", n)))) {
     const out = await addModifier(ex("hairline", name), "badge:plus", { name });
     assert.deepEqual(textChecks(name, out, 16).failures, [], name);
   }

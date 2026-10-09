@@ -52,14 +52,14 @@ test("the 20 and 24 references are examples/hairline scaled to each grid's live 
   const set = readSet(new URL("../../skills/pretty-icons/examples/hairline/", import.meta.url).pathname);
   for (const G of [20, 24]) {
     const k = preset(G).live / preset(16).live, sw = preset(G).stroke, inks = [];
-    for (const s of set) {
+    for (const s of set.filter((x) => !/data-modifier=/.test(x.text))) {
       const inner = parse(s.text).elements.map((el) => `<${el.tag} ${Object.entries(el.attrs).map(([a, v]) => `${a}="${v}"`).join(" ")} />`).join("");
       // the geometry scaled about the centre; the stroke divided back, so it draws at the grid's own width
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${G} ${G}" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(${G / 2} ${G / 2}) scale(${k}) translate(-8 -8)" stroke-width="${sw / k}">${inner}</g></svg>`;
       inks.push((await measure(svg, G)).ink);
     }
     inks.sort((a, b) => a - b);
-    const median = (inks[4] + inks[5]) / 2;
+    const m = inks.length >> 1, median = inks.length % 2 ? inks[m] : (inks[m - 1] + inks[m]) / 2;
     assert.ok(Math.abs(REFERENCE_INK[G] - median) <= 1, `${G}: stored ${REFERENCE_INK[G]}, measured ${median.toFixed(2)}`);
   }
 });

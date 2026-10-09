@@ -38,7 +38,7 @@ The blind read proves each icon names its object. It cannot say one is drawn bad
 
 > These N icons are from one app. For each number, in five words or fewer, name one drawing defect if you see one: a kink in a curve, a wobbly curve, uneven weight, a part floating off the body, a confused silhouette, a detail too small to read. Say "none" when you see no defect. Then name the three weakest and why.
 
-An icon fails when the reader names a defect from that list for it. An icon among the three weakest with no defect named passes; say it in the hand-over with the reader's reason. A failed icon goes back to the drawing (`SKILL.md` step 3), then the whole set runs `check.mjs`, `sheet.mjs`, the blind read and the craft read again, each with a **new** reader.
+An icon fails when the reader names a defect from that list for it. A modifier floats by design, since its halo is the gap rule 08 asks for: "floating" said of the badge, dot, slash or lock alone is not a defect, while said of a part of the body it is. A confused silhouette counts on any icon, modified or not. An icon among the three weakest with no defect named passes; say it in the hand-over with the reader's reason. A failed icon goes back to the drawing (`SKILL.md` step 3), then the whole set runs `check.mjs`, `sheet.mjs`, the blind read and the craft read again, each with a **new** reader.
 
 ## Without a second agent
 
