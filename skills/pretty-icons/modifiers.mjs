@@ -15,7 +15,8 @@
  *      to the quarter grid; a piece shorter than 1 (a crumb) goes too. Paint is never cut;
  *   3. the modifier is drawn last, its elements marked data-modifier="<kind>": duotone in currentColor at
  *      stroke-opacity 0.6 (--solid leaves it out), filled in the line tone at 2, a badge on paper.
- * The halo is the modifier's ink plus one stroke of clear space and half the base's stroke (its round cap).
+ * The halo is the glyph's real reach (its farthest ink, never less than half its box) plus one stroke of clear space
+ * and half the base's stroke (its round cap).
  * The result goes through check.mjs's text rules; the command refuses, with them, anything they reject.
  */
 import { readFileSync, writeFileSync, realpathSync } from "node:fs";
