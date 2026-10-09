@@ -147,6 +147,7 @@ function scoopOutline({ w, h, at, inset, depth = 0.5, side = "top", rx = 0 }) {
   const turns = { top: 0, right: 90, bottom: 180, left: 270 }[side];
   if (turns === undefined) refuse(`--side ${side}: top, right, bottom or left`);
   const [bw, bh] = turns % 180 ? [h - 2 * inset, w - 2 * inset] : [w - 2 * inset, h - 2 * inset];
+  if (rx > Math.min(bw, bh) / 2) refuse(`scoop: --rx ${rx}: at most ${fmt(Math.min(bw, bh) / 2)}`);
   const x = -bw / 2, y = -bh / 2, K = 0.5523 * rx, m = 0, dy = y + depth * bh * 0.4, q = (bw / 2 - rx) * 0.5;
   const P = (...v) => { const out = []; for (let i = 0; i < v.length; i += 2) out.push(pt(add(at, rot([v[i], v[i + 1]], turns)).map(snap))); return out.join(" "); };
   let d = `M${P(x, y + rx)}`;
@@ -258,7 +259,10 @@ export function finishOf(name, o = {}, given = null) {
  * One closed subpath of lines and cubics; an arc is refused. `repair` also says which joins it changed.
  */
 export const reconcile = (d) => repair(d).d;
+// every number of a path on the quarter grid, so the joins measured and the d written are on it
+const snapNumbers = (d) => d.replace(/-?\d*\.?\d+(?:e-?\d+)?/gi, (n) => fmt(snap(Number(n))));
 export function repair(d) {
+  d = snapNumbers(d);
   const subs = segments(d);
   if (subs.length !== 1 || !subs[0].closed) refuse("--from: one closed subpath");
   const segs = subs[0].segs.map((s) => (s.kind === "arc" ? refuse(`--from: an arc at ${pt(s.p[0])}: draw that part with a primitive, or as a cubic`) : { ...s, p: s.p.map((q) => [...q]) }));
@@ -319,6 +323,7 @@ export function main(argv) {
   const args = parseArgs(argv);
   if (!args) { console.error(USAGE); process.exit(1); }
   try {
+    if (args.o.grid !== undefined && ![16, 20, 24, 48].includes(args.o.grid)) refuse(`no preset for grid ${args.o.grid}: use 16, 20, 24 or 48`);
     const from = args.o.from;
     if (from !== undefined && from.endsWith(".svg")) {
       const fixed = repairFile(readFileSync(from, "utf8"));

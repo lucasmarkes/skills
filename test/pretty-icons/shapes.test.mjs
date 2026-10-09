@@ -140,3 +140,20 @@ test("every primitive is clean at 20 and 24 too, the grids no example is drawn o
     assert.deepEqual(clean(d), [], `${name} at ${grid}`);
   }
 });
+
+test("--from snaps off-grid numbers to the quarter grid before it measures joins", () => {
+  const off = "M8.1 24C8 14.3 14 6 24 6C34 6 40 14 40 24C40 34 34 42 24 42C14 42 9 34 8 24Z";
+  const d = repair(off).d;
+  assert.ok(onGrid(d), d);
+  assert.deepEqual(clean(d), []);
+});
+
+test("an unknown grid is refused on stderr with the grids that exist, no stack trace", () => {
+  const r = spawnSync("node", [SCRIPT, "drop", "--grid", "30"], { encoding: "utf8" });
+  assert.equal(r.status, 1);
+  assert.equal(r.stderr, "shapes: no preset for grid 30: use 16, 20, 24 or 48\n");
+});
+
+test("a scoop's rx is bounded by half its shorter side, and the refusal says the most", () => {
+  refused(() => shape("scoop", { grid: 48, rx: 30 }), "--rx 30: at most 19");
+});
