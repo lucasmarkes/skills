@@ -795,6 +795,7 @@ Redraw 3 read worse blind than redraw 2, so redraw 2's set is committed. Its ref
 - `coding` is named for small braces in every read. Its braces fill the landscape body's inner box (3 from each edge, rule 08), and a square body makes them read as parentheses. `security`'s check and `devices`' home bar were named small. Redraw 3's larger check and home bar did not lift the blind read and were not kept.
 - `empty` and `interfaces` are the names left to elimination. Across fix round 1, `empty` was named directly once as a plain square ("Clear fit") and by elimination once, and the slashed circle was a "mild case". `interfaces` was named directly once as a pointer on a window and by elimination once; the toggle competed with `connectivity`. `all` is a "mild", "partial" or full elimination in all three blind reads of fix round 1, with or without its dot.
 - Readers disagree: the same plain square and the same pointer were named directly by one reader and by elimination by the next.
+- Later, for the pixel note (rule 04), `machines` and `interfaces` were moved by 0.25 as they are, and `all`'s rect grew to the preset 11, its cross at 8.25, so `check.mjs examples/hairline` prints no `pixel` note. The drawings are the ones read above; the references hold (83.48, 115.38, 182.98).
 
 ## The after
 

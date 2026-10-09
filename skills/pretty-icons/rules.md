@@ -85,7 +85,7 @@ Each icon's ink is within 15% of the set's median, and within 20% of the grid's 
 
 - **Keep it, for a heavy icon:** it has too much line or a second filled body. A badge (a box holding a glyph, rule 09) runs heavy on any grid. Shorten or drop a detail, or turn a second body into an unfilled detail. A rack of rows and dots, four cells, a cylinder's arcs and a window's bars all run heavy. A line across a filled body adds about 1.2 per unit on 16, over the fill.
 - **Keep it, for a light icon:** it lacks a body or line. Give it a body first (rule 04), then lengthen a detail.
-- **Keep it, for the body:** change details first. A body starts at the preset and can shrink by at most 0.5. `examples/hairline/all.svg` is shrunk for weight to 10.5, against the preset 11.
+- **Keep it, for the body:** change details first. A body starts at the preset and can shrink by at most 0.5. `examples/hairline/data.svg`'s cylinder is shrunk to 10.5, against the preset 11.
 - **Keep it, after any change:** one icon's ink moves the median, so an icon you did not touch can fail. Check and read the whole set again.
 - **Keep it, for a set heavy against the reference:** every icon carries too much. Drop the second detail on each (rule 09) before shrinking anything.
 - **Rejected when:** `check.mjs` prints `weight`: `weight  machines  ink 110.79 (+34.4%) → within ±15% of the set's median 82.43`. Against the reference: `weight  javascript  ink 226.95 (+24.0%) → within ±20% of the reference 183`. In a set of one or two: `weight  machines  ink 65.09 (-22.0%) → within ±15% of the reference 83.5`.
@@ -94,7 +94,7 @@ Each icon's ink is within 15% of the set's median, and within 20% of the grid's 
 
 The centre of mass of the ink is within 0.5 of the canvas centre on each axis. The box may sit off centre. The mass may not.
 
-- **Keep it:** centre the mass, not the box. `check.mjs` prints the offset: `mass +0, +1.3` is 1.3 low. Move the drawing the other way, to the nearest 0.25. `examples/hairline/interfaces.svg`'s box sits 0.25 right and 0.25 low, under its pointer, and its mass sits at +0.02, +0.02.
+- **Keep it:** centre the mass, not the box. `check.mjs` prints the offset: `mass +0, +1.3` is 1.3 low. Move the drawing the other way, to the nearest 0.25. `examples/hairline/interfaces.svg`'s box sits 0.5 right and 0.5 low, under its pointer, and its mass sits at +0.27, +0.27.
 - **Keep it, when the move would push ink out of the live area:** the layout is lopsided. Three nodes in a triangle sit 1.3 low; two on a diagonal balance (`connectivity`). A tray's floor sits it 0.6 low: lift it, or draw a shape even top to bottom.
 - **Rejected when:** `check.mjs` prints `gravity`: `gravity  connectivity  mass +0, +1.3 → within ±0.5`.
 
@@ -109,7 +109,7 @@ Every rect is rounded by the preset. A smaller side of 8 or more takes the large
 
 Two elements either touch or sit at least one stroke apart, outer edge to outer edge. They touch when their centrelines come within 0.1 of each other: one ends on the other, or crosses it. Anything between is "almost", and is rejected. Two outlines that meet edge to edge, `0 apart`, are almost too. The subpaths of one path are held to the same rule: dots merged into one path are as close as separate ones.
 
-- **Keep it, to make a detail touch a body:** end the path on the body's centreline, on the grid. In `examples/hairline/all.svg` the rect runs from x 2.75 to 13.25, and its cross runs `M2.75 8h10.5`, edge to edge. Not the stroke's outer edge, 0.75 further out.
+- **Keep it, to make a detail touch a body:** end the path on the body's centreline, on the grid. In `examples/hairline/all.svg` the rect runs from x 2.75 to 13.75, and its cross runs `M2.75 8.25h11`, edge to edge. Not the stroke's outer edge, 0.75 further out.
 - **Keep it, to keep a detail clear:** put its centreline two strokes from the body's: 3 on 16 and 20, 4 on 24. In `examples/hairline/devices.svg` the home bar at y 11.25 sits 3 above the phone's edge at 14.25.
 - **Keep it, for a line that meets a body:** it ends on the body's edge, and never runs under the body and out the other side, because the 20% fill shows it through. An accent drawn inside a body is not this, and stays: a title bar or a card stripe ending on its edges, a check in a shield, braces. Nothing measures it; the reader sees it.
 - **Keep it, for a near miss:** a check in its shield, a home bar in its phone, cells, rows, dots or braces: move each to touch or to 3 apart. Cells that cannot sit 3 apart become one body with a cross that ends on its edges.
@@ -135,7 +135,7 @@ The accent is drawn as a gesture: the one thing that makes a body a thing and no
 | **paper sheen** | a small paper fill on glass, at 48 only | a bottle, a jar, a screen; never a white stroke |
 | **lean** | the body's belly slid to one side, `shapes.mjs --lean` | a drop, a pear, a sack; it costs no element |
 
-- **Keep it, for the count:** merge details into one path. `all` is a body and one path, `M8 2.75v10.5M2.75 8h10.5`, not four rects. A connection is two nodes and a link, not three nodes. A machine is one body and one detail, not a rack. A rounded box is a `rect` with `rx`; as a path it takes ten commands. When a merged path would pass eight, split it across the elements left. When the details together pass eight drawing commands, drop one.
+- **Keep it, for the count:** merge details into one path. `all` is a body and one path, `M8.25 2.75v11M2.75 8.25h11`, not four rects. A connection is two nodes and a link, not three nodes. A machine is one body and one detail, not a rack. A rounded box is a `rect` with `rx`; as a path it takes ten commands. When a merged path would pass eight, split it across the elements left. When the details together pass eight drawing commands, drop one.
 - **Keep it, for the object:** draw what the name means. A gear's teeth do not fit at 16 under the count and contour rules: draw settings as sliders, two knobs and two tracks, each track starting at its knob's edge and running one way (rule 08). On 16: knobs `cx 4.5 cy 4.5 r 2.75` and `cx 11.5 cy 11.5 r 2.75`, tracks `M7.25 4.5h7M1.75 11.5h7`, on the circle keyline. Knobs of r 2.5 come out light (68.5 on the square keyline, against 83.5). A dashed ring reads as loading. Do not draw:
   - interfaces as a layout window (it reads "layout" or "browser") or a card with a stripe ("payments");
   - devices, or any plural name, as one device (a phone reads "mobile");
