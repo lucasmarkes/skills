@@ -69,8 +69,24 @@ export function halo(G, kind, corner = "br") {
     const [a, b] = slashEnds(G), r = ownStroke(G) / 2 + clear, ab = sub(b, a), L2 = ab[0] ** 2 + ab[1] ** 2;
     return { r, inside: (q) => { const t = Math.max(0, Math.min(1, ((q[0] - a[0]) * ab[0] + (q[1] - a[1]) * ab[1]) / L2)); return len(sub(q, lerp(a, b, t))) - r; } };
   }
-  const { c, half } = placement(G, kind, corner), r = half + clear;
+  const { c, half } = placement(G, kind, corner), r = Math.max(half, reach(G, kind, corner)) + clear;
   return { r, c, inside: (q) => len(sub(q, c)) - r };
+}
+/** The farthest a glyph's ink reaches from its centre: its elements' sampled points, widened by half their stroke. */
+function reach(G, kind, corner) {
+  if (kind === "dot") return placement(G, kind, corner).half;
+  const { c } = placement(G, kind, corner), s = ownStroke(G);
+  let far = 0;
+  for (const el of glyph(G, kind, { corner })) {
+    const w = Number(el.attrs["stroke-width"] ?? s) / 2;
+    let parts;
+    if (el.tag === "rect") {
+      const a = el.attrs, x = +a.x, y = +a.y, W = +a.width, H = +a.height;
+      parts = [[[x, y], [x + W, y], [x, y + H], [x + W, y + H]]];
+    } else parts = sampleParts(el, 0.05);
+    for (const q of parts.flat()) far = Math.max(far, len(sub(q, c)) + w);
+  }
+  return Math.round(far * 1e6) / 1e6;
 }
 /** Where a slash starts and ends: a stroke in from the live area's corners. */
 export const slashEnds = (G) => { const p = preset(G), e = p.pad + ownStroke(G); return [[e, e], [G - e, G - e]]; };
@@ -115,7 +131,6 @@ function alongHandle(anchor, control, frac) {
   }
   return best ? add(anchor, best) : anchor;
 }
-const gcd = (a, b) => (b ? gcd(b, a % b) : a);
 /** The quarter-grid point nearest q that the halo leaves clear. */
 function outward(q, inside) {
   const base = q.map((n) => Math.floor(n / STEP) * STEP), cands = [];
@@ -278,7 +293,6 @@ export function glyph(G, kind, { corner = "br", solid = false } = {}) {
 export async function addModifier(text, kind, { corner = "br", solid = false, name = "icon" } = {}) {
   const parsed = parse(text), G = gridOf(parsed.attrs);
   if (G === null) refuse("no viewBox of a grid");
-  const p = preset(G);
   const { textChecks } = await import("./check.mjs");
   const before = textChecks(name, text, G).failures;
   if (before.length) refuse(`it fails check before the modifier; fix it first:\n${before.map((f) => `${f.rule}  ${f.icon}  ${f.got} → ${f.want}`).join("\n")}`);

@@ -148,3 +148,24 @@ test("a modifier on 20 and 24, the grids no example is drawn on, passes check", 
     }
   }
 });
+
+test("the halo clears every glyph's real reach by one base stroke, at every grid", async () => {
+  const { sampleParts } = await import("../../skills/pretty-icons/geometry.mjs");
+  for (const G of [16, 20, 24, 48]) {
+    const p = preset(G), clear = 1.5 * (p.contour ?? p.stroke), s = p.finish === "filled" ? p.contour : p.stroke;
+    for (const kind of KINDS.filter((k) => k !== "slash")) {
+      const H = halo(G, kind), { c } = placement(G, kind);
+      for (const el of glyph(G, kind)) {
+        const w = Number(el.attrs["stroke-width"] ?? (kind === "dot" ? 0 : s)) / 2;
+        const pts = el.tag === "rect" ? [[+el.attrs.x, +el.attrs.y], [+el.attrs.x + +el.attrs.width, +el.attrs.y + +el.attrs.height], [+el.attrs.x + +el.attrs.width, +el.attrs.y], [+el.attrs.x, +el.attrs.y + +el.attrs.height]] : sampleParts({ tag: el.tag, attrs: el.attrs }, 0.05).flat();
+        for (const q of pts) assert.ok(Math.hypot(q[0] - c[0], q[1] - c[1]) + w <= H.r - clear + 1e-5, `${kind} at ${G}: ${q} reaches past ${H.r - clear}`);
+      }
+    }
+  }
+});
+
+test("a cut stroke still passes the palette check", async () => {
+  const out = await addModifier(svg16(BODY16), "dot");
+  const bad = out.replace('data-cut="split"', 'data-cut="split" stroke="red"');
+  assert.ok(textChecks("x", bad, 16).failures.some((f) => /stroke red/.test(f.got)));
+});

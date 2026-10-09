@@ -145,10 +145,11 @@ function duotoneChecks(failures, icon, parsed, p) {
     const a = el.attrs, where = el.at;
     // a stroke the modifier cut was judged before it was cut (modifiers.mjs checks the base first);
     // a split body's paint, just before its cut contour, carries the body's rules
-    if (isCut(el)) continue;
     const cutAfter = isSplit(parsed.elements[i + 1]);
     if ("transform" in a) fail(failures, "stroke", icon, `${where} transform`, "not set");
     for (const k of COLOUR_ATTRS) if (k in a && !isCurrent(a[k]) && !isNone(a[k])) fail(failures, "stroke", icon, `${where} ${k} ${a[k]}`, "currentColor or none");
+    // a cut stroke still passes the colour and transform checks above; only the body and detail accounting skips it
+    if (isCut(el)) continue;
     // construction: a filled element is a closed body with a contour and the .2 fill;
     // a closed element with a contour and no fill (a ring, a hub) is allowed
     if (isCurrent(a.fill)) {

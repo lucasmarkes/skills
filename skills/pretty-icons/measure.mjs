@@ -43,7 +43,7 @@ export async function measuredChecks(set, G) {
       const filled = p.finish === "filled";
       const parsed = parse(s.text);
       const els = parsed.elements.filter((el) => !(filled && "transform" in el.attrs) && !isModifier(el));
-      const base = els.length === parsed.elements.length ? s.text : compose(parsed.attrs, parsed.elements.filter((el) => !isModifier(el)));
+      const modified = parsed.elements.some(isModifier), base = !modified ? s.text : compose(parsed.attrs, parsed.elements.filter((el) => !isModifier(el)));
       const c = filled ? classify(els) : null;
       const details = new Set(filled ? c.details.map((el) => el.at) : []);
       const paint = new Set(filled ? [...c.paint].map((el) => el.at) : els.filter((el) => String(el.attrs.stroke).trim().toLowerCase() === "none").map((el) => el.at));
@@ -52,7 +52,7 @@ export async function measuredChecks(set, G) {
       const m = filled
         ? { ...(await measure(objectOf(base), G)), live: whole.box, ink: (await measure(linesOf(base), G)).ink }
         : { ...(await measure(base, G)), live: whole.box };
-      measures.push({ ...s, els, parts, details, paint, m, modified: base !== s.text });
+      measures.push({ ...s, els, parts, details, paint, m, modified });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
