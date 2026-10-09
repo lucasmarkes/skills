@@ -25,7 +25,7 @@ import { readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { preset, PALETTE, FILL } from "./presets.mjs";
 import { pathParts, bounds } from "./geometry.mjs";
-import { segments, joins, curveFailures, SMOOTH, CORNER } from "./curve.mjs";
+import { segments, joins, curveFailures, SMOOTH, CORNER, MIN_CHORD } from "./curve.mjs";
 import { pathCommands, parse } from "./svg.mjs";
 import { filledChecks } from "./filled.mjs";
 
@@ -198,7 +198,13 @@ export function shape(name, o = {}) {
     d = pathOf({ P, segs });
   }
   const failures = curveFailures(name, { tag: "path", attrs: { d }, at: "path@1" });
-  if (failures.length) refuse(`${name}: ${failures.map((f) => `${f.rule} ${f.got.replace("path@1 ", "")}`).join("; ")}: change --bulge or the box`);
+  if (failures.length) {
+    const said = failures.map((f) => `${f.rule} ${f.got.replace("path@1 ", "")}`).join("; ");
+    // one inflection over a short chord: a box too small for its curves, which no --bulge cures
+    const chords = failures.map((f) => (f.rule === "inflection" ? f.got.match(/ 1 inflection over a chord of ([\d.]+)$/) : null));
+    if (chords.every(Boolean)) refuse(`${name}: ${said}: ${name === "blob" ? "spread the anchors" : "make the box larger"}, so every segment's chord is at least ${MIN_CHORD} (the shortest is ${Math.min(...chords.map((m) => Number(m[1])))})`);
+    refuse(`${name}: ${said}: change --bulge or the box`);
+  }
   if (name !== "blob") {
     const b = bounds(pathParts(d).flat()), half = [box.w / 2 - inset, box.h / 2 - inset], [cx, cy] = box.at;
     const r = Math.abs(box.rot % 180) === 90 ? [half[1], half[0]] : half;
@@ -355,8 +361,24 @@ export function repairFile(text) {
   return out;
 }
 
+// every flag parseArgs takes, by the value it takes: a number, an x,y pair, a word or text, none
 const NUMERIC = ["w", "h", "rot", "bulge", "lean", "grid", "tip", "skew", "waist", "thick", "narrow", "angle", "depth", "rx"];
-export const USAGE = "usage: node shapes.mjs <drop|leaf|lens|bean|crescent|taper|wedge|scoop|blob> [--w N --h N --at x,y --rot N --bulge N --lean N --grid 16|20|24|48 --shade right|lower|none --seam straight|curved ...] | node shapes.mjs --from \"<d>\"|<file.svg> [--grid N]";
+const TEXT = ["shade", "seam", "side", "anchors", "from"];
+export const FLAGS = [...NUMERIC, "at", ...TEXT, "sharp"];
+export const USAGE = [
+  "usage: node shapes.mjs <primitive> [flags]  |  node shapes.mjs --from \"<d>\"|<file.svg> [--grid N]",
+  "  every primitive: --w N --h N (its box) --at x,y --rot N (steps of 15) --bulge N (default 0.55) --lean -1..1 --grid 16|20|24|48 (default 48)",
+  "  at 48 (filled):  --shade right|lower|none --seam straight|curved",
+  "  drop      --tip 0..1",
+  "  leaf      --skew -1..1",
+  "  lens",
+  "  bean      --waist 0..1",
+  "  crescent  --thick 0..1",
+  "  taper     --narrow 0..1 --sharp",
+  "  wedge     --angle 15..120",
+  "  scoop     --depth 0..1 --side top|right|bottom|left --rx N",
+  "  blob      --anchors \"x,y[,t][,c] …\" (absolute anchors; c a cusp, t the handle length)",
+].join("\n");
 
 export function parseArgs(argv) {
   const o = {}, rest = [];
@@ -369,7 +391,7 @@ export function parseArgs(argv) {
     if (v === undefined) return null;
     if (NUMERIC.includes(k)) { o[k] = Number(v); if (!Number.isFinite(o[k])) return null; }
     else if (k === "at") { o.at = v.split(",").map(Number); if (o.at.length !== 2 || !o.at.every(Number.isFinite)) return null; }
-    else if (["shade", "seam", "side", "anchors", "from"].includes(k)) o[k] = v;
+    else if (TEXT.includes(k)) o[k] = v;
     else return null;
   }
   if (rest.length > 1 || (rest.length ? o.from !== undefined : o.from === undefined)) return null;

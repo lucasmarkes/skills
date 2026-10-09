@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { shape, finishOf, collinear, reconcile, repair, repairFile, shadeOf, parseArgs, ShapeError, drop, wedge } from "../../skills/pretty-icons/shapes.mjs";
+import { shape, finishOf, collinear, reconcile, repair, repairFile, shadeOf, parseArgs, ShapeError, drop, wedge, USAGE, FLAGS } from "../../skills/pretty-icons/shapes.mjs";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -77,8 +77,42 @@ test("bad flags are refused with the reason", () => {
   refused(() => shape("star"), 'no primitive "star"');
   refused(() => shape("bean", { lean: 1 }), "bean: overshoots its box by 0.79: lower --bulge");
   refused(() => shape("crescent", { bulge: 1.2 }), "2 inflections over a chord of 24.36");
-  refused(() => shape("bean", { grid: 16, w: 11 }), "change --bulge or the box");
+  refused(() => shape("bean", { grid: 16, w: 11 }), "make the box larger, so every segment's chord is at least 4 (the shortest is 3.26)");
   refused(() => shape("blob", { anchors: "8,8 40,8" }), "at least three");
+});
+
+test("one inflection over a short chord asks for a larger box, not --bulge; a wobble still names --bulge", () => {
+  // no --bulge cures it: the small leaf is refused for the same reason at every one
+  for (const bulge of [0.3, 0.55, 0.8]) refused(() => shape("leaf", { grid: 16, w: 8, h: 5, bulge }), "make the box larger");
+  const msg = (fn) => { try { fn(); } catch (e) { return e.message; } return ""; };
+  const small = msg(() => shape("leaf", { grid: 16, w: 8, h: 5 }));
+  assert.match(small, /1 inflection over a chord of 3\.47.*: make the box larger, so every segment's chord is at least 4 \(the shortest is 3\.47\)$/);
+  assert.ok(!small.includes("--bulge"), small);
+  assert.match(msg(() => shape("blob", { grid: 16, anchors: "4,8,c 6,6.5 8,8,c 6,9.5" })), /: spread the anchors, so every segment's chord is at least 4/);
+  const wobble = msg(() => shape("crescent", { bulge: 1.2 }));
+  assert.ok(wobble.endsWith("change --bulge or the box"), wobble);
+  assert.doesNotThrow(() => shape("leaf", { grid: 16, w: 10, h: 6 }));
+});
+
+test("the usage names every flag the parser takes, each per-primitive flag on its primitive's line", () => {
+  const value = { at: "8,8", shade: "right", seam: "curved", side: "top", anchors: "8,8 12,8 10,12", from: "M0 0Z" };
+  for (const f of FLAGS) {
+    assert.ok(USAGE.includes(`--${f}`), `USAGE names --${f}`);
+    const argv = f === "from" ? ["--from", "M0 0Z"] : ["drop", `--${f}`, ...(f === "sharp" ? [] : [value[f] ?? "1"])];
+    assert.notEqual(parseArgs(argv), null, `parseArgs takes --${f}`);
+  }
+  assert.equal(parseArgs(["drop", "--colour", "red"]), null);
+  const own = { drop: ["tip"], leaf: ["skew"], bean: ["waist"], crescent: ["thick"], taper: ["narrow", "sharp"], wedge: ["angle"], scoop: ["depth", "side", "rx"], blob: ["anchors"] };
+  const lines = USAGE.split("\n");
+  for (const [name, flags] of Object.entries(own)) {
+    const l = lines.find((x) => x.trim().startsWith(`${name} `));
+    assert.ok(l, `a line for ${name}`);
+    for (const f of flags) assert.ok(l.includes(`--${f}`), `${name}'s line names --${f}`);
+  }
+  assert.ok(USAGE.includes('--anchors "x,y[,t][,c] …"'));
+  const r = spawnSync("node", [SCRIPT], { encoding: "utf8" });
+  assert.equal(r.status, 1);
+  assert.equal(r.stderr.trim(), USAGE);
 });
 
 test("--from smooths a kink, keeps a corner, and reads relative, H and V", () => {
