@@ -29,6 +29,7 @@ import { preset, radiiFor, FILL, GRIDS } from "./presets.mjs";
 import { parse, num, G as gridOf, ELEMENTS, pathNumbers, pathCommands, moves, isClosed } from "./svg.mjs";
 import { straightSides } from "./geometry.mjs";
 import { filledChecks } from "./filled.mjs";
+import { curveFailures, curveColumns, pixelNotes } from "./curve.mjs";
 
 export { pathCommands, isClosed };
 
@@ -115,6 +116,13 @@ export function textChecks(icon, text, expectG) {
 
   if (parsed.elements.length > p.elements) fail(failures, "count", icon, `${parsed.elements.length} elements`, `at most ${p.elements}`);
   if (parsed.elements.length === 0) fail(failures, "count", icon, "0 elements", "at least 1");
+  // curves, after every other text rule; each path once, since a contour repeats its tone's
+  const seen = new Set();
+  for (const el of parsed.elements) {
+    if (el.tag !== "path" || seen.has(el.attrs.d)) continue;
+    seen.add(el.attrs.d);
+    failures.push(...curveFailures(icon, el));
+  }
 
   return { G, failures, parsed };
 }
@@ -167,31 +175,35 @@ const unmeasurable = (e) => e?.code === "ERR_MODULE_NOT_FOUND" || e?.code === "P
 export async function checkSet(folder, { grid, measure = true, loadMeasure = () => import("./measure.mjs") } = {}) {
   const set = readSet(folder);
   // nothing to measure, so nothing was left unmeasured
-  if (set.length === 0) return { failures: [{ rule: "set", icon: folder, got: "no .svg files", want: "at least one" }], measured: true, why: "", G: null, rows: [] };
+  if (set.length === 0) return { failures: [{ rule: "set", icon: folder, got: "no .svg files", want: "at least one" }], measured: true, why: "", G: null, rows: [], notes: [] };
   const G = setGrid(set, grid);
   const failures = [];
   // An icon the text layer could not read (elements) or placed on another canvas is not measured:
   // its text line already says why, and a renderer would only throw on it or skew the median.
-  const unreadable = new Set();
+  const unreadable = new Set(), readable = [];
   for (const s of set) {
-    const f = textChecks(s.name, s.text, G).failures;
+    const { failures: f, parsed } = textChecks(s.name, s.text, G);
     if (f.some((x) => x.rule === "elements" || x.rule === "canvas")) unreadable.add(s.name);
+    else readable.push([s.name, parsed]);
     failures.push(...f);
   }
   // A grid with no preset has nothing to measure against; canvas has failed every icon.
-  if (!GRIDS[G]) return { G, failures, measured: true, why: "", rows: [] };
+  if (!GRIDS[G]) return { G, failures, measured: true, why: "", rows: [], notes: [] };
+  // notes never fail the set: they say what a person may want to look at
+  const notes = readable.flatMap(([name, parsed]) => pixelNotes(name, parsed, G));
+  const columns = new Map(readable.map(([name, parsed]) => [name, curveColumns(parsed.elements)]));
   let measured = false, rows = [], why = "";
   if (measure) {
     try {
       const { measuredChecks } = await loadMeasure();
       const r = await measuredChecks(set.filter((s) => !unreadable.has(s.name)), G);
-      failures.push(...r.failures); rows = r.rows; measured = true;
+      failures.push(...r.failures); rows = r.rows.map((row) => ({ ...row, ...columns.get(row.icon) })); measured = true;
     } catch (e) {
       if (!unmeasurable(e)) throw e;
       why = e.message;
     }
   }
-  return { G, failures, measured, why, rows };
+  return { G, failures, measured, why, rows, notes };
 }
 
 export async function main(argv) {
@@ -204,6 +216,7 @@ export async function main(argv) {
   const r = await checkSet(folder, { grid });
   if (argv.includes("--print")) { console.table(r.rows); }
   for (const f of r.failures) console.log(formatFailure(f));
+  if (r.notes.length) { console.log("notes"); for (const n of r.notes) console.log(formatFailure(n)); }
   if (!r.measured) { console.log(`not measured: ${r.why}`); process.exit(2); }
   if (r.failures.length) process.exit(1);
   console.log("ok");

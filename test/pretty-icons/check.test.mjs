@@ -168,3 +168,23 @@ test("two elements on one line are told apart in a failure", async (t) => {
   const r = await checkSet(dir);
   assert.deepEqual(r.failures.filter((f) => f.rule === "gap" && f.icon === "pair").map((f) => f.got), ["path#2@3 to path#3@3 0 apart"]);
 });
+
+test("check prints notes after the failures, and notes never change the exit code", () => {
+  const cli = new URL("../../skills/pretty-icons/check.mjs", import.meta.url).pathname;
+  const r = spawnSync(process.execPath, [cli, fix("good-16")], { encoding: "utf8" });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const lines = r.stdout.trim().split("\n");
+  assert.equal(lines.at(-1), "ok");
+  assert.equal(lines[0], "notes");
+  assert.match(lines[1], /^pixel  tile  5 of 5 straight strokes off the pixel at 16 px, 5 at 32 px → their edges on whole pixels$/);
+});
+
+test("check judges a kinked curve once, even when a contour repeats its tone's path", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "curve-"));
+  try {
+    const d = "M8 24H28L37.85 25.74";
+    writeFileSync(join(dir, "kinked.svg"), `<svg viewBox="0 0 48 48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">\n<path d="${d}" fill="#ececea" stroke="none" />\n<path d="${d}" />\n</svg>`);
+    const r = await checkSet(dir, { measure: false });
+    assert.deepEqual(r.failures.filter((f) => f.rule === "join").map((f) => f.got), ["path@2 10.0° at 28, 24"]);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
