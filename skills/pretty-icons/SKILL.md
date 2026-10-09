@@ -34,15 +34,16 @@ Read `rules.md` first; for the filled finish, then `rules-filled.md`, which says
 The kit is the normal way to draw a curved body; a hand-written path is the exception (rule 04). Draw each icon in a loop:
 
 1. Compose. `node <skill-dir>/shapes.mjs <primitive> --grid <grid> --w <w> --h <h> --at <x>,<y>` prints the body; paste it into the file, then add the details and the one gesture (rule 09) by hand.
-2. `node <skill-dir>/check.mjs pretty-icons/`. Fix each line by its rule. After a hand edit kinks a curve, `node <skill-dir>/shapes.mjs --from pretty-icons/<name>.svg` repairs it.
-3. `node <skill-dir>/sheet.mjs pretty-icons/ --proof --only <name>` writes `pretty-icons-proof.png` and prints its path. Look at it: the construction (anchors, handles, every join coloured, green smooth, blue a corner, red a kink), the finish, the silhouette at 16 and 24, the pixels at display size, under a reference row from the examples.
-4. Adjust and go back to 2, until no join is red, the silhouette alone names the object, and the icon sits with the reference row.
+2. Repair, before every check, whenever the file holds a path you wrote or edited by hand, body or detail: `node <skill-dir>/shapes.mjs --from pretty-icons/<name>.svg`. It prints each kinked path smoothed, as `path@N <d>`, a tone and its contour both: paste each over its own path. `no kinks` means there are none. It mends closed paths of lines and cubics. Where it refuses (an arc, an open line), make that join by hand: both handles on one straight line through the anchor, a line meeting an arc along its tangent, or a corner past 30°.
+3. `node <skill-dir>/check.mjs pretty-icons/`. Fix each line by its rule.
+4. `node <skill-dir>/sheet.mjs pretty-icons/ --proof --only <name>` writes `pretty-icons-proof.png` and prints its path. Look at it: the construction (anchors, handles, every join coloured, green smooth, blue a corner, red a kink), the finish, the silhouette at 16 and 24, the pixels at display size, under a reference row from the examples.
+5. Adjust and go back to 2, until no join is red, the silhouette alone names the object, and the icon sits with the reference row.
 
 A state (add, off, locked, new) is the base icon plus `node <skill-dir>/modifiers.mjs pretty-icons/<name>.svg --add <kind>`, run once the base passes (rule 09).
 
 ## 4. Check
 
-1. `node <skill-dir>/check.mjs pretty-icons/`. Fix each line by its rule until it prints `ok`. The first run installs `@resvg/resvg-js` into a cache (`PRETTY_ICONS_CACHE` moves it).
+1. `node <skill-dir>/check.mjs pretty-icons/`. Fix each line by its rule until it prints `ok`; a `join` line is mended by step 3's repair. The first run installs `@resvg/resvg-js` into a cache (`PRETTY_ICONS_CACHE` moves it).
 2. `node <skill-dir>/sheet.mjs pretty-icons/`. It writes `pretty-icons-sheet.png` and `pretty-icons-blind.png` to a temp folder of this set's own (`--out=<dir>` moves them) and prints their paths and the key. Never put them in the app. Look at the sheet.
 3. Do the blind read in `read.md`. A failure goes back to step 3, then all of step 4, with a new reader.
 4. Do the craft read in `read.md`, with another new reader, once the blind read passes. A named defect goes back to step 3, then all of step 4.
@@ -74,7 +75,7 @@ Edit only that icon's `.svg`. Run steps 4 and 5 for the set.
 | adding a fourth element to make the metaphor clearer | rule 09: three at most; if it needs a fourth, the metaphor is wrong |
 | drawing a badge, initials, a logo or a bare `</>` | rule 09: draw the thing the name means; braces only, in a body |
 | adding a chimney, a shine, steam or a fold | rule 09: one accent per body, drawn as one gesture from the catalogue |
-| writing a cubic by hand for a curved body | rule 04: take it from `shapes.mjs`; `--from` repairs a kink |
+| writing a cubic by hand for a curved body | rule 04: take it from `shapes.mjs`; run `--from` on any path you wrote before the first check |
 | drawing a plus, a slash or a lock onto an icon | rule 09: `modifiers.mjs --add`, which cuts its halo out of the base |
 | looking at the icons only on the finished sheet | step 3: `sheet.mjs --proof --only <name>` after every check |
 | drawing a hexagon, cut gem or stepped body | rule 04: a rect, circle, triangle, house or curved outline |
@@ -86,6 +87,7 @@ Edit only that icon's `.svg`. Run steps 4 and 5 for the set.
 | adding an offset shadow or a white shine | `rules-filled.md` 04: neither; depth is the shade inside the body. The one sheen allowed is a paper fill on glass, a gesture from rule 09 |
 | doubling a ring or a spoke to make it read thicker | `rules-filled.md` 04: a bar at 3.5 and its core, a tube |
 | rounding every rect the same | `rules-filled.md` 07: cut, cased, moulded or a pill, by what the object is |
+| moving an icon's ink the wrong way, or by guess | `rules-filled.md` 05: a minus adds line, a plus takes it away; the percentage of 341 is how much |
 | drawing an object at its true proportions, a can 29 tall | `rules-filled.md` 02: write the keyline's box first, and name the element that reaches each side |
 | lifting a body whose box already fills the live area | `rules-filled.md` 06: the mass is the area; give the light end area, shorten the heavy end |
 | ending a stem near a leaf's curve | `rules-filled.md` 08: on an anchor, or on through the body, drawn before its tone |

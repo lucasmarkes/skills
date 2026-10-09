@@ -1316,3 +1316,78 @@ Four rules held runs 1 to 4: light, keyline, gravity and gap. Each is a defect i
 - **keyline.** Rule 02 gave the sizes and said a part counts as ink, but not how far each stroke reaches past its geometry, where the box sits, or that an object is stretched to the keyline rather than drawn true. Fix: rule 02 gives the half strokes (1, 0.75, 1.75), the four boxes in coordinates, the move (name the element that reaches each side; an anchor there), what `shapes.mjs --w --h` and `blob --anchors` each take, the stretch (a can 40 wide stands 31 to 33 tall), and `--print`'s box. `SKILL.md`'s table gains a row.
 - **gravity.** Rule 06 said "lift the body a quarter at a time, or lighten what sits low". It did not say the mass counts every painted pixel, tones at full weight, while weight reads the lines alone; nor that a box on the long side of its keyline fills the live area and cannot be lifted. Fix: rule 06 says what the mass is, compares a handle's area with a head's, and splits the move: slide on the keyline's short side; move area on the long side (widest part across the middle, the light end given area, the heavy end shortened). `SKILL.md`'s table gains a row.
 - **gap.** Rule 08 said "touch, or one stroke apart, 1.5" without saying that the check measures centrelines (touch at 0.1 or less, apart at 3 or more), or how to make a part touch a curve. Fix: rule 08 gives the centreline numbers, and the moves: end on an anchor or a straight side, or cross on into the body drawn before its tone; two bodies that meet share an anchor or cross. The seedling's line is quoted. `SKILL.md`'s table gains a row.
+
+The kit's shade was later fixed in code (43ea650): at a slant it shades one segment, from the lower belly to a tip, and passes the light check at every `--rot`. The light trap no longer needs the hand recipe for the kit's own bodies; the recipe stays for a body drawn by hand.
+
+### Trial 2
+
+A new fresh agent, handed only the skill after the doc fixes above (3d6164d, 43ea650, 88a57a5), drew six icons in the filled finish: food bowl, bone, fishbowl, birdcage, ball, brush.
+
+`check.mjs` printed `ok` first on run 3. The gate is `ok` on run 1 or 2, so the trial fails, by one run (trial 1 needed 5). After a craft redraw the final set was `ok` on run 7.
+
+The agent used `shapes.mjs` in part: `blob` for the fish's body and the brush's first outline. It wrote most outlines by hand, as arcs, lines and cubics, and measured their joins with its own script through `curve.mjs`. It never ran `--from`. It ran `sheet.mjs --proof` on every icon. Both reads were done, each by a fresh reader.
+
+#### Runs 1 and 2, as printed
+
+Run 1 (exit 1):
+
+```
+join  bone  path@3 21.5° at 13.5, 34.5 → under 4° or over 30°: smooth, or a corner on purpose
+join  bone  path@3 21.5° at 34.5, 13.5 → under 4° or over 30°: smooth, or a corner on purpose
+join  food-bowl  path@2 26.7° at 15.5, 15 → under 4° or over 30°: smooth, or a corner on purpose
+join  food-bowl  path@2 26.7° at 32.5, 15 → under 4° or over 30°: smooth, or a corner on purpose
+gravity  birdcage  mass +0, +3.07 → within ±3
+keyline  bone  34.88 × 34.94 → square 36 × 36 ±1
+gap  brush  path@4 to path@5 1.16 apart → ≥ 1.5 apart, or crossing
+gravity  food-bowl  mass +0, +3.05 → within ±3
+weight  birdcage  ink 408.49 (+30.1%) → within ±25% of the set's median 313.92
+weight  bone  ink 227.34 (-27.6%) → within ±25% of the set's median 313.92
+weight  bone  ink 227.34 (-33.4%) → within ±25% of the reference 341.3
+weight  brush  ink 255.75 (-25.1%) → within ±25% of the reference 341.3
+weight  fishbowl  ink 413 (+31.6%) → within ±25% of the set's median 313.92
+```
+
+Run 2 (exit 1):
+
+```
+gravity  food-bowl  mass +0, +3.38 → within ±3
+weight  bone  ink 254.51 (-25.7%) → within ±25% of the set's median 342.51
+weight  bone  ink 254.51 (-25.4%) → within ±25% of the reference 341.3
+weight  brush  ink 229.19 (-33.1%) → within ±25% of the set's median 342.51
+weight  brush  ink 229.19 (-32.8%) → within ±25% of the reference 341.3
+```
+
+Run 3: `ok`. Run 5, after a craft redraw: join, bone 28.2° twice; weight, bone -26.0%. Runs 6 and 7: `ok`.
+
+The final set's ink: ball 333.07, birdcage 421.05, bone 259.93, brush 265.11, fishbowl 348.11, food-bowl 349.77.
+
+#### The reads on the final set
+
+Blind: 6 of 6 on each of three reads, none by elimination. Readers 1 and 2 hedged the brush as "comb or brush"; reader 2 said it would have picked brush without elimination.
+
+Craft, word for word:
+
+> Defects per icon (from the enlarged views):
+> 1. ball: none (the seam curves look clean; the lower shade band is a bit heavy)
+> 2. birdcage: ring on top floats, tiny
+> 3. bone: uneven weight at the knobs
+> 4. brush: comb teeth too small, uneven
+> 5. fishbowl: none (the rim ellipse is faint)
+> 6. food-bowl: dots too small to read
+>
+> Three weakest:
+> 1. brush: the thin teeth cluster is cramped and uneven against the heavy outline. At small sizes it reads as a smudge, and the handle-to-head junction is confused.
+> 2. food-bowl: the dome with three dots is ambiguous, because it could be a bowl, a cloche or a hat. The dots are too small to read, and the heavy shade band muddies the silhouette.
+> 3. birdcage: the hanging ring is a tiny detached detail. The bars are crowded and the shade bands cut through them, so at 16-24px it turns into a busy blob.
+>
+> Bone is a close fourth. Its knobs have an uneven mix of outline and fill weight, and its silhouette is a little lumpy.
+
+A defect named for 4 of 6: birdcage, bone, brush, food-bowl. The agent notes that the birdcage's ring is drawn under the dome's tone and crosses into it.
+
+#### The rules that held it back, and the fix
+
+Three rules held runs 1 and 2: join, weight and gravity. The four fixed after trial 1 (light, keyline, gap, and gravity's split by side) held, except that one keyline and one gap line came back on run 1.
+
+- **join.** `SKILL.md`'s loop said "After a hand edit kinks a curve, `--from` repairs it", as a note after the check. The agent drew outlines by hand from the start, never edited one, and so never ran it; the bone's outline kinked at 21.5° and the food bowl's at 26.7°. Fix: `SKILL.md` step 3's loop gains a step, "Repair", between compose and check: run `shapes.mjs --from` on any file holding a path written or edited by hand, before every check; paste each `path@N` back; where it refuses (an arc, an open line), make the join by hand, with the handles on one line, a line along an arc's tangent, or a corner past 30°. Step 4's check sends a `join` line there, the table's row says "before the first check", and `rules.md` 04's bullet becomes "for a path you wrote or edited, before the first check".
+- **weight.** `rules-filled.md` 05 said what ink leaves out, and gave a move for a light icon (a slot as a tube) and a heavy one (thin a ring, drop a spoke). It did not say how ink is counted, what a body weighs, which way a percentage points, or how much it asks for. Thin objects (bone, brush) came in 25 to 33% light; bulky ones (birdcage, fishbowl) 30% heavy; and after run 1 the brush moved the wrong way, 255 to 229. Fix: rule 05 says ink is the lines' area, by length: 2 a unit for a contour, a line at 2 or a bar and its core, 1.5 for a line or a shape's outline, nothing for paint. A body at its keyline weighs 240 to 250, the details the other 90 (a line 60 long, a bar 45). The percentage is the move: `-30%` of 341 is about 100, a third, to add; a minus adds line. For a thin object: fill the keyline, a handle as a body (a pill 20 × 4 weighs 89, its line 32), larger ends, a bar across. For a bulky one: fewer bars, a line at 1.5 not 2, a smaller second body; the trial's birdcage weighs 421, 394 with its bars at 1.5, 364 with one bar. The brush's run-2 line is quoted. `SKILL.md`'s table gains a row.
+- **gravity.** Food-bowl +3.05 then +3.38, birdcage +3.07. Rule 06, as fixed after trial 1, already gave the moves: the bowl sits on the landscape keyline's short side, with 4 of room to slide up; the cage, 39 tall on the portrait keyline, must move area. It did not say which way a plus points (only `rules.md` 06 did), nor name a bowl or a cage as objects that sit low. Fix, small: rule 06 reads the sign (`mass +0, +3.05` is 3.05 low), names a bowl and a cage beside the gearshift, says a bowl slides up and a cage takes a slimmer foot and a fuller dome, and quotes the food-bowl's line.

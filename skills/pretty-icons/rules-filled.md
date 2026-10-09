@@ -129,20 +129,24 @@ Its horns are the two cusps (`c`), and they turn in: a crescent whose horns poin
 
 ## 05 · weight
 
-Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. A tyre filled solid weighs its outline, not its area. Within 25% of the set's median and of the reference, 341.3, the median of `examples/garage`.
+Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a line at 2 weighs 2, a bar and its core 2 (its two edges), a shape its outline at 1.5. Where lines cross, they count once. A tyre filled solid weighs its outline, not its area: paint adds nothing. Within 25% of the set's median and of the reference, 341.3, the median of `examples/garage`.
 
+A body at its keyline weighs about 240 to 250: the circle 239, a rect with `rx 6` 251. The details carry the other 90 or so: a line 60 long, or a bar 45 long. A thin object (a bone, a brush, a key) has less outline than a body at its keyline, and comes in light. A bulky one with bars or a second body (a cage, a jar, a bowl of food) comes in heavy.
+
+- **Keep it, after a run:** the percentage is the move. Read it against the number the line names: `-30%` of 341 is about 100 short, so add about a third; `+30%` is about 100 over, so take that away. A minus adds line, a plus takes it away. Aim at the reference, not the edge: the set's median moves as the others change.
 - **Keep it, for a light icon:** give it what the object has: a slot as a tube, a hole, a tick. The wrench gained a slot as a tube and passed.
-- **Keep it, for a heavy icon:** a double ring, a third spoke, a fourth tread: thin it to a tube, or drop one.
-- **Rejected when:** `weight  wrench  ink 191.98 (-30.8%) → within ±25% of the set's median 277.24`.
+- **Keep it, for a thin object:** fill its keyline first, its ends out to the box's sides or corners. Then draw a handle or a shaft as a body, two contours, not one line: a pill 20 × 4 weighs 89, its line 32. Give it larger ends (a bone's knobs, a brush's head), or a bar across it: a ferrule, a band.
+- **Keep it, for a heavy icon:** a double ring, a third spoke, a fourth tread: thin it to a tube, or drop one. For a bulky object: fewer bars, a line at 1.5 rather than 2 (a quarter less), a smaller second body or detail. The trial's birdcage weighed 421 with three bars at 2; at 1.5 it weighs 394, with one bar 364.
+- **Rejected when:** `weight  wrench  ink 191.98 (-30.8%) → within ±25% of the set's median 277.24`; `weight  brush  ink 229.19 (-33.1%) → within ±25% of the set's median 342.51`, a brush at 255 the run before, moved the wrong way.
 
 ## 06 · gravity
 
-The object's mass is within 3 of 24 on each axis. The mass is the centre of every painted pixel, tone and shade as much as line: the centre of the silhouette's area. Weight (05) reads the lines alone; gravity does not. So a wide part (a brim, a rake's head, a can's body) holds the mass, and a handle, a stem or a spout weighs little however long: a line 20 long, 1.5 wide, is 30 of area; a head 30 × 4 is 120. `check.mjs --print` gives the offset as dx and dy. A gearshift sits low by nature; 3 lets it.
+The object's mass is within 3 of 24 on each axis. The mass is the centre of every painted pixel, tone and shade as much as line: the centre of the silhouette's area. Weight (05) reads the lines alone; gravity does not. So a wide part (a brim, a rake's head, a can's body) holds the mass, and a handle, a stem or a spout weighs little however long: a line 20 long, 1.5 wide, is 30 of area; a head 30 × 4 is 120. `check.mjs --print` gives the offset as dx and dy: `mass +0, +3.05` is 3.05 low, a plus low or right. A gearshift sits low by nature; 3 lets it. A bowl and a cage, wide at the foot and round at the top, sit low too, often just past 3.
 
-- **Keep it, on the keyline's short side:** a landscape box is 32 tall in a live area 40 tall, and a portrait box 32 wide in 40: it can slide 4 that way. Slide the whole drawing against the offset, a quarter at a time.
-- **Keep it, on the long side:** the box fills the live area, 4 to 44, and cannot slide. Move area instead, before you draw: put the widest part across the middle, not at an end; give the light end area, a handle as a body or a bar at 3.5 rather than a line; shorten what sits at the heavy end. A long-handled tool (a rake, a broom, a spade) needs its handle given area and its head shortened.
+- **Keep it, on the keyline's short side:** a landscape box is 32 tall in a live area 40 tall, and a portrait box 32 wide in 40: it can slide 4 that way. Slide the whole drawing against the offset, a quarter at a time: a bowl on the landscape keyline slides up.
+- **Keep it, on the long side:** the box fills the live area, 4 to 44, and cannot slide. Move area instead, before you draw: put the widest part across the middle, not at an end; give the light end area, a handle as a body or a bar at 3.5 rather than a line; shorten what sits at the heavy end. A long-handled tool (a rake, a broom, a spade) needs its handle given area and its head shortened. A cage on the portrait keyline needs a slimmer foot and a fuller dome.
 - **Keep it, for a triangle** (a tent, a cone): it holds its mass in its base: bow its sides outward.
-- **Rejected when:** `gravity  rake  mass +0, +5.46 → within ±3`: the head, the widest part, at the bottom end.
+- **Rejected when:** `gravity  rake  mass +0, +5.46 → within ±3`: the head, the widest part, at the bottom end; `gravity  food-bowl  mass +0, +3.05 → within ±3`: a bowl centred, with room above it to slide up.
 
 ## 07 · radius
 
