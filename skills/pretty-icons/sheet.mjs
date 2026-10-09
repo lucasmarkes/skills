@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Two sheets for a set that passes check.mjs: `node sheet.mjs <folder>`.
+ * Two sheets for a set that passes check.mjs: `node sheet.mjs <folder>`. With `--proof [--only <name>]`,
+ * the proof sheet instead, pass or fail (proof.mjs): construction, finish, silhouette and pixels per icon.
  *   pretty-icons-sheet.png   for the author: the set in rows at 1× and 2×, light and dark (and on grey at the filled finish),
  *                            then a tile per icon with its ink box (solid) over the keyline it matched (dashed)
  *   pretty-icons-blind.png   for the reader: icons only, 2×, shuffled and numbered
@@ -48,7 +49,7 @@ const ROOT_INHERITED = ["stroke-dasharray", "fill-rule", "stroke-miterlimit"];
  * `color` (and png() would otherwise turn it black). A colour written in
  * the file (the filled finish's ink and palette) stays as written.
  */
-function place(s, G, x, y, size, colour) {
+export function place(s, G, x, y, size, colour) {
   const { attrs: root, elements } = parse(s.text);
   const paint = (v) => escAttr(String(v).replace(/currentColor/gi, colour));
   const inner = elements.map((el) => `<${el.tag}${Object.entries(el.attrs).filter(([k]) => DRAW_ATTRS.has(k)).map(([k, v]) => ` ${k}="${paint(v)}"`).join("")} />`).join("");
@@ -150,25 +151,35 @@ export async function writeSheets(folder, { out, seed = Date.now() % 2 ** 32 } =
   return { sheet, blind, key: b.key, seed };
 }
 
-const USAGE = "usage: node sheet.mjs <folder> [--seed=<n>] [--out=<dir>]";
+const USAGE = "usage: node sheet.mjs <folder> [--seed=<n>] [--out=<dir>] | node sheet.mjs <folder> --proof [--only <name>] [--out=<dir>]";
 
-/** The folder, seed and out from argv, or null when anything in it is not one of those. */
+/** The folder, seed and out from argv, and --proof with its --only; null when anything in it is not one of those. */
 export function parseArgs(argv) {
   const r = { folder: undefined, seed: undefined, out: undefined };
-  for (const a of argv) {
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
     if (!a.startsWith("--")) { if (r.folder !== undefined) return null; r.folder = a; continue; }
-    const m = /^--(seed|out)=(.+)$/.exec(a);
+    if (a === "--proof") { if (r.proof) return null; r.proof = true; continue; }
+    if (a === "--only") { const v = argv[++i]; if (v === undefined || v.startsWith("--") || r.only !== undefined) return null; r.only = v; continue; }
+    const m = /^--(seed|out|only)=(.+)$/.exec(a);
     if (!m || r[m[1]] !== undefined) return null;
     if (m[1] === "seed" && !/^\d+$/.test(m[2])) return null;
     r[m[1]] = m[1] === "seed" ? Number(m[2]) : m[2];
   }
-  return r.folder === undefined ? null : r;
+  // --only is for the proof; --seed shuffles the blind sheet, which the proof does not draw
+  if (r.folder === undefined || (r.only !== undefined && !r.proof) || (r.proof && r.seed !== undefined)) return null;
+  return r;
 }
 
 export async function main(argv) {
   const args = parseArgs(argv);
   if (!args) { console.error(USAGE); process.exit(1); }
   try {
+    if (args.proof) {
+      const { writeProof } = await import("./proof.mjs");
+      console.log(writeProof(args.folder, { out: args.out, only: args.only }));
+      return;
+    }
     const r = await writeSheets(args.folder, { out: args.out, seed: args.seed });
     console.log(r.sheet); console.log(r.blind);
     console.log("key: " + r.key.map((k) => `${k.n} ${k.name}`).join(" · "));
