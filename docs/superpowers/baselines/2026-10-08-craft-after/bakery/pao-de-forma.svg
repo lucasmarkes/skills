@@ -1,0 +1,6 @@
+<svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M10 23C7 21.5 7 19 7 16.5C7 10.5 15 7 24 7C33 7 41 10.5 41 16.5C41 19 41 21.5 38 23V39A2 2 0 0 1 36 41H12A2 2 0 0 1 10 39Z" fill="#ececea" stroke="none" />
+  <path d="M10 35H38V39A2 2 0 0 1 36 41H12A2 2 0 0 1 10 39Z" fill="#cfcfcb" stroke="none" />
+  <path d="M10 23C7 21.5 7 19 7 16.5C7 10.5 15 7 24 7C33 7 41 10.5 41 16.5C41 19 41 21.5 38 23V39A2 2 0 0 1 36 41H12A2 2 0 0 1 10 39Z" stroke-width="2" />
+  <path d="M13.75 37.25V21.25C11.5 20.25 10.75 18.75 10.75 16.75C10.75 13.75 16 11 24 11C32 11 37.25 13.75 37.25 16.75C37.25 18.75 36.5 20.25 34.25 21.25V37.25" />
+</svg>

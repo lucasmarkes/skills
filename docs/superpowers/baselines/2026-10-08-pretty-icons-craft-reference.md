@@ -1044,8 +1044,208 @@ Car totals, after beside before:
 | kinks | 12 | 0 |
 | double inflections (infl > 1) | 0 | 0 |
 | blind score | 10 of 10 (the spec's "read 20 of 20") | 10 of 10, no elimination |
-| craft score (icons with a list defect) | not read: `sheet.mjs` refuses the before set, which fails check on weight | 7 of 10 |
+| craft score (icons with a list defect) | 6 of 10, read at 6bc79a7 (see "Both sets") | 7 of 10 |
 
 Across the four craft reads, the count went 8, 8, 7, 7. Three icons are named in every read: extintor (the hose, then the horn), semaforo (the lamps, the stand) and banco (the headrest joint). Marcha's read-3 "kink" is the solid stem meeting the boot's arc. Check finds no kink there, since the two are separate elements.
+
+### bakery
+
+The ten bakery icons were redrawn from scratch with the kit in `docs/superpowers/baselines/2026-10-08-craft-after/bakery/`. Each keeps its name, object and format. Bodies are filled: a tone, then a shade over the lower or right part, then the contour at 2. A hole or glass is paper (#ffffff). Curves are convex cubics and arcs written by hand, so there is no kink and no inflection.
+
+Scoring follows the controller's ruling:
+- An icon fails the craft read when the reader names a defect from the prompt's list for it. The gate is at most 6 of 10.
+- "Floating" said of a modifier alone does not count. A remark outside the list is recorded and not counted.
+- The blind read must be 10 of 10, with no name won by elimination.
+
+#### Read 1
+
+Check: `ok`. No kink, and infl is 0 on every icon. Joins: batedor 8 smooth · 4 corners, bolo 8 · 5, croissant 5 · 4, farinha 4 · 9, forno 2 · 2, pao-de-forma 14 · 6, pao 5 · 2, rolo 8 · 2, rosquinha 0 · 2, trigo 28 · 0.
+
+The blind read: a fresh reader was given `pretty-icons-blind.png` and the read.md blind prompt with N = 10. Its answer, word for word (key: 1 batedor · 2 pao-de-forma · 3 trigo · 4 rosquinha · 5 farinha · 6 rolo · 7 bolo · 8 croissant · 9 forno · 10 pao):
+
+> Nenhum ícone tem letra ou dígito desenhado. Os números 1 a 10 são só as legendas abaixo de cada ícone. Dois números não disputam o mesmo nome, e nenhum número ficou com o nome só por sobra.
+>
+> 1 batedor: batedor de arame (fouet)
+> 2 pao-de-forma: fatia de pão de forma
+> 3 trigo: espiga de trigo
+> 4 rosquinha: donut com furo
+> 5 farinha: saco de farinha amarrado
+> 6 rolo: rolo de massa inclinado
+> 7 bolo: bolo com cobertura e cereja
+> 8 croissant: croissant em meia-lua
+> 9 forno: forno com visor e botões
+> 10 pao: pão redondo com cortes
+>
+> O 8 é o mais fraco. Ele parece mais uma meia-lua com uma reentrância do que um croissant com camadas. Mesmo assim, croissant era o único nome restante que serve, e nenhum outro ícone o disputa.
+
+Ten of ten. The reader says no name was won by elimination, but it calls 8 (croissant) the weakest and says croissant "era o único nome restante que serve". That is close to an elimination.
+
+The craft read: a fresh reader was given `pretty-icons-sheet.png` and the craft prompt with N = 10. Its answer, word for word:
+
+> Defects per icon, judged from the sheet image at the sizes shown. The list follows the sheet order:
+>
+> 1. batedor: tiny wire loops, crowded (detail too small to read)
+> 2. bolo: scallop icing bumpy; tiny topper (detail too small to read)
+> 3. croissant: confused silhouette; reads as a helmet
+> 4. farinha: uneven weight; neck/tie detail muddy
+> 5. forno: none (the dots are slightly small)
+> 6. pao-de-forma: none (slice reads cleanly)
+> 7. pao: none (the slash marks are a bit thin)
+> 8. rolo: uneven weight; pin ends thin
+> 9. rosquinha: sprinkles too small to read
+> 10. trigo: thin grains, wobbly stem (uneven weight)
+>
+> Three weakest:
+> 1. croissant. The shape isn't a croissant. It reads as a helmet or hood, because the inner curved lines and the pale wedge on the right don't describe crescent segments. The silhouette is confused, so the subject isn't recognisable.
+> 2. batedor. The wire loops are the finest detail on the sheet, and they crowd together and turn muddy at the small sizes. The handle is also heavy against the thin wires, so the weight is uneven.
+> 3. trigo (close call with rolo). It has the lightest, thinnest strokes on the sheet and a long diagonal stem, so it looks lighter than its neighbours. The grains are small and cluttered, and the stem looks slightly wobbly. It also uses a different, blue-dashed bounding box from the other icons.
+
+Seven of ten named a defect from the list: batedor, bolo, croissant, farinha, rolo, rosquinha and trigo. The gate failed.
+
+#### Round 1
+
+These icons were redrawn:
+- croissant: a new design in three pieces, a centre ellipse over two horns.
+- batedor: two wide wires and the centre wire, inside a paper balloon, with a fuller handle.
+- trigo: fewer, larger grains on grid-vector ellipses, with a shorter stalk.
+- rolo: a wider barrel, round knobs and two bands.
+- rosquinha: a paper hole and four longer sprinkles at 3.5.
+- bolo: icing at three larger scallops, and a larger cherry.
+- farinha: a fuller sack and a heavier tie at 3.5.
+
+Forno, pao-de-forma and pao kept their drawing, apart from the pao-de-forma seam, which was inset to clear a gap.
+
+Check: `ok`. No kink, infl 0 on every icon, median ink 355.07.
+
+The blind read: a fresh reader, with the same prompt as read 1. Its answer, word for word (key: 1 croissant · 2 batedor · 3 rosquinha · 4 forno · 5 pao-de-forma · 6 farinha · 7 pao · 8 rolo · 9 trigo · 10 bolo):
+
+> Readings from the image only:
+>
+> 1. croissant - crescent pastry
+> 2. batedor - whisk with handle
+> 3. rosquinha - ring donut, sprinkles
+> 4. forno - oven front, window
+> 5. pao-de-forma - sliced sandwich bread slice
+> 6. farinha - tied flour sack
+> 7. pao - round scored loaf
+> 8. rolo - rolling pin
+> 9. trigo - wheat ear stalk
+> 10. bolo - cake with cherry
+>
+> Competing names: none. Each name has one clear fit, though 5 (pao-de-forma) and 7 (pao) are the closest pair. 5 is a sandwich-loaf slice, so it takes pao-de-forma. 7 is a round loaf, so it takes pao.
+>
+> Letters or digits inside any icon: none. The only digits are the caption numbers under the icons.
+>
+> Names taken only because the others are used up: none. Every number has a positive match.
+
+Ten of ten, with no elimination.
+
+The craft read: a fresh reader, with the same prompt as read 1. Its answer, word for word:
+
+> Defects per icon (from the sheet image, at the large and 40px views):
+>
+> 1. batedor: handle joins whisk awkwardly (floating-ish)
+> 2. bolo: cherry blob heavy, crowds top
+> 3. croissant: confused silhouette, reads as a hat
+> 4. farinha: none (the bag neck is slightly sharp)
+> 5. forno: none (the knob dots are small)
+> 6. pao-de-forma: none
+> 7. pao: none (the slash marks are slightly uneven in length)
+> 8. rolo: handle knobs float off body
+> 9. rosquinha: sprinkles too small, uneven
+> 10. trigo: uneven weight, thin stem
+>
+> Three weakest:
+> - croissant (3): the silhouette is the most confused. The inner fold and the split shading read as a hat or helmet, not a croissant. It lacks the segmented crescent cue.
+> - rosquinha (9): the sprinkles are small and scattered, so they read as noise at small sizes. The ring and hole are fine, but the detail is too fine for the weight.
+> - rolo (8): the end knobs sit off the body as separate rings. The rolling pin also has a thin handle next to a heavy body, so the weight is uneven.
+>
+> Runners-up: trigo (thin stem and uneven stroke weight against the others) and batedor (the handle and whisk joint).
+>
+> This is based on viewing the sheet only. I ran no measurements.
+
+Six of ten, counted conservatively: batedor, bolo, croissant, rolo, rosquinha and trigo.
+- Batedor's "floating-ish" is said of the handle, a body part, so it counts.
+- Rolo's "float off body" is said of the knobs, also body parts, so it counts.
+- Bolo's "cherry blob heavy" is not in the list's words. It is counted as uneven weight. Read strictly, it would be outside the list, and the count would be 5.
+
+The gate passes, at its limit. The croissant was named a confused silhouette in both reads.
+
+#### The final set
+
+| icon | joins | infl | blind answer | craft answer |
+| --- | --- | --- | --- | --- |
+| batedor | 7 smooth · 3 corners | 0 | whisk with handle | handle joins whisk awkwardly (floating-ish) |
+| bolo | 8 smooth · 4 corners | 0 | cake with cherry | cherry blob heavy, crowds top |
+| croissant | 7 smooth · 11 corners | 0 | crescent pastry | confused silhouette, reads as a hat |
+| farinha | 4 smooth · 8 corners | 0 | tied flour sack | none |
+| forno | 2 smooth · 2 corners | 0 | oven front, window | none |
+| pao-de-forma | 14 smooth · 6 corners | 0 | sliced sandwich bread slice | none |
+| pao | 5 smooth · 2 corners | 0 | round scored loaf | none |
+| rolo | 12 smooth · 2 corners | 0 | rolling pin | handle knobs float off body |
+| rosquinha | 0 smooth · 2 corners | 0 | ring donut, sprinkles | sprinkles too small, uneven |
+| trigo | 20 smooth · 0 corners | 0 | wheat ear stalk | uneven weight, thin stem |
+
+Check: `ok`, median ink 355.07 of 10.
+
+| | before | after |
+| --- | --- | --- |
+| joins | 47 smooth · 54 corners · 3 kinks | 79 smooth · 40 corners · 0 kinks |
+| inflections | 3 (all on rosquinha) | 0 |
+| blind read | 20 of 20, per the spec | 10 of 10, no elimination |
+| craft read | 7 of 10, read at 6bc79a7 (see "Both sets") | 6 of 10 named a defect (5 strict); gate ≤ 6 passes |
+
+### Both sets
+
+The before sets fail today's check on weight, so `sheet.mjs` refuses them on this branch. Their sheets were rendered with the skill as it stood at 6bc79a7, and each was read once for craft by a fresh reader with the same prompt and N = 10. The answers follow word for word.
+
+#### Before, car (defect named for 6 of 10: banco, chave, extintor, roda, semaforo, triangulo; none: carro, cone, estrada, marcha)
+
+1. banco: headrest floats off seat back
+2. carro: none
+3. chave: teeth too small to read
+4. cone: none
+5. estrada: none
+6. extintor: hose/nozzle arc kinked, floating
+7. marcha: none
+8. roda: hub detail too small, muddy
+9. semaforo: lights too small, thin-weight
+10. triangulo: uneven weight, confused silhouette
+
+Three weakest:
+1. extintor: the hose and nozzle arc looks detached from the body and kinks. The silhouette is hard to identify.
+2. triangulo: the outer shape is a rounded blob with uneven line weight. It reads as a warning triangle only through the inner triangle.
+3. roda: the hub and spokes are tiny and muddy against the black disc. It reads as a plain black circle at small sizes. (banco and chave are close behind: the headrest floats, and the key teeth are too small.)
+
+#### Before, bakery (defect named for 7 of 10: batedor, croissant, farinha, forno, rolo, rosquinha, trigo; none: bolo, pao-de-forma, pao)
+
+1. batedor: handle slightly thin, loop uneven
+2. bolo: none (icing scallops a bit busy)
+3. croissant: confused silhouette, ribs unclear
+4. farinha: tie/neck detail small, cluttered
+5. forno: details too small to read
+6. pao-de-forma: none (double outline slightly heavy)
+7. pao: none
+8. rolo: part floating off body (handle knobs)
+9. rosquinha: center detail too small, busy
+10. trigo: uneven weight, thin leaves
+
+Three weakest:
+- rosquinha (9): the icing and hole at the center are tiny and busy, and the dark ring plus the double concentric outline make it read as a button or record, not a donut.
+- croissant (3): the silhouette is an arch or helmet, not a croissant, and the thin inner ribs are faint.
+- rolo (8): the end knobs and the handle look detached from the body, and the pin reads as a diagonal tool or pencil.
+
+forno (5) is close behind: its tiny dots and bar are hard to read at small sizes.
+
+#### Totals
+
+| | before | after |
+| --- | --- | --- |
+| kinks | 15 (car 12, bakery 3) | 0 |
+| double inflections | 3 (rosquinha) | 0 |
+| blind read | 20 of 20 | 20 of 20, no elimination |
+| craft read (icons with a list defect) | 13 of 20 (car 6, bakery 7) | 13 of 20 (car 7, bakery 6; 12 with bolo read strictly) |
+
+The calibrated gate is at most 12 of 20. The after is at 13, one over, and it is no lower than the before. The craft read does not separate the two sets. With one reader per set, its count moves about ±15% between reads. The geometry does separate them: every kink and every double inflection is gone, and the blind read holds at 20 of 20 with no elimination. The icons the readers name in every round are extintor, semaforo and banco in the car set, and croissant in the bakery set.
 
 ## The trial
