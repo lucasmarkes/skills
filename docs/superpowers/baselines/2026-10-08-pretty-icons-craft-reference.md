@@ -467,4 +467,254 @@ After the reads, a re-review found the wrench's solid hole broke rules-filled.md
 
 ## The after
 
+### car
+
+Redrawn from scratch with the kit at 48, filled finish, in `docs/superpowers/baselines/2026-10-08-craft-after/car/`, keeping each name, object and format. The kinked four (banco, cone, marcha, triangulo) were drawn first: every round corner is a cubic with its handles on the sides' own directions, so the joins are smooth and the points stay on the quarter grid. The kit's `blob` gave a wobbly seat and a concave triangle, so those two outlines are hand-built.
+
+Scoring, by the controller's ruling: the craft gate allows a list defect on at most 6 of 10; "floating" said of a modifier does not count, and no icon in this set carries a modifier, so every "floating" below is a body part and counts. The blind gate is 10 of 10 with no name won by elimination.
+
+#### Read 0, the first draw
+
+Check: `ok`, no kink, infl 0 on every icon.
+
+The blind read, a fresh reader given `pretty-icons-blind.png` and the read.md blind prompt with N = 10, word for word (key: 1 carro · 2 banco · 3 estrada · 4 chave · 5 cone · 6 semaforo · 7 marcha · 8 triangulo · 9 roda · 10 extintor):
+
+> Readings, by number:
+>
+> 1. carro: a front-view car.
+> 2. banco: a car seat in side view. Nothing else fits it, but this is the weakest read: it could be taken for a boot or a chair.
+> 3. estrada: a road in perspective with a dashed center line.
+> 4. chave: a key.
+> 5. cone: a traffic cone.
+> 6. semaforo: a traffic light with three lamps.
+> 7. marcha: a gear-shift stick on a base.
+> 8. triangulo: a warning triangle.
+> 9. roda: a tire or wheel with a hub.
+> 10. extintor: a fire extinguisher with a hose.
+>
+> No two numbers compete for one name. No number got its name only because the other names were taken, except possibly 2 as noted above. I saw no letters or digits inside any icon. The only digits are the caption numbers below the icons.
+
+Blind: 10 of 10 named, but the reader says banco may have its name "only because the other names were taken". That counts as elimination, so the blind gate fails.
+
+The craft read, a fresh reader given `pretty-icons-sheet.png` and the craft prompt, word for word:
+
+> Defects per icon, judged from the sheet at its large and proof sizes:
+>
+> 1. banco: seat/headrest joint confused; neck looks pinched.
+> 2. carro: none. The wheel arches are slightly heavy.
+> 3. chave: bow hole small; bit teeth tiny.
+> 4. cone: stripe band reads faint, uneven weight.
+> 5. estrada: dashes tiny; the left edge looks heavier.
+> 6. extintor: hose curve kinks; the handle floats off the body.
+> 7. marcha: base arc wobbly; thin, gap-like highlight.
+> 8. roda: spokes tiny, confused star shape.
+> 9. semaforo: lights too small, stand floating.
+> 10. triangulo: none. The inner triangle's stroke is a bit thin.
+>
+> Three weakest:
+> - extintor (6): the hose and handle are a kinked curve and read as detached from the body. The silhouette is hard to identify, since it looks like a hook.
+> - roda (8): the white spoke shapes inside the dark disc are small and irregular, so the detail is lost at small sizes and the star looks muddled.
+> - banco (1): the headrest-to-seat transition is awkward and the outline weight is uneven, so the silhouette is the least recognizable seat shape.
+>
+> Close runners-up are semaforo (tiny lights) and chave (tiny bit teeth).
+
+Craft: 8 icons with a list defect: banco, chave, cone, estrada, extintor (the handle floats, a body part), marcha, roda and semaforo (the stand floats, a body part). Carro and triangulo are "none". The gate fails.
+
+#### Round 1, read 1
+
+Changed:
+- banco: the back leans, the headrest sits on it with no post, a mark seam runs down the back;
+- roda: the five spokes out; a rim of r 11.5 and a solid hub;
+- estrada: the dashes are three solid trapezoids that widen down the road;
+- chave: the two bit bars are one solid bit; the hole r 4;
+- cone: the stripe is solid line;
+- semaforo: a taller housing set straight on its base, no pole, lamps r 3.25;
+- marcha: the boot is one elliptical arc; the seam out;
+- extintor: the hose leaves the head at its middle and ends in a solid nozzle.
+
+Check: `ok`, no kink, infl 0.
+
+The blind read, a new reader, word for word (key: 1 banco · 2 chave · 3 triangulo · 4 carro · 5 extintor · 6 cone · 7 roda · 8 estrada · 9 semaforo · 10 marcha):
+
+> Blind read of the image only (no other file read).
+>
+> 1. banco - car seat in side view
+> 2. chave - key with round head
+> 3. triangulo - warning triangle, inner triangle
+> 4. carro - small front-view car
+> 5. extintor - fire extinguisher with hose
+> 6. cone - striped traffic cone
+> 7. roda - tire with hub
+> 8. estrada - road with dashed center
+> 9. semaforo - traffic light on base
+> 10. marcha - gear stick, round knob
+>
+> Competing names: none. Each name has exactly one clear object.
+> Names taken only by elimination: none. Every icon was identifiable on its own. Number 10 (marcha) was the least direct, since a gear lever reads as a joystick-like shape, but "marcha" is the natural fit and nothing else competes for it.
+> Letters or digits inside any icon: none seen. The only numerals are the captions below the icons.
+
+Blind: 10 of 10. The marcha caveat names the object it shows, a gear lever, so it does not count as elimination. The blind gate passes.
+
+The craft read, a new reader, word for word:
+
+> Defects per icon, from the sheet image only. I did not open the SVG sources.
+>
+> 1. banco (seat): seat back and base look confused. The headrest is tiny, and the grey stripe is thin and floats loose.
+> 2. carro (car): windshield detail too small.
+> 3. chave (key): handle ring heavy, shaft joint awkward.
+> 4. cone: base is thin and light; the stripe band is a flat wedge.
+> 5. estrada (road): none. The road markings are small but readable.
+> 6. extintor (extinguisher): hose and nozzle read as confused. The nozzle is a thin stray stroke, and the hose is a loose curve.
+> 7. marcha (gear lever): knob and base are disconnected. The thin stem is uneven weight.
+> 8. roda (wheel): none. It is the cleanest of the ten.
+> 9. semaforo (traffic light): lights too small. The base also has a different weight from the body.
+> 10. triangulo (warning triangle): inner triangle has a thin, uneven stroke. The fill is also very faint.
+>
+> Three weakest:
+> 1. extintor: the hose and nozzle are the least readable part of the set. The top is a confused tangle of thin strokes, and it is hard to tell it from a hose or pipe.
+> 2. banco: the seat's silhouette is awkward. The headrest and back merge into the L-shaped base, and the highlight stripe is thin and floats on the body.
+> 3. marcha: the knob, thin stem and flat base read as separate parts. The stem is much lighter than the outline weight used elsewhere, so the icon looks sparse next to the others. The semaforo is a close fourth, because its three small lights almost vanish at the small sizes in the left columns.
+
+Craft: 8 icons with a list defect: banco (the stripe floats, a body part), carro, chave, cone, extintor, marcha, semaforo and triangulo. Estrada and roda are "none". The gate fails.
+
+#### Round 2, read 2
+
+Changed:
+- banco: the seam out, the headrest 15 × 10.5, the cushion to x 40.5;
+- marcha: the stem is a solid line part 5 wide;
+- semaforo: the housing to y 40.5, lamps r 3.75, the base a solid line pill;
+- extintor: the hose and nozzle replaced by a solid horn off the head;
+- cone: the base is solid line;
+- carro: the windshield taller; the wheels 8.5 tall, to keep the weight inside ±25% of the median;
+- chave: the hole r 5, centred.
+
+Tried and dropped before any reader saw it: the triangulo hole with a contour at 2, which check refuses (a filled element takes the root's line).
+
+Check: `ok`, no kink, infl 0.
+
+The blind read, a new reader, word for word (key: 1 chave · 2 carro · 3 marcha · 4 roda · 5 extintor · 6 semaforo · 7 cone · 8 estrada · 9 banco · 10 triangulo):
+
+> 1. chave: round-headed key, or a magnifier. See the flag below.
+> 2. carro: small car, front view.
+> 3. marcha: gear-shift lever on a base.
+> 4. roda: tire with hub.
+> 5. extintor: fire extinguisher with handle.
+> 6. semaforo: traffic light, three lamps.
+> 7. cone: striped traffic cone.
+> 8. estrada: road with dashed center line.
+> 9. banco: car seat, side view.
+> 10. triangulo: warning triangle.
+>
+> No two numbers compete for one name.
+>
+> I read no letter or digit inside any icon. The only digits I saw were the captions under each icon.
+>
+> Flag on icon 1: it gets "chave" mostly because the other nine names are taken. Without that, it reads as a magnifying glass, a ring head on a thick handle. It could pass as a key with a round bow, but a wrench is not what I see. Of the ten, it is the weakest read.
+
+Blind: 10 of 10 named, but chave is named by elimination: the centred hole r 5 made the key a magnifier. The blind gate fails.
+
+The craft read, a new reader, word for word:
+
+> 1 banco: heel/foot curve slightly lumpy; headrest detached-looking
+> 2 carro: none (wheel arches heavy)
+> 3 chave: handle-to-shaft join awkward
+> 4 cone: none (band tiny but readable)
+> 5 estrada: road dashes small, uneven
+> 6 extintor: hose/nozzle reads confused
+> 7 marcha: none (base slightly flat)
+> 8 roda: hub detail heavy, tyre uneven
+> 9 semaforo: lamp details too small
+> 10 triangulo: inner triangle thin, uneven weight
+>
+> Three weakest:
+> 1. extintor: the hose and nozzle is a wedge that doesn't read as a hose. It also sits off the body, and the silhouette is confused.
+> 2. banco: the seat-back curve has a visible lump at the bend. The headrest looks pasted on. The overall shape is ambiguous at small size.
+> 3. semaforo: the three lamp rings are too small at 16-20px and nearly vanish. Its outline is also heavier than the interior detail, so the weight is uneven.
+>
+> Close runners-up are chave (awkward handle-to-shaft join) and triangulo (thin inner stroke against a heavy outer stroke).
+
+Craft: 7 icons with a list defect: banco, chave, estrada, extintor, roda, semaforo and triangulo. Carro, cone and marcha are "none". The gate fails by one icon.
+
+#### Round 3, read 3
+
+Changed:
+- chave: the hole back to r 4, off-centre toward the bow's top;
+- semaforo: all three lamps solid line;
+- triangulo: the inner line at 2, as a paper fill and a separate stroke;
+- banco: the bend from back to cushion is a wider curve;
+- roda: the hub r 3.5.
+
+Check: `ok`, no kink, infl 0.
+
+The blind read, a new reader, word for word (key: 1 semaforo · 2 banco · 3 marcha · 4 roda · 5 extintor · 6 carro · 7 triangulo · 8 cone · 9 chave · 10 estrada):
+
+> 1. semaforo: traffic light, three lamps
+> 2. banco: car seat, headrest and cushion
+> 3. marcha: gear stick with round knob
+> 4. roda: tire with hub
+> 5. extintor: fire extinguisher with nozzle
+> 6. carro: front view of a car
+> 7. triangulo: warning triangle
+> 8. cone: traffic cone
+> 9. chave: key
+> 10. estrada: road in perspective
+>
+> - Competing numbers: none. Each name has exactly one number.
+> - Names by elimination: none, though 2 is the weakest read. "Banco" could also mean a bench or a bank, but the shape clearly reads as a car seat. I would have picked it without the process of elimination.
+> - Letters or digits: I read none inside any icon. The only numerals are the captions under the icons.
+
+Blind: 10 of 10. The reader says banco is the weakest read but "would have picked it without the process of elimination", so it does not count. The blind gate passes.
+
+The craft read, a new reader, word for word:
+
+> Defects per icon (from the sheet image):
+>
+> 1. banco: head and back join awkwardly (confused silhouette)
+> 2. carro: none
+> 3. chave: handle and bit weight mismatch (uneven weight)
+> 4. cone: none
+> 5. estrada: road stripes too small (detail too small)
+> 6. extintor: nozzle and hose look disconnected (part floating)
+> 7. marcha: base and stem join abruptly (kink)
+> 8. roda: none
+> 9. semaforo: lights cramped; base detached (part floating)
+> 10. triangulo: inner triangle border thinner (uneven weight)
+>
+> Three weakest:
+> 1. extintor: the black hose and nozzle bar is bulky and angled, and it reads as a separate part resting on the cylinder. The silhouette is hard to identify, and the black bar is much heavier than the thin body outline.
+> 2. banco: the seat is a lumpy L whose headrest block floats on a narrow neck. The contour changes weight along its length, so it reads as a boot or a chair, not a car seat.
+> 3. chave: the key's bow is large and thin-stroked while the shaft and bit are heavy, so the weight is uneven. The bit is cluttered at small size and the whole icon is hard to read.
+>
+> The semaforo and estrada icons are close behind. In both, the interior detail gets crowded at 24px.
+
+Craft: 7 icons with a list defect: banco, chave, estrada, extintor (part floating, a body part), marcha, semaforo (base detached, a body part) and triangulo. Carro, cone and roda are "none". The gate (at most 6) fails by one icon, and the three rounds are spent.
+
+#### After round 3
+
+Measured with `node skills/pretty-icons/check.mjs docs/superpowers/baselines/2026-10-08-craft-after/car --print`: `ok`, median ink 319.35 of 10. The answers are read 3's.
+
+| icon | joins | infl | blind answer | craft answer |
+| --- | --- | --- | --- | --- |
+| banco | 16 smooth · 4 corners | 0 | car seat, headrest and cushion | head and back join awkwardly (confused silhouette) |
+| carro | 14 smooth · 4 corners | 0 | front view of a car | none |
+| chave | 3 smooth · 11 corners | 0 | key | handle and bit weight mismatch (uneven weight) |
+| cone | 2 smooth · 9 corners | 0 | traffic cone | none |
+| estrada | 0 smooth · 20 corners | 0 | road in perspective | road stripes too small (detail too small) |
+| extintor | 2 smooth · 6 corners | 0 | fire extinguisher with nozzle | nozzle and hose look disconnected (part floating) |
+| marcha | 0 smooth · 7 corners | 0 | gear stick with round knob | base and stem join abruptly (kink) |
+| roda | 0 smooth · 2 corners | 0 | tire with hub | none |
+| semaforo | 2 smooth · 2 corners | 0 | traffic light, three lamps | lights cramped; base detached (part floating) |
+| triangulo | 10 smooth · 5 corners | 0 | warning triangle | inner triangle border thinner (uneven weight) |
+
+Car totals, after beside before:
+
+| | before | after |
+| --- | --- | --- |
+| kinks | 12 | 0 |
+| double inflections (infl > 1) | 0 | 0 |
+| blind score | 10 of 10 (the spec's "read 20 of 20") | 10 of 10, no elimination |
+| craft score (icons with a list defect) | not read: `sheet.mjs` refuses the before set, which fails check on weight | 7 of 10 |
+
+Across the four craft reads, the count went 8, 8, 7, 7. Three icons are named in every read: extintor (the hose, then the horn), semaforo (the lamps, the stand) and banco (the headrest joint). Marcha's read-3 "kink" is the solid stem meeting the boot's arc. Check finds no kink there, since the two are separate elements.
+
 ## The trial
