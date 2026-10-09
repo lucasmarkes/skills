@@ -32,6 +32,14 @@ Agents drawing without the skill made the drawings rule 09 lists. A reader with 
 
 An icon fails, whatever name the reader gave, when the reader says it got its name by elimination, or names an object that is neither the one you declared nor one that means the name: a credit card for interfaces, generic shapes for marks, a loading spinner for settings. Look for it in the five words the reader gives for the object. Redraw it. When you cannot, name it in the hand-over with what the reader saw.
 
+## The craft read
+
+The blind read proves each icon names its object. It cannot say one is drawn badly. After the blind read passes, open another fresh agent, one that has seen neither your work nor the first reader's answers. Give it `pretty-icons-sheet.png`, which numbers the icons and has no reference row, and this prompt, with N filled in:
+
+> These N icons are from one app. For each number, in five words or fewer, name one drawing defect if you see one: a kink in a curve, a wobbly curve, uneven weight, a part floating off the body, a confused silhouette, a detail too small to read. Say "none" when you see no defect. Then name the three weakest and why.
+
+An icon fails when the reader names a defect from that list for it. An icon among the three weakest with no defect named passes; say it in the hand-over with the reader's reason. A failed icon goes back to the drawing (`SKILL.md` step 3), then the whole set runs `check.mjs`, `sheet.mjs`, the blind read and the craft read again, each with a **new** reader.
+
 ## Without a second agent
 
-Say so in the hand-over, in these words: **not read blind**. Do not read the sheet yourself and call it read.
+Say so in the hand-over, in these words: **not read blind** and **not read for craft**. Do not read the sheet yourself and call it read.

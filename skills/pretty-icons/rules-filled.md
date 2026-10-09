@@ -106,6 +106,18 @@ The root is `stroke="#25262a" stroke-width="1.5"`, round caps and joins, `fill="
 
 Tone, shade, contour, in that order, for every body; at least one body in the fill tone. The contour is the tone's geometry pasted, not redrawn: `check.mjs` matches them. A shade is the lower or right part of its body, its edges on the body's outline, so the contour covers its seam. A body's contour is a rect, a circle, or a path of at most five straight sides; curves between them are free, so round a notched outline's corners with arcs rather than adding sides (`rules.md` 04).
 
+- **Keep it, for an organic body** (bread, a fruit, a leaf, a drop): take it from the kit. `node <skill-dir>/shapes.mjs <primitive> --w 40 --h 32` prints the three elements, tone, shade and contour, the contour at 2. The shade is the outline's own stretch from one anchor to another, closed by a seam (`--shade right|lower|none`, `--seam straight|curved`), so the contour covers it. Then add the one gesture (`rules.md` 09) by hand. The croissant, on the landscape keyline, is `node <skill-dir>/shapes.mjs blob --anchors "12,39,c 5,25.5 24,8.5 43,25.5 36,39,c 24,30"` pasted, and two seams for its folds:
+
+```svg
+<svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M12 39C11.5 33 5 31.5 5 25.5C5 15.5 14 8.5 24 8.5C34 8.5 43 15.5 43 25.5C43 31.5 36.5 33 36 39C33 34 29.75 30 24 30C18.25 30 15 34 12 39Z" fill="#ececea" stroke="none" />
+  <path d="M24 8.5C34 8.5 43 15.5 43 25.5C43 31.5 36.5 33 36 39Z" fill="#cfcfcb" stroke="none" />
+  <path d="M12 39C11.5 33 5 31.5 5 25.5C5 15.5 14 8.5 24 8.5C34 8.5 43 15.5 43 25.5C43 31.5 36.5 33 36 39C33 34 29.75 30 24 30C18.25 30 15 34 12 39Z" stroke-width="2" />
+  <path d="M16.5 14.5C18.75 19.5 19.25 23.5 18.5 27.5M31.5 14.5C29.25 19.5 28.75 23.5 29.5 27.5" />
+</svg>
+```
+
+Its horns are the two cusps (`c`), and they turn in: a crescent whose horns point straight down reads as a bell. The seams stop clear of the contour, 3 from its centreline, so they do not touch it by almost (08). Its ink is 40 × 32.5, its mass 1.5 high, its line ink 279.6.
 - **Keep it, for a tube** (a spoke, a rim, a gear stick): a bar at 3.5 in the line, then the same `d` with `stroke` the fill or the shade tone and no width. The core cuts the bar into two thin lines. A ring as a tube: `circle r 18.25 stroke-width 3.5`, then the circle again with `stroke="#cfcfcb"`.
 - **Keep it, for a solid small part:** a wheel, a terminal, a lamp that is on: a shape filled with the line tone. Glass and a hole: paper.
 - **Keep it, for what is printed:** ticks and treads in the mark tone, at the root's width.

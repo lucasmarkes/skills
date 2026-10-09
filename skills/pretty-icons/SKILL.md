@@ -29,15 +29,25 @@ One line per name: *name — object, format, elements*, as in `billing — recei
 
 `node <skill-dir>/sheet.mjs <skill-dir>/examples/hairline` (duotone) or `<skill-dir>/examples/garage` (filled) and look at the sheet: that is the finish. Draw your own objects at that finish (rule 09).
 
-Read `rules.md` first; for the filled finish, then `rules-filled.md`, which says where each rule reads differently at 48 and gives the tones, the radii, the bodies and a worked traffic light. Write one file per icon, `pretty-icons/<name>.svg`, from its root. Start every body from the bodies table. Use only `rect`, `circle`, `line` and short `path`s. At the filled finish, draw each body as tone, shade, contour: the contour is the tone's geometry pasted, never redrawn.
+Read `rules.md` first; for the filled finish, then `rules-filled.md`, which says where each rule reads differently at 48 and gives the tones, the radii, the bodies and a worked traffic light. Write one file per icon, `pretty-icons/<name>.svg`, from its root. Start every body from the bodies table or the kit. Use only `rect`, `circle`, `line` and short `path`s. At the filled finish, draw each body as tone, shade, contour: the contour is the tone's geometry pasted, never redrawn.
+
+The kit is the normal way to draw a curved body; a hand-written path is the exception (rule 04). Draw each icon in a loop:
+
+1. Compose. `node <skill-dir>/shapes.mjs <primitive> --grid <grid> --w <w> --h <h> --at <x>,<y>` prints the body; paste it into the file, then add the details and the one gesture (rule 09) by hand.
+2. `node <skill-dir>/check.mjs pretty-icons/`. Fix each line by its rule. After a hand edit kinks a curve, `node <skill-dir>/shapes.mjs --from pretty-icons/<name>.svg` repairs it.
+3. `node <skill-dir>/sheet.mjs pretty-icons/ --proof --only <name>` writes `pretty-icons-proof.png` and prints its path. Look at it: the construction (anchors, handles, every join coloured, green smooth, blue a corner, red a kink), the finish, the silhouette at 16 and 24, the pixels at display size, under a reference row from the examples.
+4. Adjust and go back to 2, until no join is red, the silhouette alone names the object, and the icon sits with the reference row.
+
+A state (add, off, locked, new) is the base icon plus `node <skill-dir>/modifiers.mjs pretty-icons/<name>.svg --add <kind>`, run once the base passes (rule 09).
 
 ## 4. Check
 
 1. `node <skill-dir>/check.mjs pretty-icons/`. Fix each line by its rule until it prints `ok`. The first run installs `@resvg/resvg-js` into a cache (`PRETTY_ICONS_CACHE` moves it).
 2. `node <skill-dir>/sheet.mjs pretty-icons/`. It writes `pretty-icons-sheet.png` and `pretty-icons-blind.png` to a temp folder of this set's own (`--out=<dir>` moves them) and prints their paths and the key. Never put them in the app. Look at the sheet.
 3. Do the blind read in `read.md`. A failure goes back to step 3, then all of step 4, with a new reader.
+4. Do the craft read in `read.md`, with another new reader, once the blind read passes. A named defect goes back to step 3, then all of step 4.
 
-On exit 2, sheet and emit refuse; without Node, answer the text checks atop `check.mjs` by hand. Either way, deliver the `.svg` files; say `not measured` and **not read blind**.
+On exit 2, sheet and emit refuse; without Node, answer the text checks atop `check.mjs` by hand. Either way, deliver the `.svg` files; say `not measured`, **not read blind** and **not read for craft**.
 
 ## 5. Hand over
 
@@ -45,8 +55,9 @@ On exit 2, sheet and emit refuse; without Node, answer the text checks atop `che
 
 - the finish and the preset;
 - the reader's result: which failed first, what changed, any you could not redraw;
+- the craft reader's result: the defects named, the three weakest and why; or **not read for craft**;
 - the names handed back: they need the brands' own marks (rule 09);
-- anything not measured or not read blind.
+- anything not measured, not read blind or not read for craft.
 
 ## 6. Adjust
 
@@ -62,7 +73,10 @@ Edit only that icon's `.svg`. Run steps 4 and 5 for the set.
 | placing a detail a little away from the body so they "don't merge" | rule 08: a stroke apart, or touching on the centreline; nothing between |
 | adding a fourth element to make the metaphor clearer | rule 09: three at most; if it needs a fourth, the metaphor is wrong |
 | drawing a badge, initials, a logo or a bare `</>` | rule 09: draw the thing the name means; braces only, in a body |
-| adding a chimney, a shine, steam or a fold | rule 09: one accent per body |
+| adding a chimney, a shine, steam or a fold | rule 09: one accent per body, drawn as one gesture from the catalogue |
+| writing a cubic by hand for a curved body | rule 04: take it from `shapes.mjs`; `--from` repairs a kink |
+| drawing a plus, a slash or a lock onto an icon | rule 09: `modifiers.mjs --add`, which cuts its halo out of the base |
+| looking at the icons only on the finished sheet | step 3: `sheet.mjs --proof --only <name>` after every check |
 | drawing a hexagon, cut gem or stepped body | rule 04: a rect, circle, triangle, house or curved outline |
 | reading the sheet yourself and calling it read | `read.md`: a second agent, or say "not read blind" |
 | drawing cells, nodes or rows as separate elements | rule 09: one path, eight commands at most |
