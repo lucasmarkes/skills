@@ -1392,3 +1392,89 @@ Three rules held runs 1 and 2: join, weight and gravity. The four fixed after tr
 - **join.** `SKILL.md`'s loop said "After a hand edit kinks a curve, `--from` repairs it", as a note after the check. The agent drew outlines by hand from the start, never edited one, and so never ran it; the bone's outline kinked at 21.5° and the food bowl's at 26.7°. Fix: `SKILL.md` step 3's loop gains a step, "Repair", between compose and check: run `shapes.mjs --from` on any file holding a path written or edited by hand, before every check; paste each `path@N` back; where it refuses (an arc, an open line), make the join by hand, with the handles on one line, a line along an arc's tangent, or a corner past 30°. Step 4's check sends a `join` line there, the table's row says "before the first check", and `rules.md` 04's bullet becomes "for a path you wrote or edited, before the first check".
 - **weight.** `rules-filled.md` 05 said what ink leaves out, and gave a move for a light icon (a slot as a tube) and a heavy one (thin a ring, drop a spoke). It did not say how ink is counted, what a body weighs, which way a percentage points, or how much it asks for. Thin objects (bone, brush) came in 25 to 33% light; bulky ones (birdcage, fishbowl) 30% heavy; and after run 1 the brush moved the wrong way, 255 to 229. Fix: rule 05 says ink is the lines' area, by length: 2 a unit for a contour, a line at 2 or a bar and its core, 1.5 for a line or a shape's outline, nothing for paint. A body at its keyline weighs 240 to 250, the details the other 90 (a line 60 long, a bar 45). The percentage is the move: `-30%` of 341 is about 100, a third, to add; a minus adds line. For a thin object: fill the keyline, a handle as a body (a pill 20 × 4 weighs 89, its line 32), larger ends, a bar across. For a bulky one: fewer bars, a line at 1.5 not 2, a smaller second body; the trial's birdcage weighs 421, 394 with its bars at 1.5, 364 with one bar. The brush's run-2 line is quoted. `SKILL.md`'s table gains a row.
 - **gravity.** Food-bowl +3.05 then +3.38, birdcage +3.07. Rule 06, as fixed after trial 1, already gave the moves: the bowl sits on the landscape keyline's short side, with 4 of room to slide up; the cage, 39 tall on the portrait keyline, must move area. It did not say which way a plus points (only `rules.md` 06 did), nor name a bowl or a cage as objects that sit low. Fix, small: rule 06 reads the sign (`mass +0, +3.05` is 3.05 low), names a bowl and a cage beside the gearshift, says a bowl slides up and a cage takes a slimmer foot and a fuller dome, and quotes the food-bowl's line.
+
+### Trial 3
+
+A new fresh agent, handed only the skill after the second doc fix (b0a19c4), drew six icons for a bike shop app in the filled finish: bicycle, helmet, lock, pump, chain, bell.
+
+`check.mjs` printed `ok` first on run 2. The gate is `ok` on run 1 or 2, so the trial passes. After two rounds of craft redraws the final set was `ok` on run 9.
+
+The agent ran `shapes.mjs --from` on all six before every check; it always printed `no kinks: nothing to repair`. It took the bell's body and the helmet's shell from the kit's `blob` in rounds 1 and 2, then wrote both by hand, with the chain's links, because the kit's cusps gave the bell wavy sides and the helmet a hard-hat brim. The bicycle, lock and pump were drawn by hand throughout. It ran `sheet.mjs --proof` after runs 2, 4, 7, 8 and 9; the run-8 proof caught a hose loop that read as a mug's handle before any reader saw it. Both reads were done in each of three rounds, each by a fresh reader.
+
+#### The runs, as printed
+
+Run 1 (exit 1):
+
+```
+keyline  chain  38.69 × 38.69 → circle 40 × 40 ±1
+gravity  helmet  mass +0.1, -3.85 → within ±3
+gravity  lock  mass +0, +4.59 → within ±3
+weight  chain  ink 450.39 (+34.1%) → within ±25% of the set's median 335.92
+weight  chain  ink 450.39 (+32.0%) → within ±25% of the reference 341.3
+```
+
+Run 2: `ok`.
+
+Run 3, after the helmet was redrawn by hand:
+
+```
+live  helmet  ink 4,8–44.13,39.75 → inside 4–44
+gravity  helmet  mass -0.18, -4.28 → within ±3
+```
+
+Run 4: `ok`. Run 5, after the round-1 craft fixes:
+
+```
+gap  bell  path@5 to circle@6 0.25 apart → ≥ 1.5 apart, or crossing
+```
+
+Run 6:
+
+```
+live  bell  ink 8,3.75–40,43 → inside 4–44
+```
+
+Runs 7, 8 and 9: `ok`.
+
+The final set's ink: bell 310.49, bicycle 394.64, chain 309.7, helmet 335.91, lock 406.58, pump 385.79.
+
+#### The reads on the final set
+
+Blind: 6 of 6 on each of three reads, none by elimination. The final read, word for word:
+
+> 1. pump: floor bicycle pump with hose.
+> 2. helmet: domed helmet with vents, chin strap.
+> 3. bicycle: bicycle with two wheels.
+> 4. bell: classic bell with clapper.
+> 5. lock: padlock with keyhole.
+> 6. chain: two linked chain links.
+>
+> No two numbers compete for one name. No icon shows a letter or digit. No number got its name only because the other names were taken.
+
+Craft, word for word (round 3; rounds 1 and 2 named a defect for 5 and 4 of 6):
+
+> 1. bell: none (clapper slightly detached from the rim, minor)
+> 2. bicycle: details too small (frame, handlebars, thin wheel rings)
+> 3. chain: confused silhouette (links read as a tangled blob)
+> 4. helmet: detail too small (vent slits, straps)
+> 5. lock: none
+> 6. pump: part floating off the body (hose and handle look attached unclearly)
+>
+> Three weakest:
+> - Chain (3): the two links overlap and merge, so the shape is ambiguous and the inner shading is muddy.
+> - Pump (6): the hose floats off the barrel with a odd join, and the handle and base are cluttered, so the silhouette is hard to read.
+> - Bicycle (2): thin wheel rings and the frame lines fall apart at small sizes. This is the biggest weight mismatch with the heavier lock and bell.
+
+A defect named for 4 of 6: bicycle, chain, helmet, pump. The proof shows the pump's hose joining the barrel.
+
+#### What the agent had to work out
+
+The trial passes, and the loop stops here, as ruled. What the agent reported working out for itself is recorded for the person to judge, not fixed:
+
+- `@N` in a check line is the element's line in the file, not its index.
+- The `gap` line's figure (`0.25 apart → ≥ 1.5`) is not mapped onto rule 08's centreline numbers.
+- The kit's cusps flare a bell's sides and a helmet's brim; it wrote those bodies as hand cubics that pass `--from`, against the "What goes wrong" row, and nothing says whether that is allowed.
+- `scoop` and `wedge` refuse `--shade` (the usage text now lists each primitive's flags, 8d20e0c).
+- A hole needs its subpath wound the other way under the nonzero rule; nothing says so.
+- A hedged craft answer ("none (… minor)") has no rule for pass or fail, and the craft read has no stopping rule; it stopped after three rounds and named the rest.
+- `read.md` said `pretty-icons-sheet.png` numbers the icons; it names them. Fixed in the same commit as this record: the drawer numbers them for the reader in the sheet's order.

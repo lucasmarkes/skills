@@ -34,7 +34,7 @@ An icon fails, whatever name the reader gave, when the reader says it got its na
 
 ## The craft read
 
-The blind read proves each icon names its object. It cannot say one is drawn badly. After the blind read passes, open another fresh agent, one that has seen neither your work nor the first reader's answers. Give it `pretty-icons-sheet.png`, which numbers the icons and has no reference row, and this prompt, with N filled in:
+The blind read proves each icon names its object. It cannot say one is drawn badly. After the blind read passes, open another fresh agent, one that has seen neither your work nor the first reader's answers. Give it `pretty-icons-sheet.png`, which has no reference row and labels each icon by its name, not a number: number them for the reader in the sheet's order, top to bottom, and give it the list. Then this prompt, with N filled in:
 
 > These N icons are from one app. For each number, in five words or fewer, name one drawing defect if you see one: a kink in a curve, a wobbly curve, uneven weight, a part floating off the body, a confused silhouette, a detail too small to read. Say "none" when you see no defect. Then name the three weakest and why.
 
