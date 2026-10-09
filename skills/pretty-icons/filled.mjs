@@ -34,15 +34,21 @@ export function classify(elements) {
   const out = { shadows: [], tones: [], shades: [], contours: [], shapes: [], dots: [], lines: [], marks: [], cores: [], highlights: [], role: new Map() };
   const put = (el, role) => { out[role].push(el); out.role.set(el, role); };
   const open = new Map(), bars = new Set();
-  for (const el of elements) {
+  // a modifier's cut marks every stroke it cut data-cut. "split" is a shape's line (fill and line on one element,
+  // split in two), and the paint just before it is that shape; any other cut stroke at 2 is a tone's contour
+  const cutLine = (el) => el && el.attrs["data-cut"] === "split";
+  for (const [i, el] of elements.entries()) {
     const a = el.attrs, fill = isNone(a.fill) ? null : tone(a.fill) ?? "other", stroke = a.stroke === undefined ? "line" : isNone(a.stroke) ? null : tone(a.stroke) ?? "other";
     if ("transform" in a) put(el, "shadows");
+    else if (fill && !stroke && cutLine(elements[i + 1])) put(el, "shapes");
+    else if (cutLine(el)) put(el, "lines");
     else if (fill && !stroke) put(el, fill === "shade" ? "shades" : isDot(el) ? "dots" : "tones");
     else if (fill) put(el, "shapes");
     else if (stroke === "fill" || (stroke === "shade" && bars.has(geometryKey(el)))) put(el, "cores");
     else if (stroke === "shade") put(el, "shades");
     else if (stroke === "mark") put(el, "marks");
     else if (stroke === "paper") put(el, "highlights");
+    else if ("data-cut" in a && num(a, "stroke-width") === CONTOUR) put(el, "contours");
     else if (open.has(geometryKey(el))) { put(el, "contours"); open.delete(geometryKey(el)); }
     else put(el, "lines");
     if (out.role.get(el) === "tones") open.set(geometryKey(el), el);
@@ -73,9 +79,12 @@ export function filledChecks(icon, parsed, G) {
   if (els.length && ![...c.tones, ...c.shapes].some((el) => tone(el.attrs.fill) === "fill")) fail(failures, "construction", icon, "no body", `a closed element in the fill tone, ${PALETTE.fill}`);
 
   // a tone and its contour: the tone's geometry pasted after it, no fill
-  const contourOf = new Map();
+  // a contour a modifier cut (data-cut) is the first unclaimed one after its tone
+  const contourOf = new Map(), claimed = new Set();
   for (const t of c.tones) {
-    const k = geometryKey(t), twin = c.contours.find((x) => at(x) > at(t) && geometryKey(x) === k);
+    const k = geometryKey(t), twin = c.contours.find((x) => at(x) > at(t) && geometryKey(x) === k)
+      ?? c.contours.find((x) => at(x) > at(t) && "data-cut" in x.attrs && !claimed.has(x));
+    if (twin) claimed.add(twin);
     if (twin) contourOf.set(t, twin);
     else fail(failures, "construction", icon, `${t.at} fill ${t.attrs.fill} stroke none`, "its contour after it: the same geometry, no fill, at 2");
   }

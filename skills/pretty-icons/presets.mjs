@@ -112,3 +112,8 @@ export function bodySvg(G, format) {
 export const REFERENCE_INK = { 16: 83.5, 20: 114.2, 24: 181.9, 48: 328.7 };
 export const referenceInk = (G) => REFERENCE_INK[G];
 
+/**
+ * A modifier's box on each grid (its ink's larger side) and a dot's radius. Its halo, the clear space
+ * the base gives it, is derived: half the box plus one and a half base strokes (`modifiers.mjs`).
+ */
+export const MODIFIER = { 16: { size: 5, dot: 1.5 }, 20: { size: 6.5, dot: 1.75 }, 24: { size: 8, dot: 2.25 }, 48: { size: 14.5, dot: 4 } };

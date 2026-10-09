@@ -15,7 +15,9 @@
  *   grid          every number a multiple of 0.25
  *   contour       a filled path has at most five straight sides; a rect, a circle or a curve passes
  *   radius        rx by the shape's size (at 48, by what the object is: cut, cased, moulded or a pill)
- *   count         at most three elements, at most eight commands in a path (implicit repeats count);
+ *   modifier      one per icon, of a known kind, its size and corner from the preset, at stroke-opacity 0.6
+ *                 or none in duotone, none at 48; no other stroke inside its halo (modifiers.mjs)
+ *   count         at most three elements (a modifier and, in duotone, a cut contour left out), at most eight commands in a path (implicit repeats count);
  *                 the details (every element without a fill) at most two subpaths and eight
  *                 drawing commands between them (moves left out)
  * Measured rules, from pixels: live, keyline, weight, gravity, gap. An icon that
@@ -30,6 +32,7 @@ import { parse, num, G as gridOf, ELEMENTS, pathNumbers, pathCommands, moves, is
 import { straightSides } from "./geometry.mjs";
 import { filledChecks } from "./filled.mjs";
 import { curveFailures, curveColumns, pixelNotes } from "./curve.mjs";
+import { modifierFailures, isModifier, isCut, isSplit } from "./modifiers.mjs";
 
 export { pathCommands, isClosed };
 
@@ -90,7 +93,7 @@ export function textChecks(icon, text, expectG) {
   if ("stroke-dasharray" in root) checkDash(failures, icon, "root", root["stroke-dasharray"], p.stroke);
   for (const el of parsed.elements) {
     const a = el.attrs, where = el.at;
-    for (const k of FORBIDDEN_ATTRS) if (k in a) fail(failures, "stroke", icon, `${where} ${k}`, "not set");
+    for (const k of FORBIDDEN_ATTRS) if (k in a && !(k === "stroke-opacity" && isModifier(el))) fail(failures, "stroke", icon, `${where} ${k}`, "not set");
     if ("stroke-width" in a && !p.weights.includes(num(a, "stroke-width"))) fail(failures, "stroke", icon, `${where} stroke-width ${a["stroke-width"]}`, p.weights.length ? `the root's, or ${p.weights.join(" or ")}` : "the root's");
     for (const k of ROUND_ATTRS) if (k in a && a[k] !== "round") fail(failures, "stroke", icon, `${where} ${k} ${a[k]}`, "round");
     if ("stroke-dasharray" in a) checkDash(failures, icon, where, a["stroke-dasharray"], p.stroke);
@@ -111,10 +114,14 @@ export function textChecks(icon, text, expectG) {
       if (n > p.commands) fail(failures, "count", icon, `${where} ${n} commands`, `at most ${p.commands}`);
     }
   }
-  if (p.finish === "filled") failures.push(...filledChecks(icon, parsed, expectG));
-  else duotoneChecks(failures, icon, parsed, p);
+  // the base, without its modifier: what the finish's rules and the count judge
+  const base = { ...parsed, elements: parsed.elements.filter((el) => !isModifier(el)) };
+  if (p.finish === "filled") failures.push(...filledChecks(icon, base, expectG));
+  else duotoneChecks(failures, icon, base, p);
 
-  if (parsed.elements.length > p.elements) fail(failures, "count", icon, `${parsed.elements.length} elements`, `at most ${p.elements}`);
+  // a split body's contour is one element with its paint; any other cut stroke counts as the one it was
+  const counted = base.elements.filter((el) => !isSplit(el)).length;
+  if (counted > p.elements) fail(failures, "count", icon, `${counted} elements`, `at most ${p.elements}`);
   if (parsed.elements.length === 0) fail(failures, "count", icon, "0 elements", "at least 1");
   // curves, after every other text rule; each path once, since a contour repeats its tone's
   const seen = new Set();
@@ -123,6 +130,7 @@ export function textChecks(icon, text, expectG) {
     seen.add(el.attrs.d);
     failures.push(...curveFailures(icon, el));
   }
+  failures.push(...modifierFailures(icon, parsed, expectG));
 
   return { G, failures, parsed };
 }
@@ -133,15 +141,19 @@ function duotoneChecks(failures, icon, parsed, p) {
   if (!isCurrent(root.stroke)) fail(failures, "stroke", icon, `stroke ${root.stroke ?? "missing"}`, "currentColor");
   for (const k of ["color", "stop-color"]) if (k in root && !isCurrent(root[k]) && !isNone(root[k])) fail(failures, "stroke", icon, `root ${k} ${root[k]}`, "currentColor or none");
   let bodies = 0, subpaths = 0, drawing = 0;
-  for (const el of parsed.elements) {
+  for (const [i, el] of parsed.elements.entries()) {
     const a = el.attrs, where = el.at;
+    // a stroke the modifier cut was judged before it was cut (modifiers.mjs checks the base first);
+    // a split body's paint, just before its cut contour, carries the body's rules
+    if (isCut(el)) continue;
+    const cutAfter = isSplit(parsed.elements[i + 1]);
     if ("transform" in a) fail(failures, "stroke", icon, `${where} transform`, "not set");
     for (const k of COLOUR_ATTRS) if (k in a && !isCurrent(a[k]) && !isNone(a[k])) fail(failures, "stroke", icon, `${where} ${k} ${a[k]}`, "currentColor or none");
     // construction: a filled element is a closed body with a contour and the .2 fill;
     // a closed element with a contour and no fill (a ring, a hub) is allowed
     if (isCurrent(a.fill)) {
       bodies++;
-      if (isNone(a.stroke)) fail(failures, "construction", icon, `${where} stroke none`, "a contour on every body");
+      if (isNone(a.stroke) && !cutAfter) fail(failures, "construction", icon, `${where} stroke none`, "a contour on every body");
       if (num(a, "fill-opacity") !== FILL) fail(failures, "construction", icon, `${where} fill-opacity ${a["fill-opacity"] ?? "1"}`, `${FILL}`);
       if (!isClosed(el)) fail(failures, "construction", icon, `${where} fill ${a.fill}`, "none on a line");
       // contour: a body is a rect, a circle, a path of up to five straight sides, or a path shaped by curves; more is faceted.

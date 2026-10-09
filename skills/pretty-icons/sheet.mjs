@@ -36,7 +36,7 @@ const escAttr = (v) => String(v).replace(/&(?!(?:#\d+|#x[0-9a-f]+|[a-z]\w*);)/gi
 // What an element may carry onto a sheet: geometry and paint. Anything else
 // (data-*, aria-*, ids) is dropped, so no name reaches the blind sheet that way.
 const DRAW_ATTRS = new Set(["x", "y", "width", "height", "rx", "ry", "cx", "cy", "r", "x1", "y1", "x2", "y2", "d", "pathLength", "transform",
-  "fill", "fill-opacity", "fill-rule", "stroke", "stroke-width", "stroke-dasharray", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "display", "visibility"]);
+  "fill", "fill-opacity", "fill-rule", "stroke", "stroke-width", "stroke-opacity", "stroke-dasharray", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "display", "visibility"]);
 // Inherited paint the root may set beyond stroke-width, caps and joins.
 const ROOT_INHERITED = ["stroke-dasharray", "fill-rule", "stroke-miterlimit"];
 
