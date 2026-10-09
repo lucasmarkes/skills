@@ -59,6 +59,214 @@ Bakery totals: 47 smooth, 54 corners, 3 kinks, 3 inflections (all on rosquinha).
 
 ## The bar: examples/garage
 
+### Before the redraw
+
+Measured with `node skills/pretty-icons/check.mjs skills/pretty-icons/examples/garage --print` at 678aa95: `ok`, median ink 328.69 of 10.
+
+| icon | joins | infl |
+| --- | --- | --- |
+| battery | 2 smooth · 0 corners | 0 |
+| car | 10 smooth · 6 corners | 0 |
+| fuel | 6 smooth · 2 corners | 0 |
+| gearshift | 0 smooth · 2 corners | 0 |
+| oil | 5 smooth · 5 corners | 0 |
+| speedometer | 7 smooth · 2 corners | 0 |
+| steering-wheel | 0 smooth · 2 corners | 0 |
+| traffic-light | 2 smooth · 2 corners | 0 |
+| tyre | 0 smooth · 2 corners | 0 |
+| wrench | 2 smooth · 6 corners | 0 |
+
+The craft read, a fresh reader given `pretty-icons-sheet.png` and the craft prompt with N = 10, word for word:
+
+> Ten icons, in sheet order:
+>
+> 1. battery: none
+> 2. car: cabin window too small
+> 3. fuel: pump nozzle looks detached
+> 4. gearshift: confused silhouette, tiny H-pattern
+> 5. oil: spout floats off body
+> 6. speedometer: tick marks too small
+> 7. steering-wheel: uneven weight, thin spokes
+> 8. traffic-light: side tabs thin, detached
+> 9. tyre: lug details too small
+> 10. wrench: slightly wobbly, thin handle
+>
+> Three weakest:
+> - Oil (5): the spout and drop sit loose from the can, so the silhouette reads as a floating part. The can is just a blank block.
+> - Gearshift (4): a ball, stem and base that don't read as one object. The H-pattern inside the knob is too small to read at list size.
+> - Tyre (9): the lug dots and the ring of tick marks are too small and fade into the dark body. Its weight is heavy next to the thin-line icons, so it looks inconsistent with the set.
+>
+> Steering-wheel (7) and wrench (10) came close. Their lines are thinner than the rest.
+
+Nine of ten named a defect, and check saw none of them: no join kinks, no inflections.
+
+Scoring, by the controller's ruling: "floating" said of a modifier (a badge, a dot or a slash cut out of its halo) is not a defect, since the halo gap is how rule 08 builds a modifier and check.mjs measures it; "floating" said of a body part still counts. No icon in this set carries a modifier, so every "floating" below is a body part and counts.
+
+### Round 1
+
+Redrawn: car, fuel, gearshift, oil, speedometer, steering-wheel, tyre, wrench. Battery and traffic-light stayed. Check: `ok`, no kink, infl 0 on every icon, median ink 345.13.
+
+The blind read, a fresh reader given `pretty-icons-blind.png` and the read.md blind prompt with N = 10, word for word (key: 1 oil · 2 wrench · 3 steering-wheel · 4 gearshift · 5 car · 6 fuel · 7 tyre · 8 speedometer · 9 traffic-light · 10 battery):
+
+> Read from the image only. No letters or digits appear in any icon.
+>
+> 1. oil: oil can with drop
+> 2. wrench: open-end spanner
+> 3. steering-wheel: ringed wheel with spokes. It could also pass for a crosshair or dial, but the double rim and hub fit a wheel best.
+> 4. gearshift: shift knob with H-pattern
+> 5. car: small sedan, side view
+> 6. fuel: fuel pump with nozzle handle
+> 7. tyre: dark disc with tick marks and a hub. It reads weakly as a tyre. It could be a dial, a clock face or a wheel, so I'm less sure of it than of the others.
+> 8. speedometer: semicircle gauge with needle
+> 9. traffic-light: three-lamp signal with the top lamp lit
+> 10. battery: battery with + and - terminals.
+>
+> No two numbers compete for one name. Number 7 is the only one that gets its name partly because the other names are taken. Nothing else in the set could be a tyre, but the icon itself looks more like a dial or wheel face than a tyre.
+
+Blind: 9 of 10. The tyre fails, paired partly by elimination.
+
+The craft read, a fresh reader given `pretty-icons-sheet.png` and the craft prompt with N = 10, word for word:
+
+> Defects per icon, from the image alone:
+>
+> 1. battery: none
+> 2. car: wheels slightly heavy; thin roof
+> 3. fuel: detail too small (hose side)
+> 4. gearshift: confused silhouette (person/lever)
+> 5. oil: spout floats off body
+> 6. speedometer: ticks too small to read
+> 7. steering-wheel: uneven weight (thin spokes/rings)
+> 8. traffic-light: uneven weight; side ticks tiny
+> 9. tyre: detail too small (spokes/ticks)
+> 10. wrench: uneven weight; thin handle detail
+>
+> Three weakest:
+> - oil (5): the spout and drop look detached from the can body, so the silhouette reads as separate pieces.
+> - gearshift (4): the knob on a dome base looks like a person or bust, so the object is ambiguous.
+> - steering-wheel (7): the thin concentric rings and hairline spokes are much lighter than the bold strokes on battery, car and fuel. The icon looks out of family and the details are hard to read at small size.
+>
+> Runners-up: traffic-light and tyre, whose small ticks vanish at list size.
+
+Craft: 9 icons with a defect. The gate fails.
+
+### Round 2
+
+Redrawn: car (the window and shoulders), oil (the drop back under the spout), steering-wheel (the spokes a bar with a shade core, like the ring), tyre (a wheel: lug dots on the hub and a two-stroke sheen on the rubber in the mark tone, no radial ticks), speedometer (longer ticks), wrench (the slot a 2 line), gearshift (a pill base), fuel (a wider hose loop). Check: `ok`, no kink, infl 0 on every icon.
+
+The blind read, a new reader, word for word (key: 1 battery · 2 oil · 3 speedometer · 4 gearshift · 5 tyre · 6 traffic-light · 7 steering-wheel · 8 fuel · 9 wrench · 10 car):
+
+> Answers from the image alone:
+>
+> 1. battery: car battery, plus and minus terminals. The + and - are drawn symbols, not letters or digits.
+> 2. oil: oil can with a drop.
+> 3. speedometer: dial gauge with a needle.
+> 4. gearshift: shift knob with an H-pattern. The H-pattern on the knob is a gate diagram. I read it as a pattern, not as the letter H.
+> 5. tyre: black tyre with a hub.
+> 6. traffic-light: three lamps, the top one filled.
+> 7. steering-wheel: wheel with spokes and a hub.
+> 8. fuel: fuel pump.
+> 9. wrench: open-end spanner.
+> 10. car: small side-view car.
+>
+> Two numbers compete for one name: none. All ten names are used exactly once.
+>
+> I read no letter or digit as a name-giving clue.
+>
+> No number got its name only because the other names were taken. Each one matched its own object.
+>
+> Number 2 (oil) was the closest call. The can with a drop could pass for fuel, but number 8 is clearly a pump, so the two are distinct.
+
+Blind: 10 of 10, none by elimination.
+
+The craft read, a new reader, word for word:
+
+> Defects per icon, judged from the sheet image alone:
+>
+> 1. battery: none
+> 2. car: wheels slightly oversized, heavy
+> 3. fuel: handle detail looks cramped
+> 4. gearshift: shift-pattern too small to read
+> 5. oil: spout floats off the body
+> 6. speedometer: tick marks too small and faint
+> 7. steering-wheel: uneven weight, thin spokes
+> 8. traffic-light: side tabs thin and floating
+> 9. tyre: hub dots too small to read
+> 10. wrench: thin, uneven weight, tiny hole
+>
+> Three weakest:
+> - **oil:** The spout looks detached from the can, and the drop is crowded against the body. The silhouette is confused.
+> - **gearshift:** The H-pattern inside the knob is too small to read at list size. The base and stem are also thin next to the knob.
+> - **traffic-light:** The side tabs are hairline and float off the body, and the stroke weight is lighter than in the other icons. The lamps are small.
+>
+> Runners-up are the speedometer ticks and the tyre hub dots, both too small to read.
+
+Craft: 9 icons with a defect (the traffic light's "floating" tabs are a body part, so it counts). The gate fails.
+
+### Round 3
+
+Redrawn: car (wheels r 4, two circles again, so the right hub, circle@7, still lies under badge:check's halo), oil (can and spout one body under a domed top: five straight sides, 11 commands), gearshift (knob r 12, a wider three-prong pattern), fuel (narrower body, the hose clear of it), speedometer (ticks in the line tone), wrench (the slot a solid 3.5 line, the hole r 2). Check: `ok`, no kink, infl 0 on every icon.
+
+The blind read, a new reader, word for word (key: 1 fuel · 2 battery · 3 car · 4 traffic-light · 5 speedometer · 6 tyre · 7 wrench · 8 oil · 9 gearshift · 10 steering-wheel):
+
+> 1. fuel: fuel pump with nozzle
+> 2. battery: battery with plus and minus signs. I read "+" and "−" on it, which are symbols rather than letters or digits, and they name the icon.
+> 3. car: small cartoon sedan
+> 4. traffic-light: three-lamp signal, top lamp lit
+> 5. speedometer: dial gauge with needle
+> 6. tyre: black wheel with lug holes
+> 7. wrench: open-end spanner
+> 8. oil: oil can with drop
+> 9. gearshift: H-pattern gear knob on base
+> 10. steering-wheel: wheel with spokes and hub
+>
+> No two numbers compete for one name. No number got its name only because the other names were taken. I read no letter or digit anywhere. The only marks that could count as text are the "+" and "−" on the battery.
+
+Blind: 10 of 10, none by elimination. The battery's + and − are signs, not letters or digits, as the reader says; the battery is drawn as it was at 678aa95.
+
+The craft read, a new reader, word for word:
+
+> Defects per icon (from the image alone):
+> 1. battery: none
+> 2. car: wobbly roofline curve
+> 3. fuel: uneven weight (handle thinner)
+> 4. gearshift: detail too small (H pattern)
+> 5. oil: confused silhouette (spout and drop)
+> 6. speedometer: ticks too small to read
+> 7. steering-wheel: uneven weight (thin spokes and rim)
+> 8. traffic-light: detail too small (side tick marks)
+> 9. tyre: detail too small (hub dots, arc highlight)
+> 10. wrench: uneven weight (thin shaft against heavy head)
+>
+> Three weakest:
+> - oil: the spout, drop and body read as separate parts. The spout looks like it floats off the can, and the silhouette is confused.
+> - steering-wheel: the strokes are thin and double-lined compared with the heavy battery and tyre. The weight is uneven and the spokes are hard to read at small size.
+> - gearshift: the H-pattern is cramped inside the knob and clogs at small size. The base plate and stem also feel disconnected from the knob.
+
+Craft: 9 icons with a defect. The gate fails for the third round, so the redraw stops here (the brief's limit). The blind gate holds; the craft gate does not.
+
+### After the redraw
+
+Measured with `node skills/pretty-icons/check.mjs skills/pretty-icons/examples/garage --print`: `ok`, median ink 342.46 of 10, so `REFERENCE_INK[48]` moves from 328.7 to 342.5.
+
+| icon | joins | infl |
+| --- | --- | --- |
+| battery | 2 smooth · 0 corners | 0 |
+| car | 10 smooth · 6 corners | 0 |
+| fuel | 8 smooth · 2 corners | 0 |
+| gearshift | 0 smooth · 2 corners | 0 |
+| oil | 11 smooth · 4 corners | 0 |
+| speedometer | 7 smooth · 2 corners | 0 |
+| steering-wheel | 0 smooth · 2 corners | 0 |
+| traffic-light | 2 smooth · 2 corners | 0 |
+| tyre | 0 smooth · 2 corners | 0 |
+| wrench | 2 smooth · 6 corners | 0 |
+
+The defects every craft reader named, round after round, are the same few. Check cannot see them, and a redraw within the rules has not cleared them:
+- the traffic light's side tabs, which stay byte for byte;
+- the steering wheel's bars with a core, whose two 1.0 edges read thinner than a 2 contour; `filled.test.mjs` pins the bar-and-core construction;
+- detail at list size: the speedometer's ticks, the gearshift's gate, the tyre's lug dots;
+- the oil can's spout, still read as floating after it became one body with the can.
+
 ## The bar: examples/hairline
 
 ## The after

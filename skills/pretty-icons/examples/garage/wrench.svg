@@ -1,7 +1,6 @@
 <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M15 40L32 23C37.5 24.5 43.5 19 41.5 12.5L36.5 17.5C34 18 30.5 14.5 31 12L36 7C29.5 5 23.5 10.5 25 16L8 33C5.5 35.5 12.5 42.5 15 40Z" fill="#ececea" stroke="none" />
-  <path d="M15 40L32 23C37.5 24.5 43.5 19 41.5 12.5L36.5 17.5C34 18 30.5 14.5 31 12L36 7C29.5 5 23.5 10.5 25 16L8 33C5.5 35.5 12.5 42.5 15 40Z" stroke-width="2" />
-  <path d="M17.5 30.5L26 22" stroke-width="3.5" />
-  <path d="M17.5 30.5L26 22" stroke="#cfcfcb" />
-  <circle cx="13.5" cy="34.5" r="1.75" fill="#ffffff" />
+  <path d="M16 40L33 23C38.5 24.5 44 19 42 12.5L37 17.5C34.5 18 30 13.5 30.5 11L35.5 6C29 4 23.5 9.5 25 15L8 32C5.5 34.5 13.5 42.5 16 40Z" fill="#ececea" stroke="none" />
+  <path d="M16 40L33 23C38.5 24.5 44 19 42 12.5L37 17.5C34.5 18 30 13.5 30.5 11L35.5 6C29 4 23.5 9.5 25 15L8 32C5.5 34.5 13.5 42.5 16 40Z" stroke-width="2" />
+  <path d="M19.5 28.5L26 22" stroke-width="3.5" />
+  <circle cx="14" cy="34" r="2" fill="#ffffff" />
 </svg>

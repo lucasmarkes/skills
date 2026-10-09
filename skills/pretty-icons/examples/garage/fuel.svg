@@ -1,8 +1,8 @@
 <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M32.25 15C36.5 15 39.25 17 39.25 21.5V32.5C39.25 34.5 38.5 35.5 37.25 35.5" />
-  <rect x="9.75" y="5" width="22.5" height="38" rx="6" fill="#ececea" stroke="none" />
-  <path d="M9.75 35.5H32.25V37.25A6 6 0 0 1 26.25 43H15.75A6 6 0 0 1 9.75 37.25Z" fill="#cfcfcb" stroke="none" />
-  <rect x="9.75" y="5" width="22.5" height="38" rx="6" stroke-width="2" />
-  <rect x="14.75" y="9.75" width="12.5" height="9" rx="2.5" fill="#ffffff" />
-  <path d="M16 26H26" stroke="#8b8c90" stroke-width="2" />
+  <path d="M30.75 12H35C38.25 12 40.25 14 40.25 17.25V34.25C40.25 37.5 38.25 39.5 35 39.5H30.75" stroke-width="2" />
+  <rect x="9.75" y="5" width="21" height="38" rx="6" fill="#ececea" stroke="none" />
+  <path d="M9.75 35.5H30.75V37A6 6 0 0 1 24.75 43H15.75A6 6 0 0 1 9.75 37Z" fill="#cfcfcb" stroke="none" />
+  <rect x="9.75" y="5" width="21" height="38" rx="6" stroke-width="2" />
+  <rect x="14.25" y="9.75" width="12" height="9" rx="2.5" fill="#ffffff" />
+  <path d="M15.25 26H25.25" stroke="#8b8c90" stroke-width="2" />
 </svg>

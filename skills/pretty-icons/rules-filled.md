@@ -125,7 +125,7 @@ Its horns are the two cusps (`c`), and they turn in: a crescent whose horns poin
 
 ## 05 · weight
 
-Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. A tyre filled solid weighs its outline, not its area. Within 25% of the set's median and of the reference, 328.7, the median of `examples/garage`.
+Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. A tyre filled solid weighs its outline, not its area. Within 25% of the set's median and of the reference, 342.5, the median of `examples/garage`.
 
 - **Keep it, for a light icon:** give it what the object has: a slot as a tube, a hole, a tick. The wrench gained a slot as a tube and passed.
 - **Keep it, for a heavy icon:** a double ring, a third spoke, a fourth tread: thin it to a tube, or drop one.

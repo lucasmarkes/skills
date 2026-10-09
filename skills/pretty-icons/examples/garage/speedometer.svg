@@ -1,8 +1,8 @@
 <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M5 32C5 18.5 13.5 8.75 24 8.75C34.5 8.75 43 18.5 43 32C43 36 40.5 39.25 36.5 39.25H11.5C7.5 39.25 5 36 5 32Z" fill="#ececea" stroke="none" />
-  <path d="M5 34.5H43C42.25 37.25 39.75 39.25 36.5 39.25H11.5C8.25 39.25 5.75 37.25 5 34.5Z" fill="#cfcfcb" stroke="none" />
-  <path d="M5 32C5 18.5 13.5 8.75 24 8.75C34.5 8.75 43 18.5 43 32C43 36 40.5 39.25 36.5 39.25H11.5C7.5 39.25 5 36 5 32Z" stroke-width="2" />
-  <path d="M9.5 31H12M13.5 18.25 15.25 20M24 13.75V16.25M34.5 18.25 32.75 20M38.5 31H36" stroke="#8b8c90" stroke-width="2" />
-  <path d="M24 31L30.25 23" stroke-width="2" />
-  <circle cx="24" cy="31" r="2.75" fill="#25262a" />
+  <path d="M5 31C5 19.75 12.75 9 24 9C35.25 9 43 19.75 43 31C43 35 41 39 37 39C27 39 21 39 11 39C7 39 5 35 5 31Z" fill="#ececea" stroke="none" />
+  <path d="M43 31C43 35 41 39 37 39C27 39 21 39 11 39C7 39 5 35 5 31Z" fill="#cfcfcb" stroke="none" />
+  <path d="M5 31C5 19.75 12.75 9 24 9C35.25 9 43 19.75 43 31C43 35 41 39 37 39C27 39 21 39 11 39C7 39 5 35 5 31Z" stroke-width="2" />
+  <path d="M8.5 30H12.5M13.25 19.25 16 22M24 12.5V16.5M34.75 19.25 32 22M39.5 30H35.5" stroke-width="2" />
+  <path d="M24 30L28.25 22.75" stroke-width="2" />
+  <circle cx="24" cy="30" r="2.75" fill="#25262a" />
 </svg>
