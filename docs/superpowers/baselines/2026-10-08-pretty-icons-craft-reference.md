@@ -21,6 +21,42 @@ Widths are full width at half maximum (a run's pixels plus its anti-aliased edge
 
 ## The before
 
+Measured with `node skills/pretty-icons/check.mjs <set> --print` (Task 3) on the twenty icons drawn before this work, in `docs/superpowers/baselines/2026-10-08-craft-before/`. Joins are smooth, corners and kinks per icon; infl is inflections.
+
+Car set:
+
+| icon | joins | infl |
+| --- | --- | --- |
+| banco | 10 smooth · 2 corners · 1 kink | 0 |
+| carro | 12 smooth · 8 corners | 0 |
+| chave | 0 smooth · 10 corners | 0 |
+| cone | 3 smooth · 9 corners · 3 kinks | 0 |
+| estrada | 0 smooth · 8 corners | 0 |
+| extintor | 3 smooth · 2 corners | 0 |
+| marcha | 8 smooth · 2 corners · 2 kinks | 0 |
+| roda | 0 smooth · 2 corners | 0 |
+| semaforo | 2 smooth · 2 corners | 0 |
+| triangulo | 3 smooth · 5 corners · 6 kinks | 0 |
+
+Car totals: 41 smooth, 50 corners, 12 kinks, 0 inflections. Matches the plan (banco 1, cone 3, marcha 2, triangulo 6 kinks).
+
+Bakery set:
+
+| icon | joins | infl |
+| --- | --- | --- |
+| batedor | 4 smooth · 2 corners | 0 |
+| bolo | 8 smooth · 6 corners | 0 |
+| croissant | 2 smooth · 5 corners · 3 kinks | 0 |
+| farinha | 6 smooth · 9 corners | 0 |
+| forno | 2 smooth · 2 corners | 0 |
+| pao-de-forma | 14 smooth · 8 corners | 0 |
+| pao | 5 smooth · 2 corners | 0 |
+| rolo | 0 smooth · 8 corners | 0 |
+| rosquinha | 6 smooth · 2 corners | 3 |
+| trigo | 0 smooth · 10 corners | 0 |
+
+Bakery totals: 47 smooth, 54 corners, 3 kinks, 3 inflections (all on rosquinha). Matches the plan (croissant 3 kinks).
+
 ## The bar: examples/garage
 
 ## The bar: examples/hairline
