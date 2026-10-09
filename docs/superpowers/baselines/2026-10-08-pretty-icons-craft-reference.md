@@ -267,6 +267,200 @@ The defects every craft reader named, round after round, are the same few. Check
 - detail at list size: the speedometer's ticks, the gearshift's gate, the tyre's lug dots;
 - the oil can's spout, still read as floating after it became one body with the can.
 
+### Fix round 1
+
+The controller calibrated the craft gate on the references. Fresh sonnet readers given the craft prompt named a defect for 24 of the filled reference's 40 icons (60%) and for 20 of the line reference's 26 (77%). So a reference set itself fails a gate of zero, and the gate becomes: a fresh reader names a defect for at most 6 of 10. The blind gate stays 10 of 10 with no elimination, and check stays `ok`, no kink, infl 0. Up to three more redraw rounds, each with a new blind reader and a new craft reader. Traffic-light (byte for byte) and steering-wheel (`filled.test.mjs` pins bar and core) stay out of the redraw. "Floating" said of a modifier is not a defect; said of a body part it counts, as before.
+
+An icon is scored as failed when the reader names a defect from the prompt's list for it (read.md, "The craft read"). A remark outside the list ("clunky", "wheels crowd the body", "wheels slightly oversized") is recorded and not counted.
+
+#### Fix round 1, read 1
+
+Redrawn, bigger and fewer:
+- car: a dome cabin with one window, and wheels that are two circles, so the car still refuses `badge:check` on `circle@7`;
+- fuel: a short hose hook at 3.5;
+- gearshift: the gate in 3.5 on a round knob;
+- oil: a motor-oil bottle, its cap crossing the contour, with a drop;
+- speedometer: three ticks at 3.5, a needle at 2 on a solid hub;
+- tyre: five lug dots on a hub of r 12;
+- wrench: the slot dropped, the hole r 2.25.
+
+Check: `ok`, infl 0 on every icon, median ink 340.09.
+
+The blind read, word for word (key: 1 battery · 2 speedometer · 3 traffic-light · 4 wrench · 5 oil · 6 fuel · 7 steering-wheel · 8 car · 9 gearshift · 10 tyre):
+
+> 1. battery: car battery with + and - marks. A "+" and "−" are drawn on it, so these are symbols (a letter/digit-like read), but the object is plainly a battery.
+> 2. speedometer: dial gauge with needle.
+> 3. traffic-light: three-lamp signal, top lamp lit.
+> 4. wrench: open-end spanner.
+> 5. oil: oil can/bottle with drop.
+> 6. fuel: fuel pump with window and hose.
+> 7. steering-wheel: wheel with spokes and hub.
+> 8. car: small side-view car.
+> 9. gearshift: shift knob with H-pattern, on a base.
+> 10. tyre: dark tyre with a hubcap and lug holes.
+>
+> No two numbers compete for one name. Every number has its own name, and none was named only because the other names were taken. No letter or digit is drawn on any icon, apart from the + and - marks on the battery.
+
+Blind: 10 of 10, none by elimination. The + and − on the battery are signs, and the battery is unchanged since 678aa95.
+
+The craft read, word for word:
+
+> 1. battery: none (terminal posts slightly heavy)
+> 2. car: detail too small (windows)
+> 3. fuel: uneven weight (hose and nozzle)
+> 4. gearshift: detail too small (shift pattern)
+> 5. oil: none (cap is a bit blocky)
+> 6. speedometer: detail too small (ticks and needle)
+> 7. steering-wheel: uneven weight (thin spokes)
+> 8. traffic-light: confused silhouette (side ticks)
+> 9. tyre: detail too small (hub dots)
+> 10. wrench: uneven weight (thin shaft)
+>
+> Three weakest:
+> - Tyre (9): the hub dots and the highlight arc are tiny and muddy. The mostly black disc is much heavier than its neighbours. The pale hub pattern reads as a button or a cookie, not a wheel.
+> - Steering-wheel (7): the hairline double rim and thin spokes are much lighter than the bold strokes on battery, oil and fuel. The inner details blur at small size.
+> - Gearshift (4): the shift-pattern knob has a very fine grid. The base plate and stem are thin next to the heavy knob, so the weight is uneven. The silhouette is ambiguous at small size.
+>
+> Traffic-light (8) is a close runner-up. Its side ticks are small and fussy, and the body is narrow.
+
+Craft: 8 icons with a list defect (battery and oil "none"). The gate fails.
+
+#### Fix round 1, read 2
+
+Changed:
+- car: the window grown to a top of 13.25, the hubs to r 2;
+- fuel: the hose at 2, out to x 39;
+- speedometer: longer ticks, the needle at 3.5, the hub r 3.25;
+- wrench: the lower half of the shaft in shade.
+
+Check: `ok`, infl 0.
+
+The blind read, word for word (key: 1 gearshift · 2 oil · 3 fuel · 4 battery · 5 traffic-light · 6 car · 7 steering-wheel · 8 tyre · 9 speedometer · 10 wrench):
+
+> Readings from the image alone (no letters or digits appear inside any icon; the only numerals are the grid labels):
+>
+> 1. gearshift: shift knob with H-pattern on a base plate. The H-pattern is drawn lines, not a letter.
+> 2. oil: oil can with a droplet.
+> 3. fuel: fuel pump with a hose.
+> 4. battery: battery with + and - terminals. The plus and minus are symbols, not letters or digits.
+> 5. traffic-light: three-lamp signal, top lamp filled.
+> 6. car: small side-view car.
+> 7. steering-wheel: wheel with spokes and hub.
+> 8. tyre: dark tyre with a lug-nut hub. It is the dark disc with a bolt-circle hub.
+> 9. speedometer: dial gauge with a needle.
+> 10. wrench: open-end spanner.
+>
+> No two numbers compete for one name. Every name is used once, and each number matches its name on what it shows. No number got its name only because the others were taken.
+>
+> The weakest reads are 8 (tyre) and 2 (oil). Both still read clearly: 8 is a tyre because of the dark tread ring and lug holes, and 2 is oil because of the can and drop.
+
+Blind: 10 of 10, none by elimination.
+
+The craft read, word for word:
+
+> Defects per icon (from the image alone):
+> 1. battery: terminal posts slightly clunky
+> 2. car: wheels crowd the body
+> 3. fuel: hose detail floats, uneven
+> 4. gearshift: knob detail too dense
+> 5. oil: cap floats, off-center
+> 6. speedometer: tick marks uneven weight
+> 7. steering-wheel: thin spokes, weight mismatch
+> 8. traffic-light: side ticks detached, tiny
+> 9. tyre: hub dots too small
+> 10. wrench: thin outline, uneven weight
+>
+> Three weakest:
+> - Tyre (9): the five hub dots and the highlight arc shrink to mush at small size. The silhouette is heavy and filled, so it also looks unlike the outlined icons.
+> - Traffic-light (8): the tiny side ticks look detached from the body. The lamps are thin rings next to one solid filled lamp, so the weight is uneven.
+> - Wrench (10): its stroke is thinner and lighter than the rest of the set. The open jaw is hard to read, and it looks like a different family from the heavy battery and oil icons.
+>
+> Close runners-up are fuel (the hose floats off the body) and gearshift (the knob detail is too fine).
+
+Craft: 8 icons with a list defect: fuel (floats, a body part), gearshift, oil (the cap floats, a body part), speedometer, steering-wheel, traffic-light, tyre and wrench. Battery's "clunky" and car's "wheels crowd the body" are not on the list. The gate fails.
+
+#### Fix round 1, read 3
+
+Changed:
+- fuel: the hose runs from y 11 down to y 39.5 and back into the body;
+- oil: the cap centred and 12 wide;
+- speedometer: the ticks as marks at 2, longer;
+- wrench: the hole a solid line disc.
+
+Tried and dropped before any reader saw them:
+- the gearshift gate at 2, which read as the letter H at list size;
+- the tyre with four filled lug dots, at +27.9% and with a fill on an open path.
+
+Check: `ok`, infl 0.
+
+The blind read, word for word (key: 1 steering-wheel · 2 traffic-light · 3 battery · 4 wrench · 5 gearshift · 6 fuel · 7 car · 8 oil · 9 speedometer · 10 tyre):
+
+> Read from the image alone:
+>
+> 1. steering-wheel: round wheel with spokes
+> 2. traffic-light: three-lamp signal, top lamp filled
+> 3. battery: box with two terminals, + and −
+> 4. wrench: open-end spanner, diagonal
+> 5. gearshift: shifter knob with H-pattern on a base
+> 6. fuel: pump with a window and a hose
+> 7. car: side-view small sedan
+> 8. oil: bottle with a drop
+> 9. speedometer: half-dial gauge with needle
+> 10. tyre: dark wheel with a patterned hub
+>
+> No two numbers compete for one name. No number got its name only because the other names were taken.
+>
+> I read the + and − signs on 3 as symbols, not letters or digits. The H-pattern on 5 is a shift pattern, not a letter. Two caveats:
+> - 5 could be read as a gear-lever or joystick, but gearshift is the only fit.
+> - 8 shows a bottle with a drop and no can spout. It reads as oil and fits no other name.
+
+Blind: 10 of 10. The gearshift's caveat names the object it shows, a shifter knob with an H-pattern, so it does not count as elimination.
+
+The craft read, word for word:
+
+> Defects per icon (from the image alone):
+> 1. battery: none
+> 2. car: wheels slightly oversized
+> 3. fuel: hose reads as a separate bracket
+> 4. gearshift: shift pattern too small to read
+> 5. oil: none
+> 6. speedometer: tick marks tiny and faint
+> 7. steering-wheel: uneven weight, spokes thin
+> 8. traffic-light: side tabs too small; lens details cramped
+> 9. tyre: hub dots too small to read
+> 10. wrench: uneven weight, loose silhouette
+>
+> Three weakest:
+> 1. Tyre. The five hub dots are too small and low-contrast to read. At small sizes it collapses into a dark disc with a vague highlight.
+> 2. Gearshift. The H-pattern inside the knob is too fine and crowded. The knob, stem and base also feel disconnected, so the silhouette is a little confused.
+> 3. Fuel (traffic-light is a near tie). The hose or handle on the right is a thin, detached-looking loop that doesn't join the pump body cleanly. The pump window and slot are also faint. Traffic-light's side tabs and lens outlines are similarly cramped.
+
+Craft: 7 icons with a list defect: fuel, gearshift, speedometer, steering-wheel, traffic-light, tyre and wrench. Battery and oil are "none", and car's "wheels slightly oversized" is not on the list. The gate (at most 6) fails by one icon, and the three rounds are spent.
+
+#### After fix round 1
+
+Measured with `node skills/pretty-icons/check.mjs skills/pretty-icons/examples/garage --print`: `ok`, median ink 341.25 of 10. That is 1.2 from 342.5, so `REFERENCE_INK[48]` moves to 341.3.
+
+| icon | joins | infl | ink |
+| --- | --- | --- | --- |
+| battery | 2 smooth · 0 corners | 0 | 333.18 |
+| car | 8 smooth · 6 corners | 0 | 335.51 |
+| fuel | 8 smooth · 2 corners | 0 | 376.44 |
+| gearshift | 0 smooth · 2 corners | 0 | 408.27 |
+| oil | 15 smooth · 3 corners | 0 | 307.59 |
+| speedometer | 7 smooth · 2 corners | 0 | 333.97 |
+| steering-wheel | 0 smooth · 2 corners | 0 | 361.12 |
+| traffic-light | 2 smooth · 2 corners | 0 | 347 |
+| tyre | 0 smooth · 2 corners | 0 | 418.56 |
+| wrench | 3 smooth · 9 corners | 0 | 259.13 |
+
+Across the four craft reads, the count of icons with a list defect went 9, 8, 8, 7. The reference sets fail at 60% and 77%. Two of the remaining seven are fixed points (traffic-light, steering-wheel). The other five are named in every read:
+- the tyre's lug dots;
+- the gearshift's gate;
+- the speedometer's ticks;
+- the fuel hose;
+- the wrench's weight, the lightest icon at 259.
+
 ## The bar: examples/hairline
 
 ## The after

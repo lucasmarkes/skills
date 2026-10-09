@@ -4,5 +4,5 @@
   <circle cx="24" cy="17" r="12" fill="#ececea" stroke="none" />
   <path d="M12 17A12 12 0 0 0 36 17Z" fill="#cfcfcb" stroke="none" />
   <circle cx="24" cy="17" r="12" stroke-width="2" />
-  <path d="M18 11.5V22.5M24 11.5V22.5M30 11.5V22.5M18 17H30" stroke-width="2" />
+  <path d="M18 13.25V20.75M24 12.5V21.5M30 13.25V20.75M18 17H30" stroke-width="3.5" />
 </svg>

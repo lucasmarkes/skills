@@ -109,7 +109,7 @@ export function bodySvg(G, format) {
  * at the grid's own stroke: 20 keeps 16's 1.5, so ink does not grow with the area.
  * On 48 it is the median line ink of examples/garage: the contours and marks, not the paint.
  */
-export const REFERENCE_INK = { 16: 83.5, 20: 114.2, 24: 181.9, 48: 342.5 };
+export const REFERENCE_INK = { 16: 83.5, 20: 114.2, 24: 181.9, 48: 341.3 };
 export const referenceInk = (G) => REFERENCE_INK[G];
 
 /**
