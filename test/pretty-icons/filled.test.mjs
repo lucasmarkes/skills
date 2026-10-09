@@ -17,9 +17,9 @@ const read = (n) => readFileSync(join(garage, `${n}.svg`), "utf8");
 
 // The worked example: brackets, tone, shade, contour, three lamps.
 const LIGHT = read("traffic-light");
-const TONE = '<rect x="13.75" y="4.75" width="20.5" height="38.5" rx="8" fill="#ececea" stroke="none" />';
-const SHADE = '<path d="M26.25 4.75A8 8 0 0 1 34.25 12.75V35.25A8 8 0 0 1 26.25 43.25Z" fill="#cfcfcb" stroke="none" />';
-const CONTOUR = '<rect x="13.75" y="4.75" width="20.5" height="38.5" rx="8" />';
+const TONE = '<rect x="13.75" y="5" width="20.5" height="38" rx="8" fill="#ececea" stroke="none" />';
+const SHADE = '<path d="M26.25 5A8 8 0 0 1 34.25 13V35A8 8 0 0 1 26.25 43Z" fill="#cfcfcb" stroke="none" />';
+const CONTOUR = '<rect x="13.75" y="5" width="20.5" height="38" rx="8" stroke-width="2" />';
 const add = (el) => LIGHT.replace("</svg>", `  ${el}\n</svg>`);
 const check = (svg) => textChecks("traffic-light", svg, 48);
 
@@ -30,6 +30,8 @@ test("48 is the filled preset; the duotone table is unchanged", () => {
   assert.equal(p.finish, "filled");
   assert.equal(preset(16).finish, "duotone");
   assert.equal(p.stroke, 1.5);
+  assert.equal(p.contour, 2);
+  assert.equal(preset(16).contour, undefined);
   assert.deepEqual(p.weights, [2, 3.5]);
   assert.deepEqual(preset(16).weights, []);
   assert.equal(p.pad, 4);
@@ -49,10 +51,12 @@ test("48 is the filled preset; the duotone table is unchanged", () => {
 });
 
 test("bodies at 48, and radii by character: cut, cased, moulded, pill", () => {
-  assert.deepEqual(body(48, "circle"), { tag: "circle", cx: 24, cy: 24, r: 19.25 });
-  assert.deepEqual(body(48, "square"), { tag: "rect", x: 6.75, y: 6.75, w: 34.5, h: 34.5, rx: 6 });
-  assert.deepEqual(body(48, "portrait"), { tag: "rect", x: 8.75, y: 4.75, w: 30.5, h: 38.5, rx: 6 });
-  assert.deepEqual(body(48, "landscape"), { tag: "rect", x: 4.75, y: 8.75, w: 38.5, h: 30.5, rx: 6 });
+  // drawn at the contour's 2, so the ink still lands on the keyline
+  assert.deepEqual(body(48, "circle"), { tag: "circle", cx: 24, cy: 24, r: 19 });
+  assert.deepEqual(body(48, "square"), { tag: "rect", x: 7, y: 7, w: 34, h: 34, rx: 6 });
+  assert.deepEqual(body(48, "portrait"), { tag: "rect", x: 9, y: 5, w: 30, h: 38, rx: 6 });
+  assert.deepEqual(body(48, "landscape"), { tag: "rect", x: 5, y: 9, w: 38, h: 30, rx: 6 });
+  assert.deepEqual(body(16, "circle"), { tag: "circle", cx: 8, cy: 8, r: 6.25 }, "the duotone bodies are unchanged");
   assert.deepEqual(radiiFor(48, 20.5), [2, 6, 8, 10.25]);
   assert.deepEqual(radiiFor(48, 9), [1.5, 2.5, 4, 4.5]);
   assert.deepEqual(radiiFor(48, 6.5), [1, 1.5, 2.5, 3.25]);
@@ -112,12 +116,19 @@ test("construction: no offset shadow, no highlight", () => {
 
 test("construction: tone, shade, contour, in that order, the contour pasted", () => {
   const bare = check(LIGHT.replace(`  ${CONTOUR}\n`, ""));
-  assert.ok(lines(bare).includes("construction  traffic-light  rect@3 fill #ececea stroke none → its contour after it: the same geometry, no fill, the root's line"), lines(bare).join("\n"));
+  assert.ok(lines(bare).includes("construction  traffic-light  rect@3 fill #ececea stroke none → its contour after it: the same geometry, no fill, at 2"), lines(bare).join("\n"));
   const late = check(LIGHT.replace(`${SHADE}\n  ${CONTOUR}`, `${CONTOUR}\n  ${SHADE}`));
   assert.deepEqual(lines(late), ["construction  traffic-light  path@5 shade → between a body's tone and its contour, so the line covers its edge"]);
   const redrawn = check(LIGHT.replace(CONTOUR, CONTOUR.replace('rx="8"', 'rx="6"')));
   assert.ok(rules(redrawn).includes("construction"), "a contour of other geometry is not the tone's");
-  assert.deepEqual(lines(check(LIGHT.replace(CONTOUR, CONTOUR.replace(" />", ' stroke-width="2" />')))), ["construction  traffic-light  rect@5 stroke-width 2 → the root's line on a contour"]);
+});
+
+test("the hierarchy: a contour at 2, the parts' line at 1.5, a closed line at 2 is a contour without a tone", () => {
+  assert.deepEqual(lines(check(LIGHT.replace(CONTOUR, CONTOUR.replace(' stroke-width="2"', "")))), ["stroke  traffic-light  rect@5 contour at 1.5 → 2"]);
+  assert.deepEqual(lines(check(LIGHT.replace(CONTOUR, CONTOUR.replace('stroke-width="2"', 'stroke-width="3.5"')))), ["stroke  traffic-light  rect@5 contour at 3.5 → 2"]);
+  assert.deepEqual(lines(check(add('<circle cx="24" cy="24" r="2" stroke-width="2" />'))), ["construction  traffic-light  circle@9 contour without a tone → a tone before it with the same geometry, or the root's line"]);
+  assert.deepEqual(lines(check(add('<circle cx="24" cy="24" r="2" />'))), [], "a closed line at the root's width is a part");
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="2" stroke="#8b8c90" />'))), [], "an open mark at 2 stays allowed");
   const none = check(LIGHT.replace(`  ${TONE}\n`, "").replace(`  ${SHADE}\n`, ""));
   assert.ok(lines(none).includes("construction  traffic-light  no body → a closed element in the fill tone, #ececea"), lines(none).join("\n"));
 });
@@ -130,7 +141,7 @@ test("construction: the mark tone only as a stroke; a core only on a bar", () =>
 });
 
 test("light: the shade sits below or right of its body's centre", () => {
-  const left = SHADE.replace("M26.25 4.75A8 8 0 0 1 34.25 12.75V35.25A8 8 0 0 1 26.25 43.25Z", "M21.75 4.75A8 8 0 0 0 13.75 12.75V35.25A8 8 0 0 0 21.75 43.25Z");
+  const left = SHADE.replace("M26.25 5A8 8 0 0 1 34.25 13V35A8 8 0 0 1 26.25 43Z", "M21.75 5A8 8 0 0 0 13.75 13V35A8 8 0 0 0 21.75 43Z");
   assert.deepEqual(lines(check(LIGHT.replace(SHADE, left))), ["light  traffic-light  path@4 shade centred at 17.75, 24 → below or right of rect@3's centre 24, 24: the light comes from the top"]);
 });
 

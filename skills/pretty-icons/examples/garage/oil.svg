@@ -1,8 +1,8 @@
 <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M16 19.5L4.75 12V15L16 25.5Z" fill="#ececea" />
+  <path d="M16 19.5L5 12V15L16 25.5Z" fill="#ececea" />
   <rect x="24.75" y="8.75" width="9" height="6.5" rx="2.5" fill="#25262a" />
   <rect x="16" y="14.75" width="26.25" height="24.5" rx="6" fill="#ececea" stroke="none" />
   <path d="M16 33H42.25V33.25A6 6 0 0 1 36.25 39.25H22A6 6 0 0 1 16 33.25Z" fill="#cfcfcb" stroke="none" />
-  <rect x="16" y="14.75" width="26.25" height="24.5" rx="6" />
+  <rect x="16" y="14.75" width="26.25" height="24.5" rx="6" stroke-width="2" />
   <path d="M8 25C10 27.5 10.75 29 10.75 30.5C10.75 32.25 9.5 33.5 8 33.5C6.5 33.5 5.25 32.25 5.25 30.5C5.25 29 6 27.5 8 25Z" fill="#25262a" />
 </svg>

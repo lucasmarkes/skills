@@ -21,7 +21,7 @@ import { PALETTE, preset } from "./presets.mjs";
 import { parse, compose, isClosed, geometryKey, num } from "./svg.mjs";
 import { straightSides, sampleParts, bounds } from "./geometry.mjs";
 
-const SIDES = 5, DOT = 2, BAR = 3.5;
+const SIDES = 5, DOT = 2, BAR = 3.5, CONTOUR = 2;
 const TONES = new Map(Object.entries(PALETTE).map(([name, hex]) => [hex, name]));
 const hex = (v) => String(v ?? "").trim().toLowerCase();
 const isNone = (v) => v === undefined || hex(v) === "none";
@@ -77,9 +77,16 @@ export function filledChecks(icon, parsed, G) {
   for (const t of c.tones) {
     const k = geometryKey(t), twin = c.contours.find((x) => at(x) > at(t) && geometryKey(x) === k);
     if (twin) contourOf.set(t, twin);
-    else fail(failures, "construction", icon, `${t.at} fill ${t.attrs.fill} stroke none`, "its contour after it: the same geometry, no fill, the root's line");
+    else fail(failures, "construction", icon, `${t.at} fill ${t.attrs.fill} stroke none`, "its contour after it: the same geometry, no fill, at 2");
   }
-  for (const el of c.contours) if ("stroke-width" in el.attrs) fail(failures, "construction", icon, `${el.at} stroke-width ${el.attrs["stroke-width"]}`, "the root's line on a contour");
+  // the hierarchy: a contour at 2, over the parts' line at the root's 1.5; a closed line at 2 is a contour that lost its tone
+  const rootW = num(root, "stroke-width");
+  for (const el of c.contours) {
+    const w = num(el.attrs, "stroke-width", rootW);
+    if (w !== CONTOUR) fail(failures, "stroke", icon, `${el.at} contour at ${w}`, `${CONTOUR}`);
+  }
+  for (const el of c.lines) if (isClosed(el) && num(el.attrs, "stroke-width", rootW) === CONTOUR)
+    fail(failures, "construction", icon, `${el.at} contour without a tone`, "a tone before it with the same geometry, or the root's line");
   // a shade sits inside a body: after its tone, before its contour, below or right of its centre
   for (const s of c.shades) {
     const t = [...contourOf.keys()].reverse().find((x) => at(x) < at(s) && at(contourOf.get(x)) > at(s));

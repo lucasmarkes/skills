@@ -8,7 +8,7 @@ What the finish is: a thin line over a light body, in five neutral tones and no 
 | --- | --- | --- |
 | tone | a body's colour: a closed element | `fill` the fill tone (or paper), `stroke="none"` |
 | shade | the side away from the light: the lower or right part of the body | `fill` the shade tone, `stroke="none"`, after its tone and before its contour; or an open stroke in the shade |
-| contour | the tone's geometry pasted, nothing else on it | no `fill`, no `stroke` (the root's line) |
+| contour | the tone's geometry pasted, nothing else on it | no `fill`, no `stroke`, `stroke-width="2"` |
 | shape | a closed element filled and drawn in one: a wheel, a cap, a lamp, a base | `fill` a tone; no `stroke` |
 | line | a part (a hose, a needle, a sign) | no `fill`, no `stroke`; `stroke-width` 2 for a mark of weight |
 | mark | what is printed on the object: ticks, treads, a gauge's scale | `stroke` the mark tone |
@@ -17,9 +17,21 @@ What the finish is: a thin line over a light body, in five neutral tones and no 
 
 ## The preset
 
-| Grid | Stroke | Weights | Padding | Live | Step | Circle | Square | Portrait | Landscape | Gap line · mark |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 48 | 1.5 | 2, 3.5 | 4 | 40 | 0.25 | 40 | 36 | 32 × 40 | 40 × 32 | 1.5 · 0.75 |
+| Grid | Stroke | Contour | Weights | Padding | Live | Step | Circle | Square | Portrait | Landscape | Gap line · mark |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 48 | 1.5 | 2 | 2, 3.5 | 4 | 40 | 0.25 | 40 | 36 | 32 × 40 | 40 × 32 | 1.5 · 0.75 |
+
+## The hierarchy
+
+Three weights, one job each. The eye reads the object's outline first, then its parts, then what is heavy in it.
+
+| Weight | Draws | How |
+| --- | --- | --- |
+| 2 | a body's contour | `stroke-width="2"` on the contour, never on the tone |
+| 1.5 | the parts: a hose, a needle, a bracket, a mark | the root's line |
+| 3.5 | a bar: a spoke, a rim, a stick | `stroke-width="3.5"`, then its core |
+
+A closed element at 2 with no tone under it is a contour that lost its body: `check.mjs` rejects it. An open stroke at 2 (a sign, a lug, a mark of weight) is a part and passes.
 
 Keylines are sizes of the object's ink, centred at **24, 24**. Tolerances: keyline ±1, gravity ±3, weight ±25% of the set's median and of the reference.
 
@@ -50,27 +62,27 @@ A path's corners take the same radius as arcs: the oil can's body `rx 6` and its
 
 ## The bodies
 
-Each body's ink lands on its keyline, centred at 24. A rect's edge sits half a stroke inside the keyline; a circle's radius is half the keyline less half a stroke. An outline of your own (a car, a wrench) fits its ink to the keyline's size.
+Each body's ink lands on its keyline, centred at 24. A rect's edge sits half a contour (1) inside the keyline; a circle's radius is half the keyline less half a contour. An outline of your own (a car, a wrench) fits its ink to the keyline's size.
 
 | Circle | Square | Portrait | Landscape |
 | --- | --- | --- | --- |
-| `cx 24 cy 24 r 19.25` | `x 6.75 y 6.75 w 34.5 h 34.5 rx 6` | `x 8.75 y 4.75 w 30.5 h 38.5 rx 6` | `x 4.75 y 8.75 w 38.5 h 30.5 rx 6` |
+| `cx 24 cy 24 r 19` | `x 7 y 7 w 34 h 34 rx 6` | `x 9 y 5 w 30 h 38 rx 6` | `x 5 y 9 w 38 h 30 rx 6` |
 
 Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded housing on the portrait keyline, is the whole construction in seven elements: the brackets, the tone, the shade, the contour, three lamps:
 
 ```svg
 <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
   <path d="M8.75 18H13.75M8.75 30H13.75M34.25 18H39.25M34.25 30H39.25" />
-  <rect x="13.75" y="4.75" width="20.5" height="38.5" rx="8" fill="#ececea" stroke="none" />
-  <path d="M26.25 4.75A8 8 0 0 1 34.25 12.75V35.25A8 8 0 0 1 26.25 43.25Z" fill="#cfcfcb" stroke="none" />
-  <rect x="13.75" y="4.75" width="20.5" height="38.5" rx="8" />
+  <rect x="13.75" y="5" width="20.5" height="38" rx="8" fill="#ececea" stroke="none" />
+  <path d="M26.25 5A8 8 0 0 1 34.25 13V35A8 8 0 0 1 26.25 43Z" fill="#cfcfcb" stroke="none" />
+  <rect x="13.75" y="5" width="20.5" height="38" rx="8" stroke-width="2" />
   <circle cx="24" cy="13" r="4" fill="#25262a" />
   <circle cx="24" cy="24" r="4" fill="#ffffff" />
   <circle cx="24" cy="35" r="4" fill="#ffffff" />
 </svg>
 ```
 
-The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="none"`; the shade is the right third of it, its corners the same arcs, so the contour pasted after it covers the seam; the contour is the tone's rect again, bare. The brackets come first, so the body covers their ends. The lamp that is on is solid line; the two that are off are paper, drawn by the root's line.
+The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="none"`; the shade is the right third of it, its corners the same arcs, so the contour pasted after it covers the seam; the contour is the tone's rect again, at 2. The brackets come first, so the body covers their ends. The lamp that is on is solid line; the two that are off are paper, drawn by the root's line.
 
 ## 01 · grid
 
@@ -86,7 +98,7 @@ The object's ink box is within 1 of circle 40, square 36, portrait 32 × 40 or l
 
 ## 03 · stroke, and the tones
 
-The root is `stroke="#25262a" stroke-width="1.5"`, round caps and joins, `fill="none"`. An element sets `stroke-width` only to 2 (a sign, a lug, a mark of weight) or 3.5 (a bar); never a cap, a join, an opacity or a dash. A contour and every filled element keep the root's width. Every `fill` and `stroke` is one of the five tones.
+The root is `stroke="#25262a" stroke-width="1.5"`, round caps and joins, `fill="none"`. An element sets `stroke-width` only to 2 (a sign, a lug, a mark of weight) or 3.5 (a bar); never a cap, a join, an opacity or a dash. A contour is at 2 (the hierarchy); every filled element keeps the root's width. Every `fill` and `stroke` is one of the five tones.
 
 - **Rejected when:** `stroke  traffic-light  stroke #2e3955 → #25262a, the line tone`; `stroke  traffic-light  stroke-width 2.5 → 1.5`; `palette  traffic-light  rect@3 fill #e8b4ab → one of the five tones: #25262a #ececea #cfcfcb #ffffff #8b8c90`.
 
@@ -97,11 +109,11 @@ Tone, shade, contour, in that order, for every body; at least one body in the fi
 - **Keep it, for a tube** (a spoke, a rim, a gear stick): a bar at 3.5 in the line, then the same `d` with `stroke` the fill or the shade tone and no width. The core cuts the bar into two thin lines. A ring as a tube: `circle r 18.25 stroke-width 3.5`, then the circle again with `stroke="#cfcfcb"`.
 - **Keep it, for a solid small part:** a wheel, a terminal, a lamp that is on: a shape filled with the line tone. Glass and a hole: paper.
 - **Keep it, for what is printed:** ticks and treads in the mark tone, at the root's width.
-- **Rejected when:** `construction  traffic-light  rect@3 fill #ececea stroke none → its contour after it: the same geometry, no fill, the root's line`; `construction  traffic-light  path@5 shade → between a body's tone and its contour, so the line covers its edge`; `construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lit lamp)`; `construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke`; `construction  traffic-light  path@9 stroke #ececea → the fill tone as a stroke only on a core: a 3.5 bar's path pasted after it, at the root's width`; `construction  traffic-light  rect@5 stroke-width 2 → the root's line on a contour`; `construction  traffic-light  no body → a closed element in the fill tone, #ececea`.
+- **Rejected when:** `construction  traffic-light  rect@3 fill #ececea stroke none → its contour after it: the same geometry, no fill, at 2`; `construction  traffic-light  path@5 shade → between a body's tone and its contour, so the line covers its edge`; `construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lit lamp)`; `construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke`; `construction  traffic-light  path@9 stroke #ececea → the fill tone as a stroke only on a core: a 3.5 bar's path pasted after it, at the root's width`; `stroke  traffic-light  rect@5 contour at 1.5 → 2`; `construction  traffic-light  circle@9 contour without a tone → a tone before it with the same geometry, or the root's line`; `construction  traffic-light  no body → a closed element in the fill tone, #ececea`.
 
 ## 05 · weight
 
-Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. A tyre filled solid weighs its outline, not its area. Within 25% of the set's median and of the reference, 277.2, the median of `examples/garage`.
+Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. A tyre filled solid weighs its outline, not its area. Within 25% of the set's median and of the reference, 328.7, the median of `examples/garage`.
 
 - **Keep it, for a light icon:** give it what the object has: a slot as a tube, a hole, a tick. The wrench gained a slot as a tube and passed.
 - **Keep it, for a heavy icon:** a double ring, a third spoke, a fourth tread: thin it to a tube, or drop one.

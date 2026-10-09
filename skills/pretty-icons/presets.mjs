@@ -18,7 +18,8 @@ export const FILLED_PRESETS = {
   48: {
     // No shadow: the keylines sit in the live area as the duotone's do, centred at 24.
     // Three weights: the root's line, a mark (2), a bar (3.5). A rect's radius is chosen by what the object is: RADII.
-    finish: "filled", stroke: 1.5, weights: [2, 3.5], pad: 4, elements: 8, commands: 12,
+    // The hierarchy: a body's contour at 2, the parts' line at 1.5 (the root's), a bar at 3.5.
+    finish: "filled", stroke: 1.5, contour: 2, weights: [2, 3.5], pad: 4, elements: 8, commands: 12,
     keylineTol: 1, gravityTol: 3, weightTol: 0.25, referenceTol: 0.25,
     keylines: { circle: [40, 40], square: [36, 36], portrait: [32, 40], landscape: [40, 32] },
   },
@@ -81,9 +82,10 @@ export function radiiFor(G, size) {
   return [RADII.cut[step], RADII.cased[step], RADII.moulded[step], size / 2];
 }
 
-/** The element whose ink lands exactly on a keyline. */
+/** The element whose ink lands exactly on a keyline, drawn at the contour's width (the filled finish's 2) or the stroke's. */
 export function body(G, format) {
-  const { stroke, keylines, centre: [cx, cy] } = preset(G);
+  const { stroke: line, contour, keylines, centre: [cx, cy] } = preset(G);
+  const stroke = contour ?? line;
   const kl = keylines[format];
   if (!kl) throw new Error(`no keyline "${format}"; one of ${FORMATS.join(", ")}`);
   const [kw, kh] = kl;
@@ -107,5 +109,6 @@ export function bodySvg(G, format) {
  * at the grid's own stroke: 20 keeps 16's 1.5, so ink does not grow with the area.
  * On 48 it is the median line ink of examples/garage: the contours and marks, not the paint.
  */
-export const REFERENCE_INK = { 16: 83.5, 20: 114.2, 24: 181.9, 48: 277.2 };
+export const REFERENCE_INK = { 16: 83.5, 20: 114.2, 24: 181.9, 48: 328.7 };
 export const referenceInk = (G) => REFERENCE_INK[G];
+
