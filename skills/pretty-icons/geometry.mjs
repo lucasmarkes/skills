@@ -67,7 +67,7 @@ const ARGS = { M: 2, L: 2, H: 1, V: 1, C: 6, S: 4, Q: 4, T: 2, A: 7, Z: 0 };
  * A path's commands, one at a time, as `{ C, rel, a }`: the command upper-cased, whether it was
  * relative, and its numbers. Implicit repeats come out as commands of their own (after M, an L).
  */
-function* commands(d) {
+export function* commands(d) {
   const toks = d.match(TOKENS) ?? [];
   let i = 0, cmd = "";
   const next = () => Number(toks[i++]);
