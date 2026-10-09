@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { composeProof, construction, silhouette, pixelSizes, referenceSet, writeProof, JOIN_COLOUR, PANEL } from "../../skills/pretty-icons/proof.mjs";
+import { composeProof, construction, silhouette, pixelSizes, referenceSet, writeProof, JOIN_COLOUR, PANEL, VIEW } from "../../skills/pretty-icons/proof.mjs";
 import { parseArgs } from "../../skills/pretty-icons/sheet.mjs";
 import { readSet } from "../../skills/pretty-icons/check.mjs";
 import { addModifier } from "../../skills/pretty-icons/modifiers.mjs";
@@ -55,6 +55,16 @@ test("the reference row is three icons of the finish's example; --only keeps one
   assert.ok(Number(/height="(\d+)"/.exec(one)[1]) < Number(/height="(\d+)"/.exec(all)[1]));
   assert.ok(Number(/width="(\d+)"/.exec(all)[1]) >= PANEL.w * 3);
   assert.throws(() => composeProof(set, 48, { only: "nope" }), /--only nope: no such icon; the set has battery, car/);
+});
+
+test("the reference row draws at its own grid (16), not the set's grid (20 or 24)", () => {
+  const icon = readSet(examples("hairline")).slice(0, 1);
+  for (const G of [20, 24]) {
+    const svg = composeProof(icon, G);
+    // a panel's scale is VIEW / grid, on three transforms (ghost, construction, finish): three reference panels at 16, one set panel at G
+    assert.equal((svg.match(new RegExp(`scale\\(${VIEW / 16}\\)`, "g")) ?? []).length, 3 * 3, `grid ${G}`);
+    assert.equal((svg.match(new RegExp(`scale\\(${VIEW / G}\\)`, "g")) ?? []).length, 3, `grid ${G}`);
+  }
 });
 
 test("the proof is drawn for a set that fails check: a kink is what it is for", (t) => {

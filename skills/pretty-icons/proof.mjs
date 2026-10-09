@@ -132,7 +132,9 @@ export function composeProof(set, G, { only } = {}) {
   let out = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fff" />`;
   out += `<g data-reference="row"><rect x="${left - 12}" y="12" width="${W - 2 * left + 24}" height="${refH}" rx="8" fill="#f5f5f4" />`;
   out += `<text x="${left}" y="34" ${FONT} font-size="12" fill="#737373">reference: examples/${REFERENCE[preset(G).finish][0]}</text>`;
-  refs.forEach((s, i) => { out += panel(s, G, left + i * pitchX, 44); });
+  // the reference icons draw at their own grid, not the set's: a 20 or 24 set still shows the 16 reference at 16
+  const RG = setGrid(refs);
+  refs.forEach((s, i) => { out += panel(s, RG, left + i * pitchX, 44); });
   out += "</g>";
   const y0 = 24 + refH + 24;
   icons.forEach((s, i) => { out += panel(s, G, left + (i % perRow) * pitchX, y0 + Math.floor(i / perRow) * pitchY); });
