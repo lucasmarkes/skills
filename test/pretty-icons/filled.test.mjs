@@ -190,7 +190,7 @@ test("every set in the old finish is rejected, and so is the first neutral drawi
   for (const rule of ["grid", "radius", "count", "weight"]) assert.ok(rules(red).includes(rule), `${rule} in ${rules(red)}`);
 });
 
-test("examples/garage: ten icons, every rule passes, and the reference is their median", { todo: "Task 6 redraws examples/garage" }, async () => {
+test("examples/garage: ten icons, every rule passes, and the reference is their median", async () => {
   assert.equal(readdirSync(garage).filter((f) => f.endsWith(".svg")).length, 10);
   const r = await checkSet(garage);
   assert.equal(r.G, 48);
@@ -205,18 +205,18 @@ test("the sheets keep the tones and each element's width; the dark row takes the
   const { rows } = await checkSet(garage);
   const svg = composeSheet(set, 48, rows);
   const row = (theme) => svg.split('<g data-theme="').find((x) => x.startsWith(`${theme}"`));
-  assert.ok(svg.includes('stroke-width="3.5"'), "a bar keeps its width on the sheet");
+  assert.ok(svg.includes('stroke-width="2"'), "a contour keeps its width on the sheet");
   assert.ok(row("dark").includes(PALETTE_DARK.fill) && !row("dark").includes(PALETTE.fill), "the dark row in the twins");
   assert.ok(row("grey").includes(PALETTE.fill) && !row("grey").includes(PALETTE_DARK.fill), "the grey row in the file's tones");
   const b = composeBlind(set, 48, 1);
-  assert.ok(b.svg.includes('stroke-width="3.5"'));
+  assert.ok(b.svg.includes('stroke-width="2"'));
   for (const s of set) assert.ok(!b.svg.includes(s.name));
 });
 
 test("emit passes each element's width through", () => {
   const set = readSet(garage);
-  assert.ok(toReact(set).includes('strokeWidth="3.5"'));
-  assert.ok(toSprite(set).includes('stroke-width="3.5"'));
+  assert.ok(toReact(set).includes('strokeWidth="2"'));
+  assert.ok(toSprite(set).includes('stroke-width="2"'));
 });
 
 test("rules-filled.md: the worked example is examples/garage/traffic-light.svg, and its tables match the preset", () => {

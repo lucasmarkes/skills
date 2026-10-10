@@ -78,7 +78,7 @@ test("addModifier: every example takes a badge, the cut arcs and curves pass che
   }
 });
 
-test("addModifier: every garage icon takes a badge:check, and the cut passes check", { todo: "Task 6 redraws examples/garage" }, async () => {
+test("addModifier: every garage icon takes a badge:check, and the cut passes check", async () => {
   for (const name of ["battery", "fuel", "gearshift", "oil", "speedometer", "steering-wheel", "traffic-light", "tyre", "wrench"]) {
     const out = await addModifier(ex("garage", name), "badge:check", { name });
     assert.deepEqual(textChecks(name, out, 48).failures, [], name);
@@ -106,11 +106,11 @@ test("the modifier rule: opacity, size and corner, the halo, and data-cut withou
   assert.deepEqual(rule(two), ["2 modifiers: badge:plus, dot"]);
 });
 
-test("addModifier refuses a body wholly under the halo at 48", { todo: "Task 6 redraws examples/garage" }, async () => {
+test("addModifier refuses a body wholly under the halo at 48", async () => {
   await assert.rejects(addModifier(ex("garage", "car"), "badge:check"), (e) => e instanceof ModifierError && /circle@7 lies under the badge:check's halo: try another --corner/.test(e.message));
 });
 
-test("the modifier rule at 48: a modifier has no opacity", { todo: "Task 6 redraws examples/garage" }, async () => {
+test("the modifier rule at 48: a modifier has no opacity", async () => {
   const rule = (text, G = 16) => modifierFailures("x", parse(text), G).map((f) => f.got);
   const car48 = await addModifier(ex("garage", "battery"), "arrow:up");
   assert.deepEqual(rule(car48.replace('data-modifier="arrow:up"', 'stroke-opacity="0.6" data-modifier="arrow:up"'), 48), ["path@8 stroke-opacity 0.6"]);
