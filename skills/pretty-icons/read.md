@@ -40,6 +40,14 @@ The blind read proves each icon names its object. It cannot say one is drawn bad
 
 An icon fails when the reader names a defect from that list for it. A modifier floats by design, since its halo is the gap rule 08 asks for: "floating" said of the badge, dot, slash or lock alone is not a defect, while said of a part of the body it is. A confused silhouette counts on any icon, modified or not. An icon among the three weakest with no defect named passes; say it in the hand-over with the reader's reason. A failed icon goes back to the drawing (`SKILL.md` step 3), then the whole set runs `check.mjs`, `sheet.mjs`, the blind read and the craft read again, each with a **new** reader.
 
+## The set read
+
+The craft read judges each icon. It cannot say one belongs to another set. After the craft read passes, open a third fresh agent, one that has seen neither your work nor the other readers' answers. Give it `pretty-icons-sheet.png`, numbered in the sheet's order as for the craft read, and this prompt, with N filled in:
+
+> These N icons are from one app. Name every icon that looks like it comes from a different set than the others, and in five words or fewer say why. Say 'one set' if none does.
+
+The set passes when the reader says "one set" or names one icon; say that icon in the hand-over with the reader's words. An icon named with a hedge ("possibly", "borderline") still counts as named. Two or more named go back to the drawing (`SKILL.md` step 3), each with the reader's words: "thick lines" is the line weight (`rules-filled.md` 03), "too dark" or "solid" is contrast (11), "cartoon" or "another library" is usually a second contour or a part filled in the line tone (04). Then the whole set runs `check.mjs`, `sheet.mjs` and the three reads again, each with a **new** reader. "Floating" said of a modifier does not count, as in the craft read.
+
 ## Without a second agent
 
-Say so in the hand-over, in these words: **not read blind** and **not read for craft**. Do not read the sheet yourself and call it read.
+Say so in the hand-over, in these words: **not read blind**, **not read for craft** and **not read as a set**. Do not read the sheet yourself and call it read.

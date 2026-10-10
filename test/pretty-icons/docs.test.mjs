@@ -52,5 +52,35 @@ test("read.md: the craft read, its prompt, and the words for no reader", () => {
 
 test("SKILL.md: the loop composes with the kit, checks, and looks at the proof", () => {
   const skill = doc("SKILL.md");
-  for (const s of ["shapes.mjs <primitive>", "shapes.mjs --from", "--proof --only <name>", "modifiers.mjs", "Do the craft read", "**not read for craft**"]) assert.ok(skill.includes(s), s);
+  for (const s of ["shapes.mjs <primitive>", "shapes.mjs --from", "--proof --only <name>", "modifiers.mjs", "Do the craft read", "**not read for craft**", "Do the set read", "**not read as a set**"]) assert.ok(skill.includes(s), s);
+  assert.ok(!skill.includes("a bar at 3.5"), "the bar is gone from What goes wrong");
+});
+
+const LIGHT = readFileSync(new URL("../../skills/pretty-icons/examples/garage/traffic-light.svg", import.meta.url), "utf8");
+const LIT = '<circle cx="24" cy="13" r="2" fill="#25262a" stroke="none" />';
+const light = (el) => textChecks("traffic-light", LIGHT.replace(LIT, el), 48).failures.map(line);
+
+test("rules-filled.md quotes what check.mjs prints for one weight, the solid, the painted stroke and contrast", async () => {
+  const filled = doc("rules-filled.md");
+  const quoted = [
+    ...light('<path d="M24 44V40" stroke-width="3.5" />'),
+    ...light('<circle cx="24" cy="13" r="3" fill="#25262a" stroke="none" />'),
+    ...light('<path d="M24 44V40" stroke="#ececea" />'),
+    ...light('<path d="M17 10V16" stroke="#ffffff" />'),
+  ];
+  assert.equal(quoted.length, 4);
+  const r = await checkSet(new URL("./fixtures/contrast/", import.meta.url).pathname);
+  quoted.push(...r.failures.filter((f) => f.rule === "contrast").map(line));
+  assert.equal(quoted.length, 6);
+  for (const l of quoted) assert.ok(filled.includes(`\`${l}\``), `rules-filled.md quotes ${l}`);
+  const live = filled.replace("`stroke  traffic-light  path@9 stroke-width 3.5 → 1.5, or 2 on a contour`", "");
+  for (const gone of [/\bcores?\b/, /\btubes?\b/, /solid small part/, /mark of weight/, /stroke-width="3\.5"/, /a bar at 3\.5/, /\b341\b/]) assert.ok(!gone.test(live), `rules-filled.md still says ${gone}`);
+  assert.ok(filled.includes("## 11 · contrast"));
+});
+
+test("read.md: the set read, its prompt word for word, and the words for no reader", () => {
+  const read = doc("read.md");
+  assert.ok(read.includes("## The set read"));
+  assert.ok(read.includes("> These N icons are from one app. Name every icon that looks like it comes from a different set than the others, and in five words or fewer say why. Say 'one set' if none does."));
+  assert.ok(read.includes("**not read as a set**"));
 });
