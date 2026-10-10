@@ -136,7 +136,7 @@ A body at its keyline weighs about 240 to 250: the circle 239, a rect with `rx 6
 - **Keep it, for a light icon:** give it what the object has: a hole, a slot, a tick. The wrench gained a hole and passed.
 - **Keep it, for a thin object:** fill its keyline first, its ends out to the box's sides or corners. Then draw a handle or a shaft as a body, two contours, not one line: a pill 20 × 4 weighs 89, its line 32. Give it larger ends (a bone's knobs, a brush's head), or a band across it, as a second body: a ferrule.
 - **Keep it, for a heavy icon:** a double ring, a third spoke, a fourth tread: drop one, or shrink the hole. For a bulky object: a smaller second body or detail. `examples/garage/tyre.svg` weighs 391 with its two rows of treads, and 357 with one row dropped; `gearshift.svg` weighs 357 with its gate at the root's line, and 340.6 with its middle stroke dropped.
-- **Rejected when:** `weight  wrench  ink 246.01 (-27.7%) → within ±25% of the set's median 340.37` and `weight  wrench  ink 246.01 (-27.7%) → within ±25% of the reference 340.4`, `examples/garage` with the wrench's hole taken out and its jaw's curve drawn as a straight line; `weight  brush  ink 229.19 (-33.1%) → within ±25% of the set's median 342.51`, a brush at 255 the run before, moved the wrong way.
+- **Rejected when:** `weight  wrench  ink 246.01 (-27.7%) → within ±25% of the set's median 340.37` and `weight  wrench  ink 246.01 (-27.7%) → within ±25% of the reference 340.4`, `examples/garage` with the wrench's hole taken out and its jaw's notch filled in (a straight edge from 32.5 20.5 to 35.25 7.75); `weight  brush  ink 229.19 (-33.1%) → within ±25% of the set's median 342.51`, a brush at 255 the run before, moved the wrong way.
 
 ## 06 · gravity
 
