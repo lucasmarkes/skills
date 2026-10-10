@@ -4,13 +4,14 @@
  * At the filled finish weight reads the lines alone (no paint, no fill), and gap holds
  * every element but the paint apart (a tone, a shade, a dot: filled.mjs): line
  * from line by a stroke, a mark from anything by half a stroke.
+ * At the filled finish contrast reads the base as written, every tone kept: the line tone's share of its painted pixels (`shares` in raster.mjs).
  * A modifier (modifiers.mjs) is the base's sign, not its object. Its cut moves the base's box, mass and ink,
  * so a modified icon is judged for live (the whole) and gap (without the modifier, whose halo is the modifier
  * rule's) only: not keyline, gravity or weight, and it stays out of the median. Its base is judged for those. In duotone the
  * paint is a split body's fill (stroke none): its edge is its contour's, so it is left out of gap too.
  */
 import { preset, TOUCH, FORMATS, referenceInk } from "./presets.mjs";
-import { measure, resvg, NO_RASTER } from "./raster.mjs";
+import { measure, shares, resvg, NO_RASTER } from "./raster.mjs";
 import { parse, compose } from "./svg.mjs";
 import { isModifier } from "./modifiers.mjs";
 import { sampleParts, minDistance } from "./geometry.mjs";
@@ -52,14 +53,15 @@ export async function measuredChecks(set, G) {
       const m = filled
         ? { ...(await measure(objectOf(base), G)), live: whole.box, ink: (await measure(linesOf(base), G)).ink }
         : { ...(await measure(base, G)), live: whole.box };
-      measures.push({ ...s, els, parts, details, paint, m, modified });
+      const share = filled ? await shares(base, G) : null;
+      measures.push({ ...s, els, parts, details, paint, m, modified, share });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
     }
   }
 
-  for (const { name, els, parts, details, paint, m, modified } of measures) {
+  for (const { name, els, parts, details, paint, m, modified, share } of measures) {
     const { box, mass, ink, live } = m;
     // an empty icon has no box or mass to judge; count already reports it
     const inked = live.w > 0;
@@ -87,7 +89,7 @@ export async function measuredChecks(set, G) {
       const sub = parts[i];
       if (sub.length > 1) for (let a = 0; a < sub.length; a++) for (let b = a + 1; b < sub.length; b++) gap(sub[a], sub[b], `${els[i].at}[${a}]`, `${els[i].at}[${b}]`);
     }
-    rows.push({ icon: name, x0: r2(box.x0), y0: r2(box.y0), w: r2(box.w), h: r2(box.h), keyline: fits ? k.format : "—", ink: r2(ink), dx: r2(dx), dy: r2(dy) });
+    rows.push({ icon: name, x0: r2(box.x0), y0: r2(box.y0), w: r2(box.w), h: r2(box.h), keyline: fits ? k.format : "—", ink: r2(ink), dx: r2(dx), dy: r2(dy), ...(share ? { "line%": share.paint ? Math.round((100 * share.dark) / share.paint) : 0 } : {}) });
   }
 
   // weight: a set of three or more against its own median and, looser, the reference, so a set
@@ -106,6 +108,11 @@ export async function measuredChecks(set, G) {
   for (const { name, m } of weighed) {
     weigh(name, m.ink, median, p.weightTol, own ? "the set's median" : "the reference");
     if (own) weigh(name, m.ink, ref, p.referenceTol, "the reference");
+  }
+  // contrast: the line tone's share of the paint, the base as written (a modifier left out, like weight)
+  if (p.contrast) for (const { name, share } of measures) {
+    const s = share.paint ? share.dark / share.paint : 0;
+    if (s < p.contrast[0] || s > p.contrast[1]) fail(failures, "contrast", name, `line tone on ${Math.round(s * 100)}% of the paint`, `${pct(p.contrast[0])}% to ${pct(p.contrast[1])}%`);
   }
   return { failures, rows };
 }

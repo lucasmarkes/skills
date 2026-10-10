@@ -6,6 +6,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { checkSet } from "../../skills/pretty-icons/check.mjs";
 import { nearestKeyline } from "../../skills/pretty-icons/measure.mjs";
+import { addModifier } from "../../skills/pretty-icons/modifiers.mjs";
+import { shares } from "../../skills/pretty-icons/raster.mjs";
 
 const fix = (n) => new URL(`./fixtures/${n}/`, import.meta.url).pathname;
 const rules = (r) => [...new Set(r.failures.map((f) => f.rule))].sort();
@@ -187,4 +189,35 @@ test("check judges a kinked curve once, even when a contour repeats its tone's p
     const r = await checkSet(dir, { measure: false });
     assert.deepEqual(r.failures.filter((f) => f.rule === "join").map((f) => f.got), ["path@2 10.0° at 28, 24"]);
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("contrast: the line tone's share of the paint, 20% to 45%, too much and too little", async () => {
+  const r = await checkSet(fix("contrast"));
+  const c = r.failures.filter((f) => f.rule === "contrast").map((f) => `${f.rule}  ${f.icon}  ${f.got} → ${f.want}`);
+  assert.deepEqual(c.sort(), ["contrast  plate  line tone on 1% of the paint → 20% to 45%", "contrast  wheel  line tone on 65% of the paint → 20% to 45%"]);
+  assert.equal(r.rows.find((x) => x.icon === "box")["line%"], 28);
+  // plate fails the text rules too (a tone with no contour), and is still measured
+  assert.ok(r.failures.some((f) => f.icon === "plate" && f.rule === "construction"));
+});
+
+test("contrast: a badged icon is measured without its badge", async (t) => {
+  const dir = tmp(t);
+  const box = readFileSync(join(fix("contrast"), "box.svg"), "utf8");
+  writeFileSync(join(dir, "box.svg"), box);
+  const badged = await addModifier(box, "badge:plus", { name: "box-new" });
+  writeFileSync(join(dir, "box-new.svg"), badged);
+  const r = await checkSet(dir);
+  assert.ok(!r.failures.some((f) => f.rule === "contrast"), r.failures.map((f) => f.got).join("\n"));
+  const row = (n) => r.rows.find((x) => x.icon === n)["line%"];
+  // the base is measured as cut (like weight): a cut only removes line, and the badge itself is left out
+  const full = await shares(badged, 48);
+  assert.ok(row("box-new") <= row("box"), `${row("box-new")} and ${row("box")}`);
+  assert.ok(row("box-new") < Math.round((100 * full.dark) / full.paint), `${row("box-new")} and ${Math.round((100 * full.dark) / full.paint)}`);
+});
+
+test("contrast: duotone has no line% and no contrast", async () => {
+  const r = await checkSet(fix("good-16"));
+  assert.ok(r.rows.length > 0);
+  assert.ok(r.rows.every((x) => !("line%" in x)));
+  assert.ok(!r.failures.some((f) => f.rule === "contrast"));
 });

@@ -14,13 +14,19 @@ export const PRESETS = {
   20: { stroke: 1.5, radius: [2, 1], keylines: { circle: [18, 18], square: [16, 16], portrait: [14, 18], landscape: [18, 14] } },
   24: { stroke: 2, radius: [2, 1], keylines: { circle: [22, 22], square: [20, 20], portrait: [18, 22], landscape: [22, 18] } },
 };
+/**
+ * The line tone's share of an icon's painted pixels, at the filled finish. The filled reference's forty run 17% to 48%,
+ * median near 30: the dark tone is the line and the odd dot, every body light with a contour. Below 20 an icon
+ * has too little line; above 45 something large is filled in the line tone, or the lines crowd a small body.
+ */
+export const CONTRAST_BAND = [0.2, 0.45];
 export const FILLED_PRESETS = {
   48: {
     // No shadow: the keylines sit in the live area as the duotone's do, centred at 24.
     // Two weights: the root's line and a contour at 2. A bar at 3.5 is refused (rules-filled.md 03).
     // A rect's radius is chosen by what the object is: RADII.
     // The hierarchy: a body's contour at 2, everything else at 1.5 (the root's).
-    finish: "filled", stroke: 1.5, contour: 2, weights: [2], pad: 4, elements: 8, commands: 12,
+    finish: "filled", stroke: 1.5, contour: 2, weights: [2], contrast: CONTRAST_BAND, pad: 4, elements: 8, commands: 12,
     keylineTol: 1, gravityTol: 3, weightTol: 0.25, referenceTol: 0.25,
     keylines: { circle: [40, 40], square: [36, 36], portrait: [32, 40], landscape: [40, 32] },
   },

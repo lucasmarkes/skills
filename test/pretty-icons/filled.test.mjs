@@ -34,6 +34,8 @@ test("48 is the filled preset; the duotone table is unchanged", () => {
   assert.equal(p.contour, 2);
   assert.equal(preset(16).contour, undefined);
   assert.deepEqual(p.weights, [2]);
+  assert.deepEqual(p.contrast, [0.2, 0.45]);
+  assert.equal(preset(16).contrast, undefined);
   assert.deepEqual(preset(16).weights, []);
   assert.equal(p.pad, 4);
   assert.equal(p.live, 40);
