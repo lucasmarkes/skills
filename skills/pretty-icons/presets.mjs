@@ -56,6 +56,8 @@ export const GRID_STEP = 0.25;
 export const TOUCH = 0.1;
 export const SCALE = 32;
 export const INK_ALPHA = 0.05;
+/** A pixel is in the line tone when its mean of r, g and b is under this: the midpoint of the line tone (38) and the mark tone (140). */
+export const DARK_LUMA = 89;
 export const RADIUS_AT = 8;
 export const FORMATS = ["circle", "square", "portrait", "landscape"];
 

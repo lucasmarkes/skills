@@ -4,10 +4,27 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { cacheDir, measure, render } from "../../skills/pretty-icons/raster.mjs";
+import { cacheDir, measure, render, shares } from "../../skills/pretty-icons/raster.mjs";
 
 const near = (a, b, eps = 0.05) => assert.ok(Math.abs(a - b) < eps, `${a} ≈ ${b}`);
 const ROOT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">`;
+const ROOT48 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">`;
+
+test("shares: a body in the fill tone is dark only on its contour; a square in the line tone is dark all over", async () => {
+  const body = await shares(`${ROOT48}<rect x="8" y="8" width="32" height="32" rx="6" fill="#ececea" stroke="none" /><rect x="8" y="8" width="32" height="32" rx="6" stroke-width="2" /></svg>`, 48);
+  assert.ok(body.paint > 0);
+  near(body.dark / body.paint, 0.21, 0.03);
+  const solid = await shares(`${ROOT48}<rect x="8" y="8" width="32" height="32" fill="#25262a" stroke="none" /></svg>`, 48);
+  assert.ok(solid.paint > 0);
+  assert.equal(solid.dark, solid.paint);
+});
+
+test("shares: a mark is paint, never dark; an empty icon is nothing", async () => {
+  const mark = await shares(`${ROOT48}<path d="M8 24H40" stroke="#8b8c90" /></svg>`, 48);
+  assert.ok(mark.paint > 0);
+  assert.equal(mark.dark, 0);
+  assert.deepEqual(await shares(`${ROOT48}</svg>`, 48), { paint: 0, dark: 0 });
+});
 
 test("cacheDir by platform, architecture and env", () => {
   assert.equal(cacheDir({}, "darwin", "/Users/x", "arm64"), "/Users/x/Library/Caches/pretty-icons/darwin-arm64");

@@ -10,7 +10,7 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
-import { SCALE, INK_ALPHA } from "./presets.mjs";
+import { SCALE, INK_ALPHA, DARK_LUMA } from "./presets.mjs";
 import { withNs } from "./svg.mjs";
 
 // Pinned: the bar set's margins are thin, and a renderer's anti-aliasing moves ink.
@@ -83,4 +83,20 @@ export async function measure(svgText, G) {
     mass: { dx: u(sx / sum) - u(width) / 2, dy: u(sy / sum) - u(height) / 2 },
     ink: sum / s / s,
   };
+}
+
+/**
+ * The icon as written, its tones kept: `paint` the pixels at alpha ≥ 128, `dark` those of them in the line tone.
+ * resvg's pixels are premultiplied, so each is divided by its alpha before it is compared.
+ */
+export async function shares(svgText, G) {
+  const { pixels } = render(svgText, G * SCALE);
+  let paint = 0, dark = 0;
+  for (let i = 0; i < pixels.length; i += 4) {
+    const a = pixels[i + 3];
+    if (a < 128) continue;
+    paint++;
+    if (((pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3) * 255 / a < DARK_LUMA) dark++;
+  }
+  return { paint, dark };
 }
