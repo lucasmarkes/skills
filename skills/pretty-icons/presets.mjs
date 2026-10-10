@@ -17,9 +17,10 @@ export const PRESETS = {
 export const FILLED_PRESETS = {
   48: {
     // No shadow: the keylines sit in the live area as the duotone's do, centred at 24.
-    // Three weights: the root's line, a mark (2), a bar (3.5). A rect's radius is chosen by what the object is: RADII.
-    // The hierarchy: a body's contour at 2, the parts' line at 1.5 (the root's), a bar at 3.5.
-    finish: "filled", stroke: 1.5, contour: 2, weights: [2, 3.5], pad: 4, elements: 8, commands: 12,
+    // Two weights: the root's line and a contour at 2. A bar at 3.5 is refused (rules-filled.md 03).
+    // A rect's radius is chosen by what the object is: RADII.
+    // The hierarchy: a body's contour at 2, everything else at 1.5 (the root's).
+    finish: "filled", stroke: 1.5, contour: 2, weights: [2], pad: 4, elements: 8, commands: 12,
     keylineTol: 1, gravityTol: 3, weightTol: 0.25, referenceTol: 0.25,
     keylines: { circle: [40, 40], square: [36, 36], portrait: [32, 40], landscape: [40, 32] },
   },

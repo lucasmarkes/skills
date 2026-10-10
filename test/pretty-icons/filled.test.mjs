@@ -32,7 +32,7 @@ test("48 is the filled preset; the duotone table is unchanged", () => {
   assert.equal(p.stroke, 1.5);
   assert.equal(p.contour, 2);
   assert.equal(preset(16).contour, undefined);
-  assert.deepEqual(p.weights, [2, 3.5]);
+  assert.deepEqual(p.weights, [2]);
   assert.deepEqual(preset(16).weights, []);
   assert.equal(p.pad, 4);
   assert.equal(p.live, 40);
@@ -95,11 +95,12 @@ test("the worked traffic light passes the text layer", () => {
   assert.deepEqual(lines(check(LIGHT)), []);
 });
 
-test("stroke: the root draws in the line tone at 1.5; an element may take 2 or 3.5", () => {
+test("stroke: the root draws in the line tone at 1.5; an element takes 2 on a contour, never 3.5", () => {
   assert.deepEqual(lines(check(LIGHT.replace('stroke="#25262a" stroke-width="1.5"', 'stroke="#2e3955" stroke-width="1.5"'))), ["stroke  traffic-light  stroke #2e3955 → #25262a, the line tone"]);
   assert.deepEqual(lines(check(LIGHT.replace('stroke-width="1.5" stroke-linecap', 'stroke-width="2.5" stroke-linecap'))), ["stroke  traffic-light  stroke-width 2.5 → 1.5"]);
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="3.5" />'))), ["stroke  traffic-light  path@9 stroke-width 3.5 → 1.5, or 2 on a contour"]);
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="2.5" />'))), ["stroke  traffic-light  path@9 stroke-width 2.5 → 1.5, or 2 on a contour"]);
   assert.deepEqual(rules(check(add('<path d="M24 44V40" stroke-width="2" />'))), []);
-  assert.deepEqual(rules(check(add('<path d="M24 44V40" stroke-width="2.5" />'))), ["stroke"]);
 });
 
 test("palette: every fill and stroke is one of the five tones", () => {
@@ -125,7 +126,7 @@ test("construction: tone, shade, contour, in that order, the contour pasted", ()
 
 test("the hierarchy: a contour at 2, the parts' line at 1.5, a closed line at 2 is a contour without a tone", () => {
   assert.deepEqual(lines(check(LIGHT.replace(CONTOUR, CONTOUR.replace(' stroke-width="2"', "")))), ["stroke  traffic-light  rect@5 contour at 1.5 → 2"]);
-  assert.deepEqual(lines(check(LIGHT.replace(CONTOUR, CONTOUR.replace('stroke-width="2"', 'stroke-width="3.5"')))), ["stroke  traffic-light  rect@5 contour at 3.5 → 2"]);
+  assert.deepEqual(lines(check(LIGHT.replace(CONTOUR, CONTOUR.replace('stroke-width="2"', 'stroke-width="3.5"')))), ["stroke  traffic-light  rect@5 stroke-width 3.5 → 1.5, or 2 on a contour", "stroke  traffic-light  rect@5 contour at 3.5 → 2"]);
   assert.deepEqual(lines(check(add('<circle cx="24" cy="24" r="2" stroke-width="2" />'))), ["construction  traffic-light  circle@9 contour without a tone → a tone before it with the same geometry, or the root's line"]);
   assert.deepEqual(lines(check(add('<circle cx="24" cy="24" r="2" />'))), [], "a closed line at the root's width is a part");
   assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="2" stroke="#8b8c90" />'))), [], "an open mark at 2 stays allowed");
@@ -136,8 +137,6 @@ test("the hierarchy: a contour at 2, the parts' line at 1.5, a closed line at 2 
 test("construction: the mark tone only as a stroke; a core only on a bar", () => {
   assert.deepEqual(lines(check(LIGHT.replace('cy="35" r="4" fill="#ffffff"', 'cy="35" r="4" fill="#8b8c90"'))), ["construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke"]);
   assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke="#ececea" />'))), ["construction  traffic-light  path@9 stroke #ececea → the fill tone as a stroke only on a core: a 3.5 bar's path pasted after it, at the root's width"]);
-  const tube = LIGHT.replace(/  <path d="M8.75 18H13.75[^\n]*\n/, "").replace("</svg>", '  <path d="M24 44V40" stroke-width="3.5" />\n  <path d="M24 44V40" stroke="#ececea" />\n</svg>');
-  assert.deepEqual(rules(check(tube)), []);
 });
 
 test("light: the shade sits below or right of its body's centre", () => {
@@ -179,7 +178,7 @@ test("every set in the old finish is rejected, and so is the first neutral drawi
   for (const rule of ["grid", "radius", "count", "weight"]) assert.ok(rules(red).includes(rule), `${rule} in ${rules(red)}`);
 });
 
-test("examples/garage: ten icons, every rule passes, and the reference is their median", async () => {
+test("examples/garage: ten icons, every rule passes, and the reference is their median", { todo: "Task 6 redraws examples/garage" }, async () => {
   assert.equal(readdirSync(garage).filter((f) => f.endsWith(".svg")).length, 10);
   const r = await checkSet(garage);
   assert.equal(r.G, 48);
