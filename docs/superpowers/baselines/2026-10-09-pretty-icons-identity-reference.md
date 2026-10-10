@@ -226,3 +226,261 @@ Answer (verbatim):
 10. wrench: none
 Three weakest: tyre (tread teeth small and busy, weight uneven around the rim); steering-wheel (inner spokes cramped, detail small); fuel (nozzle sits as a separate wedge beside the pump body).
 Verdict: pass — 4 of 10 named with a listed defect (pass is at most 6).
+
+## The after sets
+
+Drawn from `docs/superpowers/baselines/2026-10-08-craft-after/` at one weight (1ee0db9), then read as sets with the prompts in `### Reads` above, each set's names in alphabetical order, three new readers per round. The brief's literal edits gave way where `check.mjs` printed a line against them; each such deviation is named below with the number that forced it.
+
+### car
+
+```
+┌─────────┬─────────────┬──────┬──────┬───────┬───────┬─────────────┬────────┬───────┬───────┬───────┬─────────────────────────┬──────┐
+│ (index) │ icon        │ x0   │ y0   │ w     │ h     │ keyline     │ ink    │ dx    │ dy    │ line% │ joins                   │ infl │
+├─────────┼─────────────┼──────┼──────┼───────┼───────┼─────────────┼────────┼───────┼───────┼───────┼─────────────────────────┼──────┤
+│ 0       │ 'banco'     │ 9    │ 4    │ 32.5  │ 39.5  │ 'portrait'  │ 262.18 │ -1.57 │ 1.99  │ 35    │ '16 smooth · 4 corners' │ 0    │
+│ 1       │ 'carro'     │ 4.16 │ 8    │ 39.69 │ 31.25 │ 'landscape' │ 347.2  │ 0     │ 1.13  │ 38    │ '14 smooth · 4 corners' │ 0    │
+│ 2       │ 'chave'     │ 5    │ 5    │ 35.47 │ 36.25 │ 'square'    │ 302.57 │ -2.56 │ -1.81 │ 45    │ '3 smooth · 11 corners' │ 0    │
+│ 3       │ 'cone'      │ 6    │ 4    │ 36    │ 36.5  │ 'square'    │ 304.8  │ 0     │ 2.98  │ 42    │ '2 smooth · 9 corners'  │ 0    │
+│ 4       │ 'estrada'   │ 6    │ 5    │ 36    │ 36    │ 'square'    │ 260.16 │ 0     │ 1.77  │ 29    │ '0 smooth · 8 corners'  │ 0    │
+│ 5       │ 'extintor'  │ 7.75 │ 4.25 │ 32.25 │ 39.75 │ 'portrait'  │ 256.4  │ 1.08  │ 0.97  │ 35    │ '2 smooth · 6 corners'  │ 0    │
+│ 6       │ 'marcha'    │ 8    │ 4    │ 32    │ 40    │ 'portrait'  │ 288.93 │ 0     │ 1.95  │ 43    │ '0 smooth · 7 corners'  │ 0    │
+│ 7       │ 'roda'      │ 4    │ 4    │ 40    │ 40    │ 'circle'    │ 371.51 │ 0     │ 0     │ 31    │ '0 smooth · 4 corners'  │ 0    │
+│ 8       │ 'semaforo'  │ 8    │ 4    │ 32    │ 39.75 │ 'portrait'  │ 371.16 │ 0     │ 1.09  │ 44    │ '2 smooth · 2 corners'  │ 0    │
+│ 9       │ 'triangulo' │ 6.5  │ 4.13 │ 35    │ 35.88 │ 'square'    │ 298.73 │ 0     │ 2.92  │ 40    │ '10 smooth · 5 corners' │ 0    │
+└─────────┴─────────────┴──────┴──────┴───────┴───────┴─────────────┴────────┴───────┴───────┴───────┴─────────────────────────┴──────┘
+ok
+```
+
+What changed, per icon (1ee0db9):
+- banco: unchanged.
+- carro: the wheels take the shade; the hubs are dots r 2 in the line tone (paper hubs r 3 weighed +29.5% of the set median).
+- chave: the bit takes the shade; the hole r 2.5 (line% 47 at r 4, 46 at r 3.5 and r 3, 45 at r 2.5).
+- cone: the band is paper; the base takes the shade.
+- estrada: the three dashes are one path of three open strokes at the root's line.
+- extintor: the hose at the root's line, its end at 39.25 5 (at 38.25 6 the box fell to 38.75 tall and the keyline failed); nozzle and cap take the shade.
+- marcha: the stick takes the shade.
+- roda: the kit's ring with hole 7 (hole 11.5 weighed +34 to +39% of the median; 9 and 8 were still over), a hub dot r 2.5, five slanted treads in the line tone at the root's line (R8).
+- semaforo: the base takes the shade; lenses paper r 3.5 (+25.3% of the median at 3.75); the top lens gains a dot r 2.
+- triangulo: the inner triangle is one paper element at the root's line.
+
+#### Round 1 (1ee0db9)
+
+##### Set read (pretty-icons-sheet.png)
+Answer (verbatim):
+One set. All 10 icons share the same thick dark outline, grey two-tone fill and rounded joins, with no outlier.
+Verdict: pass — one set.
+
+##### Blind read (pretty-icons-blind.png; key 1 cone · 2 roda · 3 marcha · 4 carro · 5 extintor · 6 banco · 7 chave · 8 triangulo · 9 estrada · 10 semaforo)
+Answer (verbatim):
+1 = cone: traffic cone with stripes
+2 = roda: wheel or tire with hub
+3 = marcha: gear stick with round knob
+4 = carro: small car, front view
+5 = extintor: fire extinguisher with hose
+6 = banco: car seat, side view
+7 = chave: key with round head
+8 = triangulo: warning triangle
+9 = estrada: road in perspective, dashed line
+10 = semaforo: traffic light, three lamps
+
+Competing names: none. Every number maps to a different name.
+Letters or digits seen: none.
+Names taken only because the others were taken: none outright. Icon 2 is the least certain. It could also read as an eyeball or a disc with a hub, because of the ticks around the rim and the ring in the centre. I chose "roda" because the tire and rim look like a wheel, but it was also the only name left for it. If you count that as partly by elimination, treat icon 2 as the weak one.
+
+Verdict: pass, 10 of 10 against the key — the reader named the wheel from the picture ("the tire and rim look like a wheel") and said "none outright"; roda is recorded as the weakest, the same doubt the implementer flagged.
+
+##### Craft read (pretty-icons-sheet.png; numbered alphabetically)
+Answer (verbatim):
+1. banco: seat-back to base joint looks slightly kinked
+2. carro: none
+3. chave: handle-to-shaft join slightly uneven weight
+4. cone: none
+5. estrada: none
+6. extintor: nozzle/hose detail too small, awkward
+7. marcha: none
+8. roda: spoke ticks too small, busy
+9. semaforo: none
+10. triangulo: none
+
+Three weakest:
+1. roda: the ticks and spokes are small and busy, so the silhouette reads as a disc or CD. The shading split also looks arbitrary.
+2. extintor: the hose and nozzle are thin and cramped, and the nozzle is the least legible part.
+3. banco: the curve where the back meets the seat is slightly lumpy, and the headrest is a separate blob.
+Verdict: pass — 4 of 10 named with a listed defect (pass is at most 6).
+
+Left for the person: the car set passed all three reads in round 1 and was not redrawn (R13). roda is the weakest icon in every read ("a disc or CD"), and its construction (a ring, a shade half, a small paper hole) is close to bakery's rosquinha; chave (45%) and semaforo (44%) sit at the top of the contrast band.
+
+### bakery
+
+```
+┌─────────┬────────────────┬──────┬──────┬──────┬───────┬─────────────┬────────┬────┬───────┬───────┬─────────────────────────┬──────┐
+│ (index) │ icon           │ x0   │ y0   │ w    │ h     │ keyline     │ ink    │ dx │ dy    │ line% │ joins                   │ infl │
+├─────────┼────────────────┼──────┼──────┼──────┼───────┼─────────────┼────────┼────┼───────┼───────┼─────────────────────────┼──────┤
+│ 0       │ 'batedor'      │ 8    │ 5    │ 32   │ 39    │ 'portrait'  │ 337.1  │ 0  │ -2.48 │ 41    │ '7 smooth · 3 corners'  │ 0    │
+│ 1       │ 'bolo'         │ 4    │ 8.5  │ 40   │ 31    │ 'landscape' │ 324.64 │ 0  │ 2.78  │ 39    │ '8 smooth · 4 corners'  │ 0    │
+│ 2       │ 'croissant'    │ 4    │ 8    │ 40   │ 31.5  │ 'landscape' │ 293.36 │ 0  │ -2.56 │ 39    │ '5 smooth · 4 corners'  │ 3    │
+│ 3       │ 'farinha'      │ 8    │ 4.25 │ 32   │ 39.75 │ 'portrait'  │ 286.35 │ 0  │ 1.77  │ 29    │ '4 smooth · 8 corners'  │ 0    │
+│ 4       │ 'forno'        │ 4    │ 8    │ 40   │ 32    │ 'landscape' │ 359    │ 0  │ 0     │ 31    │ '2 smooth · 2 corners'  │ 0    │
+│ 5       │ 'pao-de-forma' │ 6    │ 6    │ 36   │ 36    │ 'square'    │ 354.29 │ 0  │ 0.16  │ 32    │ '14 smooth · 6 corners' │ 0    │
+│ 6       │ 'pao'          │ 4    │ 8    │ 40   │ 32    │ 'landscape' │ 286.08 │ 0  │ 1.18  │ 28    │ '5 smooth · 2 corners'  │ 0    │
+│ 7       │ 'rolo'         │ 4.25 │ 4    │ 39.5 │ 40    │ 'circle'    │ 295.98 │ 0  │ 0     │ 40    │ '12 smooth · 2 corners' │ 0    │
+│ 8       │ 'rosquinha'    │ 4    │ 4    │ 40   │ 40    │ 'circle'    │ 344.54 │ 0  │ 0     │ 27    │ '0 smooth · 2 corners'  │ 0    │
+│ 9       │ 'trigo'        │ 7.25 │ 4    │ 31.5 │ 39.75 │ 'portrait'  │ 290.6  │ -1 │ 0.11  │ 44    │ '3 smooth · 7 corners'  │ 0    │
+└─────────┴────────────────┴──────┴──────┴──────┴───────┴─────────────┴────────┴────┴───────┴───────┴─────────────────────────┴──────┘
+ok
+```
+
+What changed, per icon:
+- 1ee0db9, to one weight: farinha (the tie at the root's line); forno (the knobs two dots r 1.75); rosquinha (the sprinkles at the root's line, line tone); bolo (the cherry a dot r 2.5; the drawing up 0.5, gravity was +3.28 after the cherry shrank); batedor and pao (the wires' and scores' own stroke-width removed); croissant, pao-de-forma, rolo unchanged. trigo redrawn whole: the brief's edit (the stem loses its width) left line% 56, and no narrow grain reached 45%; four lens grains round a root-line stem, line% 42.
+- 4a07c20, after round 1: croissant (a filled arch, the shade on the right flank, seams in the line tone, two on the crown and one on each flank; line% 39); trigo (two staggered columns of two lens grains, each with tone, shade and contour, turned 35°; line% 41; more than two grains a column went over 45%).
+- aad74f4, after round 2: trigo (one upright teardrop ear 20 × 30 with tone, a right-half shade and a contour; three chevrons in the line tone at the root's line, the grain rows (R8); a straight stem; two curved flag-leaf lines off the stem, because no keyline takes a lone 20-wide ear and portrait needs 32 × 40 ± 1; no awns; 31.5 × 39.75, line% 44).
+
+#### Round 1 (1ee0db9)
+
+Note: the controller's craft prompt numbered pao 6 / pao-de-forma 7 while the sheet shows pao-de-forma first; a correction was sent and the reader named icons by label. Both had no defect either way.
+
+##### Set read (pretty-icons-sheet.png)
+Prompt: as the garage reads, with this set's names.
+Answer (verbatim):
+trigo: thin outline, no fill (it is the only one that looks like a different set). Also minor: rolo has a lighter, off-weight feel, but it is within the set.
+Verdict: FAIL (trigo).
+
+##### Craft read (pretty-icons-sheet.png; named by the sheet's labels)
+Prompt: as the garage reads, with this set's names.
+Answer (verbatim):
+1. batedor: wobbly curve on balloon top
+2. bolo: detail too small (scalloped icing)
+3. croissant: confused silhouette, reads as helmet
+4. farinha: kink at bag neck/shoulder
+5. forno: none
+6. pao: none
+7. pao-de-forma: none
+8. rolo: uneven weight, handle ends floating
+9. rosquinha: detail too small (sprinkles)
+10. trigo: confused silhouette, leaves muddled
+
+Three weakest:
+- croissant (3): The ring and the center wedge don't read as a croissant. The shading split adds to the confusion.
+- trigo (10): The overlapping leaves are tangled and the stem is thin. The weight looks uneven against the others.
+- bolo (2): The scalloped icing and the top dot are tiny and crowded, so they read poorly at small size.
+Verdict: FAIL 7/10.
+
+##### Blind read (pretty-icons-blind.png; key 1 croissant · 2 pao-de-forma · 3 bolo · 4 batedor · 5 rolo · 6 forno · 7 trigo · 8 pao · 9 rosquinha · 10 farinha)
+Prompt: as the garage reads, with this set's names.
+Answer (verbatim):
+1. croissant: crescent croissant pastry
+2. pao-de-forma: sandwich bread slice
+3. bolo: frosted cake with cherry
+4. batedor: whisk with handle
+5. rolo: rolling pin
+6. forno: oven with window and knobs
+7. trigo: wheat stalk with grains
+8. pao: domed bread loaf, scored
+9. rosquinha: ring donut with sprinkles
+10. farinha: tied flour sack
+
+Competing names: none. Each number maps to one name.
+Letters or digits inside any icon: none. The only digits are the caption numbers under each icon.
+Names got only by elimination: none. The closest was 8 (pao), a scored dome loaf. It read as bread directly and was not left over from the other names. 2 (pao-de-forma) is the sandwich slice, so the two bread names stayed distinct.
+Verdict: PASS 10/10.
+
+#### Round 2 (4a07c20)
+
+##### Set read (pretty-icons-sheet.png)
+Prompt: as the garage reads, with this set's names.
+Answer (verbatim):
+one set
+Verdict: PASS.
+
+##### Blind read (pretty-icons-blind.png; key 1 pao · 2 forno · 3 batedor · 4 trigo · 5 rosquinha · 6 pao-de-forma · 7 rolo · 8 bolo · 9 croissant · 10 farinha)
+Prompt: as the garage reads, with this set's names.
+Answer (verbatim):
+1. pao: a scored bread loaf
+2. forno: an oven with a window and a knob
+3. batedor: a whisk
+4. trigo: wheat or leaf sprigs. This one reads a little like leaves, but wheat is the only plant name on the list.
+5. rosquinha: a ring donut with sprinkles
+6. pao-de-forma: a slice of sandwich bread
+7. rolo: a rolling pin
+8. bolo: a frosted cake on a plate, with a cherry on top
+9. croissant: a crescent croissant
+10. farinha: a flour sack or bag
+
+No two numbers compete for one name. I read no letter or digit in any icon, apart from the numbers under them. Only 4 (trigo) is helped by the other names being taken, as noted above. The other nine I named from the object, not by elimination.
+Verdict: FAIL (trigo by elimination).
+
+##### Craft read (pretty-icons-sheet.png; named by the sheet's labels)
+Prompt: as the garage reads, with this set's names.
+Answer (verbatim):
+1. batedor: none
+2. bolo: dot floats above cake
+3. croissant: confused silhouette, reads as arch
+4. farinha: none
+5. forno: none
+6. pao-de-forma: none
+7. pao: none
+8. rolo: none
+9. rosquinha: sprinkle dashes too small
+10. trigo: confused silhouette, leaf cluster
+
+Three weakest:
+- trigo: it reads as a clump of leaves or a clover, not wheat. The grain heads have no clear stalk or ear shape, and the tangled shading adds to the confusion.
+- croissant: the crescent reads as a plain arch or helmet. The inner segment strokes are thin and ambiguous, so the shape is not clearly a croissant.
+- forno: it reads as a window or a card with two dots. The lines are clean, but the oven object is weak. No defect from the list applies to it, so it passes.
+Verdict: PASS 4/10.
+
+#### Round 3 (aad74f4)
+
+##### Set read (pretty-icons-sheet.png)
+Prompt: as the garage reads, with this set's names.
+Answer (verbatim):
+Outliers: **trigo** (thin, lighter strokes, no fill) and **batedor** (open-line whisk, lighter detail). The other eight share a heavy outline with grey fill. Trigo is the clearest case. Batedor is a milder call.
+Verdict: FAIL (trigo, batedor).
+
+##### Blind read (pretty-icons-blind.png; key 1 pao · 2 trigo · 3 rolo · 4 bolo · 5 forno · 6 pao-de-forma · 7 croissant · 8 batedor · 9 farinha · 10 rosquinha)
+Prompt: as the garage reads, with this set's names.
+Answer (verbatim):
+1. pao. Object: bread loaf or bun with slash cuts, dome-shaped.
+2. trigo. Object: wheat ear, leaf-like head with chevron grains and a curved base.
+3. rolo. Object: rolling pin, diagonal, with handles at both ends.
+4. bolo. Object: cake with icing and a cherry, on a plate.
+5. forno. Object: oven, front view with a window and two knobs.
+6. pao-de-forma. Object: sandwich bread slice, loaf-pan shape.
+7. croissant. Object: croissant, crescent-shaped.
+8. batedor. Object: whisk, balloon wires and a handle.
+9. farinha. Object: flour sack, tied at the neck.
+10. rosquinha. Object: donut, ring with a glaze and sprinkles.
+
+Competing names: none. Letters or digits seen inside an icon: none. The small numerals under the icons are the sheet's own labels. Names given only by elimination: none, but two were less certain. Icon 2 (trigo) first read as a leaf with chevrons, and the wheat ear was the closest name. Icon 1 (pao) was a dome loaf with slashes, between a bun and a loaf, and it took pao rather than pao-de-forma because 6 is clearly sliced bread.
+
+Caveat: I read the image directly and had no separate fresh agent. Strictly this is not a second-agent read, but I used only read.md and the image, as instructed.
+
+Verdict: pass — 10 of 10 against the key, none by elimination; trigo named as "wheat ear" from the picture, the least certain. (The caveat is wrong: the reader was itself a fresh agent.)
+
+##### Craft read (pretty-icons-sheet.png; named by the sheet's labels)
+Prompt: as the garage reads, with this set's names.
+Answer (verbatim):
+1. batedor: head-to-handle join slightly confused
+2. bolo: cherry floats off cake body
+3. croissant: confused silhouette, reads as helmet or dumpling
+4. farinha: none
+5. forno: none
+6. pao-de-forma: none
+7. pao: none
+8. rolo: handle end knobs too small
+9. rosquinha: sprinkle dashes too small to read
+10. trigo: confused silhouette, reads as leaf. Inner chevrons too small.
+
+Three weakest:
+1. trigo. It reads as a leaf or feather, not wheat. Its chevrons are tiny and busy, and its base curve is cramped.
+2. croissant. The crescent plus fan lines reads as a shell or helmet. The inner dashes are faint.
+3. bolo. The cherry dot sits detached above the body, and the scalloped icing is dense at small size.
+
+Verdicts under the read.md rule:
+- Fail: bolo (a part of the body floats), croissant (confused silhouette), trigo (confused silhouette), rolo (detail too small), rosquinha (detail too small).
+- Borderline: batedor, which the rule would count as failing if the join reads as confused.
+- Pass: farinha, forno, pao-de-forma, pao. Their defect is "none" and none is among the three weakest.
+
+Verdict: pass — 6 of 10 named with a defect, counting batedor (pass is at most 6).
+
+Left for the person: three rounds spent (R16). Round 3 passed the blind read (10 of 10, none by elimination) and the craft read (6 of 10), and failed the set read: trigo ("thin, lighter strokes, no fill") and batedor ("a milder call"). Round 2's trigo passed the set read but was named only by elimination; round 3's is kept because the blind reader named it from the picture. croissant and trigo were named "confused silhouette" in all three craft reads; bolo's cherry and rosquinha's sprinkles in two.
