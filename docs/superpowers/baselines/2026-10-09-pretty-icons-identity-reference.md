@@ -32,4 +32,197 @@ Redrawn after the round-3 reads (blind PASS 10 of 10; craft PASS 3 of 10; set FA
 
 ### Reads
 
-Pending: run by the controller after this commit.
+Each round used three new readers who had seen none of the icons. The prompts, sent word for word:
+
+- Blind: `read.md` "## How" on `pretty-icons-blind.png`, N = 10, names in alphabetical order (battery, car, fuel, gearshift, oil, speedometer, steering-wheel, traffic-light, tyre, wrench).
+- Craft: `read.md` "## The craft read" on `pretty-icons-sheet.png`, N = 10, numbered in the sheet's alphabetical order.
+- Set: "These 10 icons are from one app. Name every icon that looks like it comes from a different set than the others, and in five words or fewer say why. Say 'one set' if none does." on `pretty-icons-sheet.png`.
+
+| round | drawing | blind | craft | set |
+| --- | --- | --- | --- | --- |
+| 1 | ba8ef08 | pass | FAIL 8/10 | pass |
+| 2 | 7acd710 | FAIL (tyre by elimination) | pass 6/10 | FAIL (wrench; speedometer, hedged) |
+| 3 | 35de5ac | pass | pass 3/10 | FAIL (steering-wheel, tyre) |
+| 4 | d9becb4 | pass | pass 4/10 | FAIL (wrench, tyre) |
+
+Left for the person: the set read did not pass after round 1. The wrench ("no grey fill band", "thinner stroke") and the tyre (its tread, in every form tried) are the recurring outliers. The redraws stopped after round 4 by the controller's ruling; the blind and craft reads pass on the committed drawing.
+
+#### Round 1 (ba8ef08)
+
+Sheet seed 649786535; key: 1 fuel · 2 battery · 3 car · 4 speedometer · 5 wrench · 6 traffic-light · 7 gearshift · 8 oil · 9 tyre · 10 steering-wheel
+
+##### Set read (pretty-icons-sheet.png)
+Prompt: "These 10 icons are from one app. Name every icon that looks like it comes from a different set than the others, and in five words or fewer say why. Say 'one set' if none does."
+Answer (verbatim): "Wrench: no gray fill band."
+Verdict: pass (one icon named).
+
+##### Craft read (pretty-icons-sheet.png; numbered 1 battery, 2 car, 3 fuel, 4 gearshift, 5 oil, 6 speedometer, 7 steering-wheel, 8 traffic-light, 9 tyre, 10 wrench)
+Prompt: read.md "## The craft read", N = 10.
+Answer (verbatim):
+1 battery: none
+2 car: roof/window shape slightly confused
+3 fuel: detail too small (hose/panel)
+4 gearshift: floating knob, thin stem
+5 oil: none
+6 speedometer: ticks too small, uneven
+7 steering-wheel: spokes crowd hub; detail too small
+8 traffic-light: side tabs too thin/small
+9 tyre: tiny lug dots, uneven highlight
+10 wrench: head silhouette slightly confused
+Three weakest: 1. Tyre (9): small-size legibility fails; the lug dots and the highlight arc become noise, fill heavier than others. 2. Traffic-light (8): side tabs and small ring circles go thin and spiky at small size; fussy next to heavy-outlined icons. 3. Gearshift (4): knob on a thin stem above a flat base looks disconnected; the H-pattern is tiny. Runners-up: speedometer (tick marks), steering-wheel (crowded hub).
+Verdict: FAIL — 8 of 10 named with a listed defect (pass is at most 6).
+
+##### Blind read (pretty-icons-blind.png)
+Prompt: read.md "## How", N = 10, names: battery, car, fuel, gearshift, oil, speedometer, steering-wheel, traffic-light, tyre, wrench.
+Answer (verbatim):
+Each number gets its own name, and no two compete for one. No name was assigned only because the others were taken.
+1. fuel: fuel pump, nozzle at the side
+2. battery: battery with terminals, plus and minus signs
+3. car: small side-view car
+4. speedometer: dial gauge with needle
+5. wrench: open-end spanner
+6. traffic-light: three-lamp signal
+7. gearshift: shift knob with H-pattern, on a base
+8. oil: oil can with a drop
+9. tyre: wheel with tread and hub
+10. steering-wheel: wheel with spokes and a hub
+I read no letter or digit. Two things came close: Icon 2: the plus and minus marks are symbols, not letters or digits. Icon 7: the shift-pattern lines on the knob form an H-like grid. It reads as a gear pattern, not a letter, but it is the closest thing to one.
+Verdict: pass — 10 of 10 against the key, no elimination.
+
+#### Round 2 (7acd710)
+
+Sheet seed 650692174; blind key: 1 wrench · 2 battery · 3 steering-wheel · 4 fuel · 5 tyre · 6 gearshift · 7 car · 8 speedometer · 9 oil · 10 traffic-light
+
+##### Set read (pretty-icons-sheet.png)
+Prompt: as round 1.
+Answer (verbatim):
+Outliers: wrench (thin, no bottom fill). Possibly speedometer (thinner needle and ticks). Everything else looks like one set.
+Wrench: lighter stroke, lacks the gray base fill the other icons have.
+Speedometer: weaker, borderline mismatch; only the needle and ticks are lighter.
+Verdict: FAIL by ruling R6 — two named (wrench firm, speedometer hedged).
+
+##### Blind read (pretty-icons-blind.png)
+Prompt: as round 1.
+Answer (verbatim):
+1. wrench. Open-end spanner.
+2. battery. Battery with + and - terminals.
+3. steering-wheel. Round wheel with three spokes. It competes with 5 for "tyre". I picked 3 as the steering wheel because of its spokes and hub ring.
+4. fuel. Fuel pump with a window.
+5. tyre. A disc with a centre hub. I named it tyre only because the other names are taken. Without the list I would have said a record, a disc or a target.
+6. gearshift. Gear knob with an H pattern, on a base.
+7. car. Small sedan, side view.
+8. speedometer. Half-round gauge with a needle.
+9. oil. Can with a drop.
+10. traffic-light. Three-lamp signal.
+Competing names: 3 and 5 both pull toward "tyre". 3 reads as a wheel and could be a tyre or a steering wheel. 5 reads as a tyre only by elimination.
+Letters or digits: none. The H pattern on 6 reads as a shift pattern. The + and - on 2 read as terminal signs.
+Name got only by elimination: 5 (tyre).
+Verdict: FAIL — 10/10 against the key, but tyre named by elimination (3 and 5 compete).
+
+##### Craft read (pretty-icons-sheet.png; numbered alphabetically)
+Prompt: as round 1.
+Answer (verbatim):
+1. battery: none
+2. car: none
+3. fuel: hose reads as plain block
+4. gearshift: none
+5. oil: none
+6. speedometer: ticks faint, uneven weight
+7. steering-wheel: hub and spokes slightly confused
+8. traffic-light: lamps small, side bumps muddy
+9. tyre: confused silhouette, reads as disc
+10. wrench: thinner weight, jaw curve kinked
+Three weakest: 9 tyre (concentric circles, no tread or sidewall, reads as a record or disc); 10 wrench (strokes look lighter, open-jaw curve has a slight kink); 3 fuel (hose and nozzle a blank rounded block; pump alone would read as a phone).
+Verdict: pass — 6 of 10 named with a listed defect (pass is at most 6).
+
+#### Round 3 (35de5ac)
+
+Sheet seed 651876911; blind key: 1 oil · 2 gearshift · 3 tyre · 4 car · 5 battery · 6 speedometer · 7 steering-wheel · 8 wrench · 9 traffic-light · 10 fuel
+
+##### Set read (pretty-icons-sheet.png)
+Prompt: as round 1.
+Answer (verbatim):
+Steering-wheel: flat spokes, heavier fill. Tyre: different perspective, ribbed tread.
+Everything else (battery, car, fuel, gearshift, oil, speedometer, traffic-light, wrench) looks consistent: same outline weight, same grey base fill, same rounded style.
+Steering-wheel is the clearest outlier. Its lower half is a solid grey fill and it has a double ring. Tyre is a milder case: it is drawn in a 3/4 perspective with ribbed tread, where the others are flat front-on.
+Verdict: FAIL — two named (steering-wheel, tyre).
+
+##### Blind read (pretty-icons-blind.png)
+Prompt: as round 1.
+Answer (verbatim):
+1 oil: oil bottle with drop
+2 gearshift: gear stick with shift pattern
+3 tyre: tyre, angled view with tread
+4 car: small cartoon car, side view
+5 battery: car battery with plus and minus
+6 speedometer: dial gauge with needle
+7 steering-wheel: steering wheel, front view
+8 wrench: open-end wrench
+9 traffic-light: traffic light, three lamps
+10 fuel: fuel pump with nozzle
+Competing names: none.
+Letters or digits: none. The + and - on 5 are symbols, not a letter or digit.
+Names got by elimination: none. I would have named every icon without the list. Minor note: 7 could pass for a wheel or tyre, but 3 reads clearly as a tyre, so 7 takes steering-wheel.
+Verdict: pass — 10/10 against the key, no elimination.
+
+##### Craft read (pretty-icons-sheet.png; numbered alphabetically)
+Prompt: as round 1.
+Answer (verbatim):
+1 battery: none
+2 car: none
+3 fuel: nozzle floats off pump body
+4 gearshift: none
+5 oil: none
+6 speedometer: none
+7 steering-wheel: none
+8 traffic-light: side bumps confuse silhouette
+9 tyre: confused silhouette, tread ribs ambiguous
+10 wrench: none
+Three weakest: tyre (tread ribs on the right with a flat left face read as a drum or roller; perspective inconsistent); fuel (nozzle and hose sit apart from the pump body); traffic-light (side bumps blur the outline into a capsule; lamps tight).
+Verdict: pass — 3 of 10 named with a listed defect (pass is at most 6).
+
+#### Round 4 (d9becb4)
+
+Sheet seed 652918599; blind key: 1 steering-wheel · 2 wrench · 3 fuel · 4 oil · 5 traffic-light · 6 battery · 7 speedometer · 8 car · 9 gearshift · 10 tyre
+
+##### Blind read (pretty-icons-blind.png)
+Prompt: as round 1.
+Answer (verbatim):
+1. steering-wheel: round wheel with hub, spokes
+2. wrench: open-end spanner
+3. fuel: fuel pump with nozzle
+4. oil: bottle with a drop
+5. traffic-light: vertical three-light signal
+6. battery: car battery, plus/minus terminals
+7. speedometer: semicircle gauge with needle
+8. car: small side-view car
+9. gearshift: shift knob with H pattern
+10. tyre: tire with hub
+No two numbers compete for one name. None of the names was assigned by elimination.
+Letters and digits: none read as letters or digits. The "+" and "−" on 6 are battery polarity marks, and the H-pattern on 9 is a shift gate, so neither is a letter. (6 and 9 flagged borderline; neither read as a badge.)
+Notes: 3 a fuel pump, not a kiosk; 4 the drop could read as "liquid" or "water" before "oil"; 5 a side bump on each side, slightly ambiguous, still a traffic light.
+Verdict: pass — 10/10 against the key, no elimination.
+
+##### Set read (pretty-icons-sheet.png)
+Prompt: as round 1.
+Answer (verbatim):
+wrench: no bottom-band shading, thinner stroke.
+tyre: busy serrated tread, finer detail.
+The other eight look like one set.
+Verdict: FAIL — two named (wrench, tyre).
+
+##### Craft read (pretty-icons-sheet.png; numbered alphabetically)
+Prompt: as round 1.
+Answer (verbatim):
+1. battery: none
+2. car: none
+3. fuel: nozzle detached from pump body
+4. gearshift: none
+5. oil: none
+6. speedometer: none
+7. steering-wheel: spokes slightly cramped, busy
+8. traffic-light: side clamps read oddly
+9. tyre: tread teeth uneven, busy
+10. wrench: none
+Three weakest: tyre (tread teeth small and busy, weight uneven around the rim); steering-wheel (inner spokes cramped, detail small); fuel (nozzle sits as a separate wedge beside the pump body).
+Verdict: pass — 4 of 10 named with a listed defect (pass is at most 6).
