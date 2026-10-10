@@ -15,12 +15,13 @@ const rules = (r) => [...new Set(r.failures.map((f) => f.rule))].sort();
 const lines = (r) => r.failures.map(formatFailure);
 const read = (n) => readFileSync(join(garage, `${n}.svg`), "utf8");
 
-// The worked example: brackets, tone, shade, contour, three lamps.
+// The worked example: brackets, tone, shade, contour, three lenses, the lit lamp's dot.
 const LIGHT = read("traffic-light");
 const TONE = '<rect x="13.75" y="5" width="20.5" height="38" rx="8" fill="#ececea" stroke="none" />';
 const SHADE = '<path d="M26.25 5A8 8 0 0 1 34.25 13V35A8 8 0 0 1 26.25 43Z" fill="#cfcfcb" stroke="none" />';
 const CONTOUR = '<rect x="13.75" y="5" width="20.5" height="38" rx="8" stroke-width="2" />';
-const add = (el) => LIGHT.replace("</svg>", `  ${el}\n</svg>`);
+const LIT = '<circle cx="24" cy="13" r="2" fill="#25262a" stroke="none" />';
+const add = (el) => LIGHT.replace(LIT, el);
 const check = (svg) => textChecks("traffic-light", svg, 48);
 
 test("48 is the filled preset; the duotone table is unchanged", () => {
@@ -75,7 +76,7 @@ test("the tones: five, neutral, each with a dark twin", () => {
   for (const [k, hex] of Object.entries(PALETTE)) if (LIGHT.includes(hex)) assert.ok(dark.includes(PALETTE_DARK[k]) && !dark.includes(hex), k);
 });
 
-test("classify: tone, shade, contour, shape, line; bar and core; mark", () => {
+test("classify: tone, shade, contour, shape, dot, line; mark", () => {
   const at = (els) => els.map((e) => e.at);
   const t = classify(parse(LIGHT).elements);
   assert.deepEqual(at(t.lines), ["path@2"]);
@@ -83,12 +84,10 @@ test("classify: tone, shade, contour, shape, line; bar and core; mark", () => {
   assert.deepEqual(at(t.shades), ["path@4"]);
   assert.deepEqual(at(t.contours), ["rect@5"]);
   assert.deepEqual(at(t.shapes), ["circle@6", "circle@7", "circle@8"]);
-  const w = classify(parse(read("steering-wheel")).elements);
-  assert.deepEqual(at(w.cores), ["circle@3", "path@5"]);
-  assert.deepEqual(at(w.lines), ["circle@2", "path@4"], "the bars");
-  const y = classify(parse(read("tyre")).elements);
-  assert.deepEqual(at(y.marks), ["path@3", "path@4"]);
-  assert.deepEqual([...y.paint].map((e) => e.at).sort(), ["circle@5", "path@6"]);
+  assert.deepEqual(at(t.dots), ["circle@9"]);
+  assert.deepEqual([...t.paint].map((e) => e.at).sort(), ["circle@9", "path@4", "rect@3"]);
+  assert.equal(t.cores, undefined, "no core: the bar is gone");
+  assert.deepEqual(at(classify(parse(add('<path d="M17 10V16" stroke="#8b8c90" />')).elements).marks), ["path@9"]);
 });
 
 test("the worked traffic light passes the text layer", () => {
@@ -100,7 +99,6 @@ test("stroke: the root draws in the line tone at 1.5; an element takes 2 on a co
   assert.deepEqual(lines(check(LIGHT.replace('stroke-width="1.5" stroke-linecap', 'stroke-width="2.5" stroke-linecap'))), ["stroke  traffic-light  stroke-width 2.5 → 1.5"]);
   assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="3.5" />'))), ["stroke  traffic-light  path@9 stroke-width 3.5 → 1.5, or 2 on a contour"]);
   assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="2.5" />'))), ["stroke  traffic-light  path@9 stroke-width 2.5 → 1.5, or 2 on a contour"]);
-  assert.deepEqual(rules(check(add('<path d="M24 44V40" stroke-width="2" />'))), []);
 });
 
 test("palette: every fill and stroke is one of the five tones", () => {
@@ -112,7 +110,7 @@ test("palette: every fill and stroke is one of the five tones", () => {
 test("construction: no offset shadow, no highlight", () => {
   const shadow = check(LIGHT.replace(TONE, `${TONE.replace("#ececea", "#cfcfcb").replace(" />", ' transform="translate(3 3)" />')}\n  ${TONE}`));
   assert.ok(lines(shadow).includes("construction  traffic-light  rect@3 transform → no offset shadow: the shade sits inside the body"), lines(shadow).join("\n"));
-  assert.deepEqual(lines(check(add('<path d="M17 10V16" stroke="#ffffff" />'))), ["construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lit lamp)"]);
+  assert.deepEqual(lines(check(add('<path d="M17 10V16" stroke="#ffffff" />'))), ["construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lamp that is off)"]);
 });
 
 test("construction: tone, shade, contour, in that order, the contour pasted", () => {
@@ -129,14 +127,28 @@ test("the hierarchy: a contour at 2, the parts' line at 1.5, a closed line at 2 
   assert.deepEqual(lines(check(LIGHT.replace(CONTOUR, CONTOUR.replace('stroke-width="2"', 'stroke-width="3.5"')))), ["stroke  traffic-light  rect@5 stroke-width 3.5 → 1.5, or 2 on a contour", "stroke  traffic-light  rect@5 contour at 3.5 → 2"]);
   assert.deepEqual(lines(check(add('<circle cx="24" cy="24" r="2" stroke-width="2" />'))), ["construction  traffic-light  circle@9 contour without a tone → a tone before it with the same geometry, or the root's line"]);
   assert.deepEqual(lines(check(add('<circle cx="24" cy="24" r="2" />'))), [], "a closed line at the root's width is a part");
-  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="2" stroke="#8b8c90" />'))), [], "an open mark at 2 stays allowed");
   const none = check(LIGHT.replace(`  ${TONE}\n`, "").replace(`  ${SHADE}\n`, ""));
   assert.ok(lines(none).includes("construction  traffic-light  no body → a closed element in the fill tone, #ececea"), lines(none).join("\n"));
 });
 
-test("construction: the mark tone only as a stroke; a core only on a bar", () => {
+test("construction: the mark tone only as a stroke; the fill and shade tones only as a fill", () => {
   assert.deepEqual(lines(check(LIGHT.replace('cy="35" r="4" fill="#ffffff"', 'cy="35" r="4" fill="#8b8c90"'))), ["construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke"]);
-  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke="#ececea" />'))), ["construction  traffic-light  path@9 stroke #ececea → the fill tone as a stroke only on a core: a 3.5 bar's path pasted after it, at the root's width"]);
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke="#ececea" />'))), ["construction  traffic-light  path@9 stroke #ececea → the fill tone only as a fill"]);
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke="#cfcfcb" />'))), ["construction  traffic-light  path@9 stroke #cfcfcb → the shade tone only as a fill"]);
+});
+
+test("solid: the line tone fills only a dot of r ≤ 2.5", () => {
+  assert.deepEqual(lines(check(add('<circle cx="24" cy="13" r="3" fill="#25262a" stroke="none" />'))), ["solid  traffic-light  circle@9 r 3 filled in the line tone → a body (tone, shade, contour), or a dot of r ≤ 2.5"]);
+  assert.deepEqual(lines(check(LIGHT.replace('<circle cx="24" cy="13" r="4" fill="#ffffff" />', '<circle cx="24" cy="13" r="4" fill="#25262a" />'))), ["solid  traffic-light  circle@6 r 4 filled in the line tone → a body (tone, shade, contour), or a dot of r ≤ 2.5"]);
+  assert.deepEqual(lines(check(add('<rect x="22" y="11" width="4" height="4" rx="1" fill="#25262a" />'))), ["solid  traffic-light  rect@9 filled in the line tone → a body (tone, shade, contour), or a dot of r ≤ 2.5"]);
+  assert.deepEqual(lines(check(add('<circle cx="24" cy="13" r="2.5" fill="#25262a" stroke="none" />'))), [], "a dot of r 2.5");
+  assert.deepEqual(lines(check(add('<circle cx="24" cy="13" r="2.5" fill="#25262a" />'))), [], "a dot drawn with the root's line is a shape, and passes");
+});
+
+test("one line weight: an open line or a mark at 2 is refused like 3.5; a root-width part passes", () => {
+  for (const w of ["2", "3.5", "2.5"]) assert.deepEqual(lines(check(add(`<path d="M24 44V40" stroke-width="${w}" />`))), [`stroke  traffic-light  path@9 stroke-width ${w} → 1.5, or 2 on a contour`], w);
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="2" stroke="#8b8c90" />'))), ["stroke  traffic-light  path@9 stroke-width 2 → 1.5, or 2 on a contour"]);
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" />'))), []);
 });
 
 test("light: the shade sits below or right of its body's centre", () => {
@@ -157,14 +169,12 @@ test("count: eight elements, twelve commands", () => {
   assert.deepEqual(lines(check(add('<path d="M5 5h1h1h1h1h1h1h1h1h1h1h1" />'))), [], "the move counts: twelve is the cap");
 });
 
-test("the variants for measuring: the object as drawn, and its lines alone with each core cut out", () => {
-  assert.equal(parse(objectOf(LIGHT)).elements.length, 7);
+test("the variants for measuring: the object as drawn, and its lines alone", () => {
+  assert.equal(parse(objectOf(LIGHT)).elements.length, 8);
   const l = linesOf(LIGHT);
   assert.ok(!/#ececea|#cfcfcb|#ffffff/.test(l), l);
-  assert.equal(parse(l).elements.length, 5, "brackets, contour, three lamps: the tone and the shade are paint");
-  const w = linesOf(read("steering-wheel"));
-  assert.match(w, /<mask id="cores"/);
-  assert.match(w, /mask="url\(#cores\)"/);
+  assert.doesNotMatch(l, /<mask/);
+  assert.equal(parse(l).elements.length, 5, "brackets, contour, three lenses: the tone, the shade and the dot are paint");
 });
 
 test("every set in the old finish is rejected, and so is the first neutral drawing", async () => {

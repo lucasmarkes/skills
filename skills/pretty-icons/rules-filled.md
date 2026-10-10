@@ -68,7 +68,7 @@ Each body's ink lands on its keyline, centred at 24. A rect's edge sits half a c
 | --- | --- | --- | --- |
 | `cx 24 cy 24 r 19` | `x 7 y 7 w 34 h 34 rx 6` | `x 9 y 5 w 30 h 38 rx 6` | `x 5 y 9 w 38 h 30 rx 6` |
 
-Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded housing on the portrait keyline, is the whole construction in seven elements: the brackets, the tone, the shade, the contour, three lamps:
+Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded housing on the portrait keyline, is the whole construction in eight elements: the brackets, the tone, the shade, the contour, three lenses and the lit lamp's dot:
 
 ```svg
 <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -76,13 +76,14 @@ Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded
   <rect x="13.75" y="5" width="20.5" height="38" rx="8" fill="#ececea" stroke="none" />
   <path d="M26.25 5A8 8 0 0 1 34.25 13V35A8 8 0 0 1 26.25 43Z" fill="#cfcfcb" stroke="none" />
   <rect x="13.75" y="5" width="20.5" height="38" rx="8" stroke-width="2" />
-  <circle cx="24" cy="13" r="4" fill="#25262a" />
+  <circle cx="24" cy="13" r="4" fill="#ffffff" />
   <circle cx="24" cy="24" r="4" fill="#ffffff" />
   <circle cx="24" cy="35" r="4" fill="#ffffff" />
+  <circle cx="24" cy="13" r="2" fill="#25262a" stroke="none" />
 </svg>
 ```
 
-The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="none"`; the shade is the right third of it, its corners the same arcs, so the contour pasted after it covers the seam; the contour is the tone's rect again, at 2. The brackets come first, so the body covers their ends. The lamp that is on is solid line; the two that are off are paper, drawn by the root's line.
+The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="none"`; the shade is the right third of it, its corners the same arcs, so the contour pasted after it covers the seam; the contour is the tone's rect again, at 2. The brackets come first, so the body covers their ends. The three lenses are paper, drawn by the root's line; the lamp that is on is a dot in the line tone inside the top lens.
 
 ## 01 · grid
 

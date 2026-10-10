@@ -2,7 +2,7 @@
  * The measured rules, over a set. Each icon is rendered and measured by
  * raster.mjs; gap is read from geometry.mjs, with the stroke added.
  * At the filled finish weight reads the lines alone (no paint, no fill), and gap holds
- * every element but the paint apart (a tone, a shade, a dot, a core: filled.mjs): line
+ * every element but the paint apart (a tone, a shade, a dot: filled.mjs): line
  * from line by a stroke, a mark from anything by half a stroke.
  * A modifier (modifiers.mjs) is the base's sign, not its object. Its cut moves the base's box, mass and ink,
  * so a modified icon is judged for live (the whole) and gap (without the modifier, whose halo is the modifier

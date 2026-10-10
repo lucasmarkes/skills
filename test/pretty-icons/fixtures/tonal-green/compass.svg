@@ -2,6 +2,6 @@
   <circle cx="24" cy="24" r="19" fill="#ececea" stroke="none" />
   <path d="M6.5 30A19.25 19.25 0 0 0 41.5 30Z" fill="#cfcfcb" stroke="none" />
   <circle cx="24" cy="24" r="19" stroke-width="2" />
-  <path d="M33.5 14.5L19.5 19.5L28.5 28.5Z" fill="#25262a" />
+  <path d="M33.5 14.5L19.5 19.5L28.5 28.5Z" fill="#cfcfcb" />
   <path d="M14.5 33.5L19.5 19.5L28.5 28.5Z" fill="#ffffff" />
 </svg>
