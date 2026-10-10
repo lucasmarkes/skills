@@ -68,11 +68,11 @@ Each body's ink lands on its keyline, centred at 24. A rect's edge sits half a c
 | --- | --- | --- | --- |
 | `cx 24 cy 24 r 19` | `x 7 y 7 w 34 h 34 rx 6` | `x 9 y 5 w 30 h 38 rx 6` | `x 5 y 9 w 38 h 30 rx 6` |
 
-Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded housing on the portrait keyline, is the whole construction in eight elements: the brackets, the tone, the shade, the contour, three lenses and the lit lamp's dot:
+Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded housing on the portrait keyline, is the whole construction in eight elements: the side panels, the tone, the shade, the contour, three lenses and the lit lamp's dot:
 
 ```svg
 <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M8.75 18H13.75M8.75 30H13.75M34.25 18H39.25M34.25 30H39.25" />
+  <path d="M13.75 14C11 15.5 8.75 17 8.75 20V28C8.75 31 11 32.5 13.75 34ZM34.25 14C37 15.5 39.25 17 39.25 20V28C39.25 31 37 32.5 34.25 34Z" fill="#cfcfcb" />
   <rect x="13.75" y="5" width="20.5" height="38" rx="8" fill="#ececea" stroke="none" />
   <path d="M26.25 5A8 8 0 0 1 34.25 13V35A8 8 0 0 1 26.25 43Z" fill="#cfcfcb" stroke="none" />
   <rect x="13.75" y="5" width="20.5" height="38" rx="8" stroke-width="2" />
@@ -83,7 +83,7 @@ Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded
 </svg>
 ```
 
-The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="none"`; the shade is the right third of it, its corners the same arcs, so the contour pasted after it covers the seam; the contour is the tone's rect again, at 2. The brackets come first, so the body covers their ends. The three lenses are paper, drawn by the root's line; the lamp that is on is a dot in the line tone inside the top lens.
+The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="none"`; the shade is the right third of it, its corners the same arcs, so the contour pasted after it covers the seam; the contour is the tone's rect again, at 2. The side panels come first, one shape in the shade tone: each ends on the housing's straight side, between its corner arcs, so the contour covers its seam. A bracket of one line goes thin at 16 to 24 px; a panel 5 wide holds. The three lenses are paper, drawn by the root's line; the lamp that is on is a dot in the line tone inside the top lens.
 
 ## 01 · grid
 
@@ -130,7 +130,7 @@ Its horns are the two cusps (`c`), and they turn in: a crescent whose horns poin
 
 ## 05 · weight
 
-Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a line at 2 weighs 2, a bar and its core 2 (its two edges), a shape its outline at 1.5. Where lines cross, they count once. A tyre filled solid weighs its outline, not its area: paint adds nothing. Within 25% of the set's median and of the reference, 328.3, the median of `examples/garage`.
+Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a line at 2 weighs 2, a bar and its core 2 (its two edges), a shape its outline at 1.5. Where lines cross, they count once. A tyre filled solid weighs its outline, not its area: paint adds nothing. Within 25% of the set's median and of the reference, 334.6, the median of `examples/garage`.
 
 A body at its keyline weighs about 240 to 250: the circle 239, a rect with `rx 6` 251. The details carry the other 90 or so: a line 60 long, or a bar 45 long. A thin object (a bone, a brush, a key) has less outline than a body at its keyline, and comes in light. A bulky one with bars or a second body (a cage, a jar, a bowl of food) comes in heavy.
 
@@ -159,7 +159,7 @@ By character, by the smaller side: the radii table. A rect whose `rx` is none of
 
 Line to line: touch, or one stroke apart, 1.5, outer edge to outer edge. A mark from anything: touch, or half a stroke apart, 0.75. `check.mjs` measures centrelines, and counts every stroke as 1.5, a contour's 2 too: two touch at 0.1 or less, and sit a stroke apart at 3 or more, 2.25 from a mark. Between is almost. Tones, shades, dots and cores are paint and are left out.
 
-- **Keep it, for a part that meets a body:** end it on the contour's centreline at an anchor or on a straight side, where the point is on the grid: the steering wheel's spokes start on the ring's centreline. Or cross it: run the part on into the body and draw it before the body's tone, so the tone covers its end, as the traffic light's brackets. Ending near a curve between anchors is a guess: a stem that stops 0.25 short of a leaf's edge is already almost.
+- **Keep it, for a part that meets a body:** end it on the contour's centreline at an anchor or on a straight side, where the point is on the grid: the steering wheel's spokes start on the ring's centreline. Or cross it: run the part on into the body and draw it before the body's tone, so the tone covers its end, as the gearshift's stem. Ending near a curve between anchors is a guess: a stem that stops 0.25 short of a leaf's edge is already almost.
 - **Keep it, for two bodies that meet** (two leaves on a stem, a lid on a pot): give both contours the same anchor, or let one cross the other.
 - **Rejected when:** `gap  wrench  path@4 to circle@5 0.07 apart → ≥ 1.5 apart, or crossing`; `gap  seedling  path@2 to path@6 overlapping, centrelines 0.5 apart → ≥ 1.5 apart, or crossing`: a part stopped near a leaf's edge, neither on it nor through it.
 

@@ -15,7 +15,7 @@ const rules = (r) => [...new Set(r.failures.map((f) => f.rule))].sort();
 const lines = (r) => r.failures.map(formatFailure);
 const read = (n) => readFileSync(join(garage, `${n}.svg`), "utf8");
 
-// The worked example: brackets, tone, shade, contour, three lenses, the lit lamp's dot.
+// The worked example: side panels, tone, shade, contour, three lenses, the lit lamp's dot.
 const LIGHT = read("traffic-light");
 const TONE = '<rect x="13.75" y="5" width="20.5" height="38" rx="8" fill="#ececea" stroke="none" />';
 const SHADE = '<path d="M26.25 5A8 8 0 0 1 34.25 13V35A8 8 0 0 1 26.25 43Z" fill="#cfcfcb" stroke="none" />';
@@ -81,11 +81,11 @@ test("the tones: five, neutral, each with a dark twin", () => {
 test("classify: tone, shade, contour, shape, dot, line; mark", () => {
   const at = (els) => els.map((e) => e.at);
   const t = classify(parse(LIGHT).elements);
-  assert.deepEqual(at(t.lines), ["path@2"]);
+  assert.deepEqual(at(t.lines), []);
   assert.deepEqual(at(t.tones), ["rect@3"]);
   assert.deepEqual(at(t.shades), ["path@4"]);
   assert.deepEqual(at(t.contours), ["rect@5"]);
-  assert.deepEqual(at(t.shapes), ["circle@6", "circle@7", "circle@8"]);
+  assert.deepEqual(at(t.shapes), ["path@2", "circle@6", "circle@7", "circle@8"]);
   assert.deepEqual(at(t.dots), ["circle@9"]);
   assert.deepEqual([...t.paint].map((e) => e.at).sort(), ["circle@9", "path@4", "rect@3"]);
   assert.equal(t.cores, undefined, "no core: the bar is gone");

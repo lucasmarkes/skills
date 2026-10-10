@@ -2,7 +2,7 @@
   <circle cx="24" cy="24" r="19" fill="#ececea" stroke="none" />
   <path d="M5 24A19 19 0 0 0 43 24Z" fill="#cfcfcb" stroke="none" />
   <circle cx="24" cy="24" r="19" stroke-width="2" />
-  <circle cx="24" cy="24" r="12" fill="#ffffff" />
-  <path d="M12 24H24M36 24H24M24 24V36" />
-  <circle cx="24" cy="24" r="2" fill="#25262a" stroke="none" />
+  <circle cx="24" cy="24" r="11" fill="#ffffff" />
+  <path d="M13 24H20M35 24H28M24 28V35" />
+  <circle cx="24" cy="24" r="4" fill="#cfcfcb" />
 </svg>

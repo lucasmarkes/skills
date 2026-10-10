@@ -10,19 +10,21 @@ Spec: `docs/superpowers/specs/2026-10-09-pretty-icons-identity-design.md` · Pla
 ├─────────┼──────────────────┼──────┼──────┼───────┼───────┼─────────────┼────────┼──────┼──────┼───────┼─────────────────────────┼──────┤
 │ 0       │ 'battery'        │ 4    │ 8    │ 40    │ 32.25 │ 'landscape' │ 321.07 │ 0    │ 1.55 │ 27    │ '2 smooth · 0 corners'  │ 0    │
 │ 1       │ 'car'            │ 4    │ 9    │ 40    │ 31.25 │ 'landscape' │ 335.51 │ 0    │ 1.82 │ 38    │ '8 smooth · 6 corners'  │ 0    │
-│ 2       │ 'fuel'           │ 8.75 │ 4    │ 31.25 │ 40    │ 'portrait'  │ 350.42 │ -2.6 │ 0.11 │ 35    │ '8 smooth · 2 corners'  │ 0    │
-│ 3       │ 'gearshift'      │ 8    │ 4    │ 32    │ 39.75 │ 'portrait'  │ 317.12 │ 0    │ 0.73 │ 39    │ '0 smooth · 2 corners'  │ 0    │
+│ 2       │ 'fuel'           │ 8.75 │ 4    │ 31.25 │ 40    │ 'portrait'  │ 333.65 │ -2.6 │ 0.11 │ 35    │ '8 smooth · 2 corners'  │ 0    │
+│ 3       │ 'gearshift'      │ 8    │ 4    │ 32    │ 39.75 │ 'portrait'  │ 356.65 │ 0    │ 0.93 │ 39    │ '0 smooth · 2 corners'  │ 0    │
 │ 4       │ 'oil'            │ 8    │ 4.25 │ 32    │ 39.75 │ 'portrait'  │ 307.59 │ 0    │ 2.39 │ 28    │ '15 smooth · 3 corners' │ 0    │
-│ 5       │ 'speedometer'    │ 4    │ 8    │ 40    │ 32    │ 'landscape' │ 270.4  │ 0    │ 1.68 │ 24    │ '7 smooth · 2 corners'  │ 0    │
-│ 6       │ 'steering-wheel' │ 4    │ 4    │ 40    │ 40    │ 'circle'    │ 401.3  │ 0    │ 0    │ 32    │ '0 smooth · 2 corners'  │ 0    │
-│ 7       │ 'traffic-light'  │ 8    │ 4    │ 32    │ 40    │ 'portrait'  │ 347    │ 0    │ 0    │ 42    │ '2 smooth · 2 corners'  │ 0    │
-│ 8       │ 'tyre'           │ 4    │ 4    │ 40    │ 40    │ 'circle'    │ 402.44 │ 0    │ 0    │ 31    │ '0 smooth · 4 corners'  │ 0    │
+│ 5       │ 'speedometer'    │ 4    │ 8    │ 40    │ 32    │ 'landscape' │ 278.32 │ 0    │ 1.68 │ 24    │ '7 smooth · 2 corners'  │ 0    │
+│ 6       │ 'steering-wheel' │ 4    │ 4    │ 40    │ 40    │ 'circle'    │ 404.88 │ 0    │ 0    │ 32    │ '0 smooth · 2 corners'  │ 0    │
+│ 7       │ 'traffic-light'  │ 8    │ 4    │ 32    │ 40    │ 'portrait'  │ 386.1  │ 0    │ 0    │ 40    │ '6 smooth · 6 corners'  │ 0    │
+│ 8       │ 'tyre'           │ 4    │ 4    │ 40    │ 40    │ 'circle'    │ 339.28 │ 0    │ 0    │ 28    │ '0 smooth · 4 corners'  │ 0    │
 │ 9       │ 'wrench'         │ 6.5  │ 4.56 │ 36.94 │ 36.94 │ 'square'    │ 260.13 │ 0.5  │ -0.5 │ 44    │ '3 smooth · 9 corners'  │ 0    │
 └─────────┴──────────────────┴──────┴──────┴───────┴───────┴─────────────┴────────┴──────┴──────┴───────┴─────────────────────────┴──────┘
 ok
 ```
 
 What changed, per icon: tyre (a ring from the kit, hole 10; was a bar at 3.5 with a core), steering-wheel (a disc with a paper face; a ring weighed 529), gearshift (the gate at 1.5; was 3.5), speedometer (the needle's hub a dot r 2; was r 3.25 in the line tone), traffic-light (paper lenses and a dot), battery, car, oil (their line-tone parts in the shade tone). `REFERENCE_INK[48]` 341.3 → 328.3.
+
+Redrawn after the round-1 craft read (8 of 10 named), each for the defect the reader named: tyre ("tiny lug dots, uneven highlight": the five lug dots and the two mark arcs dropped; the kit's ring with hole 8 and one hub dot of r 2.5, so the rubber reads fat and nothing on it is tiny); traffic-light ("side tabs too thin/small": the four one-line brackets became two side panels, one shape in the shade tone, 5 wide, each ending on the housing's straight side); gearshift ("floating knob, thin stem": the stem a pill 5 wide in the shade tone, run from inside the knob into the base, so the knob sits on it; the gate drawn larger, 13 wide); speedometer ("ticks too small, uneven": the three ticks 7 long, all from r 10 to r 17 about the hub; were 5.25, at uneven radii); steering-wheel ("spokes crowd hub; detail too small": the hub a shade disc of r 4, the spokes ending on its edge; the face r 11, so the weight stays in band); fuel ("detail too small (hose/panel)": the grey panel line dropped). `REFERENCE_INK[48]` 328.3 → 334.6, the new median.
 
 ### Reads
 
