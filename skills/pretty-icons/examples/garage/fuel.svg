@@ -4,5 +4,5 @@
   <path d="M9.75 35.5H30.75V37A6 6 0 0 1 24.75 43H15.75A6 6 0 0 1 9.75 37Z" fill="#cfcfcb" stroke="none" />
   <rect x="9.75" y="5" width="21" height="38" rx="6" stroke-width="2" />
   <rect x="14.25" y="9.75" width="12" height="9" rx="2.5" fill="#ffffff" />
-  <path d="M36.25 9.5H38A1.25 1.25 0 0 1 39.25 10.75V19H35.5L34 12.5Z" fill="#cfcfcb" />
+  <path d="M36.25 9.5H38A1.25 1.25 0 0 1 39.25 10.75V19H35.5L30.75 13Z" fill="#cfcfcb" />
 </svg>

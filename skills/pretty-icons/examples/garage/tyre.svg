@@ -1,8 +1,9 @@
 <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M20 5H28A11 19 0 0 1 28 43H20A11 19 0 0 1 20 5Z" fill="#ececea" stroke="none" />
-  <path d="M20 5H28A11 19 0 0 1 28 43H20A11 19 0 0 0 20 5Z" fill="#cfcfcb" stroke="none" />
-  <path d="M20 5H28A11 19 0 0 1 28 43H20A11 19 0 0 1 20 5Z" stroke-width="2" />
-  <path d="M20 5A11 19 0 0 1 20 43M28.5 12H36.5M30.5 18H38.5M31 24H39M30.5 30H38.5M28.5 36H36.5" />
-  <path d="M20 16A4.5 8 0 0 1 20 32A4.5 8 0 0 1 20 16Z" fill="#ffffff" />
-  <circle cx="20" cy="24" r="2" fill="#25262a" stroke="none" />
+  <circle cx="24" cy="24" r="19" fill="#ececea" stroke="none" />
+  <path d="M43 24A19 19 0 0 1 5 24A20 20 0 0 0 43 24Z" fill="#cfcfcb" stroke="none" />
+  <circle cx="24" cy="24" r="19" stroke-width="2" />
+  <path d="M42.5 29 38.25 31.25M37.5 37.5 32.75 37.5M29 42.5 24.75 40M19 42.5 16.75 38.25M10.5 37.5 10.5 32.75M5.5 29 8 24.75" />
+  <path d="M5.5 19 9.75 16.75M10.5 10.5 15.25 10.5M19 5.5 23.25 8M29 5.5 31.25 9.75M37.5 10.5 37.5 15.25M42.5 19 40 23.25" />
+  <circle cx="24" cy="24" r="9" fill="#ffffff" />
+  <circle cx="24" cy="24" r="2.5" fill="#25262a" stroke="none" />
 </svg>

@@ -11,7 +11,7 @@ What the finish is: a thin line over a light body, in five neutral tones and no 
 | contour | the tone's geometry pasted, nothing else on it | no `fill`, no `stroke`, `stroke-width="2"` |
 | shape | a closed element filled and drawn in one: a wheel, a cap, a lamp, a base | `fill` a tone; no `stroke` |
 | line | a part (a hose, a needle, a sign) | no `fill`, no `stroke`; `stroke-width` 2 for a mark of weight |
-| mark | what is printed on the object: ticks, treads, a gauge's scale | `stroke` the mark tone |
+| mark | a secondary mark printed on the object: a minor tick, a seam (a tick or tread that names the object, a gauge's scale or a tyre's tread, takes the line tone) | `stroke` the mark tone |
 | bar and core | a tube (a spoke, a rim, a stick): a bar at `stroke-width="3.5"`, then its path pasted | the core: `stroke` the fill or the shade tone, at the root's width |
 | dot | a circle of r 2 or less: a hub, a rivet | `fill` a tone, `stroke="none"` |
 
@@ -45,7 +45,7 @@ Five tones, nothing else. A file holds the light ones; a dark page swaps each fo
 | fill | `#ececea` | `#3d3e43` | the body |
 | shade | `#cfcfcb` | `#2c2d31` | the side away from the light, a base, a core |
 | paper | `#ffffff` | `#5a5b61` | glass, a lamp that is off, a hole |
-| mark | `#8b8c90` | `#9d9ea3` | ticks and treads, as a stroke only |
+| mark | `#8b8c90` | `#9d9ea3` | minor ticks and seams, as a stroke only; a scale or a tread that names the object takes the line |
 
 ## The radii
 
@@ -125,12 +125,12 @@ Its horns are the two cusps (`c`), and they turn in: a crescent whose horns poin
 - **Keep it, for the light:** `check.mjs` compares the centre of the shade's box with the centre of its tone's box. The shade passes when its centre is lower, or further right. A shade run from end to end of a slanted body (a leaf or a lens at 30° to 60°) has the tone's own box, centre on centre, and fails on either side. Never shade a body with a copy of its whole tone. The kit's shade passes the light check at every `--rot`; when it cannot, it says so. At a slant it shades one segment, from the lower belly to a tip (the tip on the right with `--shade right`), closed by its chord, even with `--seam curved`. For a body you drew yourself, or with `--from`, do the same by hand: copy that segment from the contour and close it with `Z`. For `leaf --w 16 --h 8 --at 16,12 --rot -45` that is `M21 7C19.25 9 20.5 11.75 18.5 13.75Z`, the kit's own shade. A small part beside a larger body (a leaf on a stem, a grain on an ear) may take `--shade none`; the larger body carries the light.
 - **Keep it, for a tube** (a spoke, a rim, a gear stick): a bar at 3.5 in the line, then the same `d` with `stroke` the fill or the shade tone and no width. The core cuts the bar into two thin lines. A ring as a tube: `circle r 18.25 stroke-width 3.5`, then the circle again with `stroke="#cfcfcb"`.
 - **Keep it, for a solid small part:** a wheel, a terminal, a lamp that is on: a shape filled with the line tone. Glass and a hole: paper.
-- **Keep it, for what is printed:** ticks and treads in the mark tone, at the root's width.
+- **Keep it, for what is printed:** a tick or tread that names the object (a gauge's scale, a tyre's tread) is a line, in the line tone at the root's width; the mark tone stays for secondary marks, a minor tick or a seam, at the root's width.
 - **Rejected when:** `light  seedling  path@5 shade centred at 16.25, 12.5 → below or right of path@4's centre 16.25, 12.5: the light comes from the top`; `construction  traffic-light  rect@3 fill #ececea stroke none → its contour after it: the same geometry, no fill, at 2`; `construction  traffic-light  path@5 shade → between a body's tone and its contour, so the line covers its edge`; `construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lit lamp)`; `construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke`; `construction  traffic-light  path@9 stroke #ececea → the fill tone as a stroke only on a core: a 3.5 bar's path pasted after it, at the root's width`; `stroke  traffic-light  rect@5 contour at 1.5 → 2`; `construction  traffic-light  circle@9 contour without a tone → a tone before it with the same geometry, or the root's line`; `construction  traffic-light  no body → a closed element in the fill tone, #ececea`.
 
 ## 05 · weight
 
-Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a line at 2 weighs 2, a bar and its core 2 (its two edges), a shape its outline at 1.5. Where lines cross, they count once. A tyre filled solid weighs its outline, not its area: paint adds nothing. Within 25% of the set's median and of the reference, 339.6, the median of `examples/garage`.
+Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a line at 2 weighs 2, a bar and its core 2 (its two edges), a shape its outline at 1.5. Where lines cross, they count once. A tyre filled solid weighs its outline, not its area: paint adds nothing. Within 25% of the set's median and of the reference, 340.4, the median of `examples/garage`.
 
 A body at its keyline weighs about 240 to 250: the circle 239, a rect with `rx 6` 251. The details carry the other 90 or so: a line 60 long, or a bar 45 long. A thin object (a bone, a brush, a key) has less outline than a body at its keyline, and comes in light. A bulky one with bars or a second body (a cage, a jar, a bowl of food) comes in heavy.
 
@@ -159,7 +159,7 @@ By character, by the smaller side: the radii table. A rect whose `rx` is none of
 
 Line to line: touch, or one stroke apart, 1.5, outer edge to outer edge. A mark from anything: touch, or half a stroke apart, 0.75. `check.mjs` measures centrelines, and counts every stroke as 1.5, a contour's 2 too: two touch at 0.1 or less, and sit a stroke apart at 3 or more, 2.25 from a mark. Between is almost. Tones, shades, dots and cores are paint and are left out.
 
-- **Keep it, for a part that meets a body:** end it on the contour's centreline at an anchor or on a straight side, where the point is on the grid: the steering wheel's spokes start on the ring's centreline. Or cross it: run the part on into the body and draw it before the body's tone, so the tone covers its end, as the gearshift's stem. Ending near a curve between anchors is a guess: a stem that stops 0.25 short of a leaf's edge is already almost.
+- **Keep it, for a part that meets a body:** end it on the contour's centreline at an anchor or on a straight side, where the point is on the grid: the fuel pump's nozzle ends on the pump's straight side, at 30.75, 13. Or cross it: run the part on into the body and draw it before the body's tone, so the tone covers its end, as the gearshift's stem. Ending near a curve between anchors is a guess: a stem that stops 0.25 short of a leaf's edge is already almost.
 - **Keep it, for two bodies that meet** (two leaves on a stem, a lid on a pot): give both contours the same anchor, or let one cross the other.
 - **Rejected when:** `gap  wrench  path@4 to circle@5 0.07 apart → ≥ 1.5 apart, or crossing`; `gap  seedling  path@2 to path@6 overlapping, centrelines 0.5 apart → ≥ 1.5 apart, or crossing`: a part stopped near a leaf's edge, neither on it nor through it.
 
