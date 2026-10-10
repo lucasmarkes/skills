@@ -1,6 +1,6 @@
 # The ten rules at the filled finish
 
-The grid names the finish: 16, 20 and 24 are duotone (`rules.md`), 48 is filled. The ten rules keep their names and numbers; this file says where each reads differently at 48, and the rest is `rules.md`'s text. An icon at 48 is shown at 16 to 64 px by CSS, wherever the person chose the filled finish. It is sharpest from 32 up, where the line is a whole pixel; below 32 it softens on a 1× screen. `examples/garage`, ten icons for one car app, is the finish; its metaphors are not the bar (rule 09).
+The grid names the finish: 16, 20 and 24 are duotone (`rules.md`), 48 is filled. The ten rules keep their names and numbers, and an eleventh, 11 · contrast, is the finish's own; this file says where each reads differently at 48, and the rest is `rules.md`'s text. An icon at 48 is shown at 16 to 64 px by CSS, wherever the person chose the filled finish. It is sharpest from 32 up, where the line is a whole pixel; below 32 it softens on a 1× screen. `examples/garage`, ten icons for one car app, is the finish; its metaphors are not the bar (rule 09).
 
 What the finish is: a thin line over a light body, in five neutral tones and no colour. The light comes from the top: the side of the body away from it is shaded inside the body, under the line. No offset shadow, no highlight. The one exception is the paper sheen on glass (`rules.md` 09): a small paper fill, never a stroke. The line tone is the line: it fills only a dot of r 2.5 or less (a hub, a lamp that is on); everything larger is a body, or paper (glass, a lamp that is off, a hole). Everything is told apart by paint and by order:
 
@@ -100,9 +100,9 @@ The object's ink box is within 1 of circle 40, square 36, portrait 32 × 40 or l
 
 ## 03 · stroke, and the tones
 
-The root is `stroke="#25262a" stroke-width="1.5"`, round caps and joins, `fill="none"`. An element sets `stroke-width` only to 2, and only on a contour; never a cap, a join, an opacity or a dash. Every other line and every filled element keeps the root's width. The fill and the shade tones are never a stroke. Every `fill` and `stroke` is one of the five tones.
+The root is `stroke="#25262a" stroke-width="1.5"`, round caps and joins, `fill="none"`. An element sets `stroke-width` only to 2, and only on a contour; never a cap, a join, an opacity or a dash. Every other line and every filled element keeps the root's width. A modifier (`modifiers.mjs`) keeps its own weights and is measured apart: 03, the dot limit and 11 do not read it. The fill and the shade tones are never a stroke. Every `fill` and `stroke` is one of the five tones.
 
-- **Rejected when:** `stroke  traffic-light  stroke #2e3955 → #25262a, the line tone`; `stroke  traffic-light  stroke-width 2.5 → 1.5`; `stroke  traffic-light  path@9 stroke-width 3.5 → 1.5, or 2 on a contour`; `palette  traffic-light  rect@3 fill #e8b4ab → one of the five tones: #25262a #ececea #cfcfcb #ffffff #8b8c90`.
+- **Rejected when:** `stroke  traffic-light  stroke #2e3955 → #25262a, the line tone`; `stroke  traffic-light  stroke-width 2.5 → 1.5`; `stroke  traffic-light  path@9 stroke-width 3.5 → not set: the root's 1.5, or 2 on a contour`; `palette  traffic-light  rect@3 fill #e8b4ab → one of the five tones: #25262a #ececea #cfcfcb #ffffff #8b8c90`.
 
 ## 04 · construction
 
@@ -128,7 +128,7 @@ Its horns are the two cusps (`c`), and they turn in: a crescent whose horns poin
 
 ## 05 · weight
 
-Ink is the line alone: tones, shades and dots dropped, every other stroke read in the line tone. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a shape its outline at 1.5. Where lines cross, they count once. A tyre filled solid weighs its outline, not its area: paint adds nothing. Within 25% of the set's median and of the reference, 340.4, the median of `examples/garage`.
+Ink is the line alone: tones, shades and dots dropped, every other stroke read in the line tone. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a shape its outline at 1.5. Where lines cross, they count once. A tyre is a `ring` (`shapes.mjs`), its tone and its contour; paint adds nothing. Within 25% of the set's median and of the reference, 340.4, the median of `examples/garage`.
 
 A body at its keyline weighs about 240 to 250: the circle 239, a rect with `rx 6` 251. The details carry the other 90 or so: a line 60 long. A thin object (a bone, a brush, a key) has less outline than a body at its keyline, and comes in light. A bulky one with a second body (a cage, a jar, a bowl of food) comes in heavy.
 
@@ -179,7 +179,7 @@ The line tone is 20% to 45% of the icon's paint, `CONTRAST_BAND` in `presets.mjs
 
 - **Keep it, for a dark icon:** a part filled in the line tone becomes a body (tone, shade, contour) or paper; a part that must stay dark shrinks to a dot. A small body crowded with line takes fewer lines or grows to its keyline.
 - **Keep it, for a pale icon:** give it a line: the contour it lacks, a printed detail, a part.
-- **Rejected when:** `contrast  wheel  line tone on 65% of the paint → 20% to 45%`, a ring of r 10 and a cross; `contrast  plate  line tone on 1% of the paint → 20% to 45%`, a tone with no contour and one short line.
+- **Rejected when:** `contrast  wheel  line tone on 64.8% of the paint → 20% to 45%`, a ring of r 10 and a cross; `contrast  plate  line tone on 1.0% of the paint → 20% to 45%`, a tone with no contour and one short line.
 
 ## How check.mjs measures
 

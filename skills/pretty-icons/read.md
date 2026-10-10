@@ -42,11 +42,11 @@ An icon fails when the reader names a defect from that list for it. A modifier f
 
 ## The set read
 
-The craft read judges each icon. It cannot say one belongs to another set. After the craft read passes, open a third fresh agent, one that has seen neither your work nor the other readers' answers. Give it `pretty-icons-sheet.png`, numbered in the sheet's order as for the craft read, and this prompt, with N filled in:
+The craft read judges each icon. It cannot say one belongs to another set. Every round, beside the craft read and whatever it says, open a third fresh agent, one that has seen neither your work nor the other readers' answers. Give it `pretty-icons-sheet.png`, numbered in the sheet's order as for the craft read, and this prompt, with N filled in:
 
 > These N icons are from one app. Name every icon that looks like it comes from a different set than the others, and in five words or fewer say why. Say 'one set' if none does.
 
-The set passes when the reader says "one set" or names one icon; say that icon in the hand-over with the reader's words. An icon named with a hedge ("possibly", "borderline") still counts as named. Two or more named go back to the drawing (`SKILL.md` step 3), each with the reader's words: "thick lines" is the line weight (`rules-filled.md` 03), "too dark" or "solid" is contrast (11), "cartoon" or "another library" is usually a second contour or a part filled in the line tone (04). Then the whole set runs `check.mjs`, `sheet.mjs` and the three reads again, each with a **new** reader. "Floating" said of a modifier does not count, as in the craft read.
+The set passes when the reader says "one set" or names one icon; say that icon in the hand-over with the reader's words. An icon named with a hedge ("possibly", "borderline") still counts as named. Two or more named go back to the drawing (`SKILL.md` step 3), each with the reader's words: the finish's rules file says where: at the filled finish (`rules-filled.md`), "thick lines" is the line weight (03), "too dark" or "solid" is contrast (11), "cartoon" or "another library" is usually a second contour or a part filled in the line tone (04); at duotone (`rules.md`), "thick" or "heavy" is weight (05), "cartoon" or "another library" is usually construction (04) or the metaphor (09). Then the whole set runs `check.mjs`, `sheet.mjs` and the three reads again, each with a **new** reader. "Floating" said of a modifier does not count, as in the craft read.
 
 ## Without a second agent
 

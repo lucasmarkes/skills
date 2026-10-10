@@ -73,7 +73,7 @@ test("rules-filled.md quotes what check.mjs prints for one weight, the solid, th
   quoted.push(...r.failures.filter((f) => f.rule === "contrast").map(line));
   assert.equal(quoted.length, 6);
   for (const l of quoted) assert.ok(filled.includes(`\`${l}\``), `rules-filled.md quotes ${l}`);
-  const live = filled.replace("`stroke  traffic-light  path@9 stroke-width 3.5 → 1.5, or 2 on a contour`", "");
+  const live = filled.replace("`stroke  traffic-light  path@9 stroke-width 3.5 → not set: the root's 1.5, or 2 on a contour`", "");
   for (const gone of [/\bcores?\b/, /\btubes?\b/, /solid small part/, /mark of weight/, /stroke-width="3\.5"/, /a bar at 3\.5/, /\b341\b/]) assert.ok(!gone.test(live), `rules-filled.md still says ${gone}`);
   assert.ok(filled.includes("## 11 · contrast"));
 });

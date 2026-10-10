@@ -47,7 +47,7 @@ A state (add, off, locked, new) is the base icon plus `node <skill-dir>/modifier
 2. `node <skill-dir>/sheet.mjs pretty-icons/`. It writes `pretty-icons-sheet.png` and `pretty-icons-blind.png` to a temp folder of this set's own (`--out=<dir>` moves them) and prints their paths and the key. Never put them in the app. Look at the sheet.
 3. Do the blind read in `read.md`. A failure goes back to step 3, then all of step 4, with a new reader.
 4. Do the craft read in `read.md`, with another new reader, once the blind read passes. A named defect goes back to step 3, then all of step 4.
-5. Do the set read in `read.md`, with a third new reader, once the craft read passes. Two or more icons named go back to step 3, then all of step 4.
+5. Do the set read in `read.md`, with a third new reader, every round beside the craft read, whatever the craft read says. Two or more icons named go back to step 3, then all of step 4.
 
 On exit 2, sheet and emit refuse; without Node, answer the text checks atop `check.mjs` by hand. Either way, deliver the `.svg` files; say `not measured`, **not read blind**, **not read for craft** and **not read as a set**.
 
@@ -87,6 +87,7 @@ Edit only that icon's `.svg`. Run steps 4 and 5 for the set.
 | shading the top or the left, or a stripe across the body | `rules-filled.md` 04: the light is from the top; the shade is the lower or right part, inside the outline |
 | shading a slanted leaf from tip to tip, or with a copy of its tone | `rules-filled.md` 04: the shade's box must sit lower or right of the tone's; print the body from `shapes.mjs`, or shade one segment by hand |
 | adding an offset shadow or a white shine | `rules-filled.md` 04: neither; depth is the shade inside the body. The one sheen allowed is a paper fill on glass, a gesture from rule 09 |
+| a `line%` out of the band | `rules-filled.md` 11: move the line tone onto or off the body (a part in the line tone becomes a body or a dot; a pale icon takes a line) |
 | filling a wheel, a lamp or a band in the line tone because it is "solid" | `rules-filled.md` 04: a body, or a dot of r 2.5 or less |
 | drawing a rim or a frame as a thick bar | `rules-filled.md` 04: a ring, from the kit (`shapes.mjs ring`) |
 | rounding every rect the same | `rules-filled.md` 07: cut, cased, moulded or a pill, by what the object is |

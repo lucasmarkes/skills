@@ -343,7 +343,7 @@ Note: the controller's craft prompt numbered pao 6 / pao-de-forma 7 while the sh
 Prompt: as the garage reads, with this set's names.
 Answer (verbatim):
 trigo: thin outline, no fill (it is the only one that looks like a different set). Also minor: rolo has a lighter, off-weight feel, but it is within the set.
-Verdict: FAIL (trigo).
+Verdict: pass (one icon named: trigo).
 
 ##### Craft read (pretty-icons-sheet.png; named by the sheet's labels)
 Prompt: as the garage reads, with this set's names.
@@ -629,5 +629,5 @@ The spec's "What success is", line by line:
 1. **Met.** `filled.test.mjs`: "solid: the line tone fills only a dot of r ≤ 2.5", "stroke: the root draws in the line tone at 1.5; an element takes 2 on a contour, never 3.5", "one line weight: an open line or a mark at 2 is refused like 3.5; a root-width part passes"; `check.test.mjs`: "contrast: the line tone's share of the paint, 20% to 45%, too much and too little"; `raster.test.mjs`: "shares: …". Each refusal names the element and the move.
 2. **Met.** garage, car and bakery each print `ok` above, and `ok` includes the contrast band; their `--print` tables (garage, "## The after sets") show every line% between 20 and 45.
 3. **Not met.** car passed all three reads in round 1. garage never passed all three in one round: round 1 passed the set read and failed craft (8 of 10); rounds 3 and 4 passed blind and craft and failed the set read (round 4: wrench and tyre). bakery passed blind (10 of 10) and craft (6 of 10) in round 3 and failed the set read (trigo, batedor hedged), after three rounds (R16). Both are left for the person in their sections.
-4. **Not met.** "## The trial": the music agent's `check.mjs` first printed `ok` on run 3, and the fresh set reader named metronome and microphone. The added dashboard trial is held the same way (run 4; notifications and team).
+4. **Not met.** "## The trial": the music agent's `check.mjs` first printed `ok` on run 3, and the fresh set reader named metronome and microphone. The added dashboard trial is held the same way (run 4; notifications and team) (duotone 16; not a test of the filled identity).
 5. **Met.** `git diff 81ea306 -- test/pretty-icons/fixtures/good-16 test/pretty-icons/fixtures/hairline-before` is empty, `examples/hairline` is unchanged, and its check is `ok`.
