@@ -1,8 +1,8 @@
 <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <circle cx="24" cy="24" r="19" fill="#ececea" stroke="none" />
-  <path d="M5 24A19 19 0 0 0 43 24L32 24A8 8 0 0 1 16 24Z" fill="#cfcfcb" stroke="none" />
-  <circle cx="24" cy="24" r="19" stroke-width="2" />
-  <circle cx="24" cy="24" r="8" fill="#ffffff" stroke="none" />
-  <circle cx="24" cy="24" r="8" stroke-width="2" />
-  <circle cx="24" cy="24" r="2.5" fill="#25262a" stroke="none" />
+  <path d="M20 5H28A11 19 0 0 1 28 43H20A11 19 0 0 1 20 5Z" fill="#ececea" stroke="none" />
+  <path d="M20 5H28A11 19 0 0 1 28 43H20A11 19 0 0 0 20 5Z" fill="#cfcfcb" stroke="none" />
+  <path d="M20 5H28A11 19 0 0 1 28 43H20A11 19 0 0 1 20 5Z" stroke-width="2" />
+  <path d="M20 5A11 19 0 0 1 20 43M28.5 12H36.5M30.5 18H38.5M31 24H39M30.5 30H38.5M28.5 36H36.5" />
+  <path d="M20 16A4.5 8 0 0 1 20 32A4.5 8 0 0 1 20 16Z" fill="#ffffff" />
+  <circle cx="20" cy="24" r="2" fill="#25262a" stroke="none" />
 </svg>

@@ -130,7 +130,7 @@ Its horns are the two cusps (`c`), and they turn in: a crescent whose horns poin
 
 ## 05 · weight
 
-Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a line at 2 weighs 2, a bar and its core 2 (its two edges), a shape its outline at 1.5. Where lines cross, they count once. A tyre filled solid weighs its outline, not its area: paint adds nothing. Within 25% of the set's median and of the reference, 334.6, the median of `examples/garage`.
+Ink is the line alone: tones, shades, dots and cores dropped, every other stroke read in the line tone, a core cut out of its bar. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a line at 2 weighs 2, a bar and its core 2 (its two edges), a shape its outline at 1.5. Where lines cross, they count once. A tyre filled solid weighs its outline, not its area: paint adds nothing. Within 25% of the set's median and of the reference, 339.6, the median of `examples/garage`.
 
 A body at its keyline weighs about 240 to 250: the circle 239, a rect with `rx 6` 251. The details carry the other 90 or so: a line 60 long, or a bar 45 long. A thin object (a bone, a brush, a key) has less outline than a body at its keyline, and comes in light. A bulky one with bars or a second body (a cage, a jar, a bowl of food) comes in heavy.
 

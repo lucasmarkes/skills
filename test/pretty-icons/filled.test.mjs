@@ -90,6 +90,7 @@ test("classify: tone, shade, contour, shape, dot, line; mark", () => {
   assert.deepEqual([...t.paint].map((e) => e.at).sort(), ["circle@9", "path@4", "rect@3"]);
   assert.equal(t.cores, undefined, "no core: the bar is gone");
   assert.deepEqual(at(classify(parse(add('<path d="M17 10V16" stroke="#8b8c90" />')).elements).marks), ["path@9"]);
+  assert.deepEqual(at(classify(parse(add('<path d="M24 44V40" />')).elements).lines), ["path@9"]);
 });
 
 test("the worked traffic light passes the text layer", () => {
@@ -176,7 +177,7 @@ test("the variants for measuring: the object as drawn, and its lines alone", () 
   const l = linesOf(LIGHT);
   assert.ok(!/#ececea|#cfcfcb|#ffffff/.test(l), l);
   assert.doesNotMatch(l, /<mask/);
-  assert.equal(parse(l).elements.length, 5, "brackets, contour, three lenses: the tone, the shade and the dot are paint");
+  assert.equal(parse(l).elements.length, 5, "side panels, contour, three lenses: the tone, the shade and the dot are paint");
 });
 
 test("every set in the old finish is rejected, and so is the first neutral drawing", async () => {
