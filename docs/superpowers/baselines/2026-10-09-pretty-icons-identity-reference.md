@@ -484,3 +484,131 @@ Verdicts under the read.md rule:
 Verdict: pass — 6 of 10 named with a defect, counting batedor (pass is at most 6).
 
 Left for the person: three rounds spent (R16). Round 3 passed the blind read (10 of 10, none by elimination) and the craft read (6 of 10), and failed the set read: trigo ("thin, lighter strokes, no fill") and batedor ("a milder call"). Round 2's trigo passed the set read but was named only by elimination; round 3's is kept because the blind reader named it from the picture. croissant and trigo were named "confused silhouette" in all three craft reads; bolo's cherry and rosquinha's sprinkles in two.
+
+## The trial
+
+Two trials, each by one fresh agent with no access to this conversation, working in an empty scratch folder. The music trial is the plan's. The person added the dashboard trial (sidebar icons, AI and agents among them); its prompt leaves the finish to the skill (R15). Both ran while the bakery's round 3 was drawn (R14). Neither agent ran a set read, so a fresh reader read each final sheet with the prompt from Task 6 Step 5.
+
+### music
+
+The prompt as sent:
+
+> Your working directory for this whole task is `<scratch>/trial.DEOK4I`. It is empty. Run every command from there (cd into it first in each shell command), and write nothing outside it.
+>
+> Use the skill in `/Users/lucasmarques/estudos/skills/skills/pretty-icons/SKILL.md` to draw six icons for a music shop app, in the filled finish: guitar, drum, microphone, headphones, record, metronome. Follow every step. Before each `check.mjs` run, say "check run N". Stop at the hand-over and report what `check.mjs` printed each time.
+
+Each check run, as the agent reported it (21 runs; the scratch ones measured variants, not the set):
+
+1. fail: `contour headphones path@2 6 straight sides → at most 5, or curves` · `gravity guitar mass +0, +4.11 → within ±3` · `gap guitar rect@2 to circle@7 overlapping, centrelines 1 apart → ≥ 1.5 apart, or crossing` · `contrast headphones line tone on 55%` · `contrast microphone line tone on 53%`
+2. fail: `gravity guitar mass +0, +3.49 → within ±3` · `gap guitar rect@3 to path@6 0.5 apart` · `contrast headphones 46%` · `contrast microphone 48%`
+3. `ok`
+4. scratch, fail: `contrast m2 45%`, `contrast m3 48%`
+5. scratch, `ok`
+6. `ok`
+7. `ok`; blind read 1 passed, craft read 1 failed
+8. fail: `gap guitar path@4 to circle@7 0.49 apart` · `weight guitar ink 263.23 (-28.7%) → within ±25% of the set's median 369.04` · `contrast guitar 49%`, `contrast headphones 47%`, `contrast microphone 46%`
+9. scratch, fail: keyline ga 37.19, gb 37.31, gc 37.75 against square 36 ±1 · `gap gb path@4 to circle@7 1.31 apart` · weight hp +37.0%, mic +25.4% · `contrast hp 45%`, `contrast mic 46%`
+10. scratch, fail: `keyline gb 37.25 × 37.25 → square 36 × 36 ±1`
+11. `ok`
+12. `ok`; blind read 2 passed, craft read 2 failed
+13. scratch, fail: live and keyline for ga, gb (against circle 40), gc keyline 38.5 · guitar soundhole gaps 1.05, 1.48, 1.35, 1.35, 1.45 · `metronome path@5 to rect@7 0.62 apart` · weight ga -27.8%, gb -26.9%, gc -25.5% · `contrast ga 46%`, `contrast mic 45%`
+14. on `examples/garage`, to measure the wrench's box: `ok`
+15. scratch, fail: `contrast gc 45%`, `contrast mic 45%`
+16. scratch, `ok`
+17. `ok`; blind read 3 passed, craft read 3 failed
+18. scratch, fail: `gap ga path@4 to circle@5 1.27 apart` · `gap gc path@4 to circle@5 1.15 apart` · `contrast gc 45%`
+19. `ok`; blind read 4 passed, craft read 4 failed
+20. scratch, fail: live and keyline for ga, gb (37.16, 37.31), live gc · guitar soundhole gaps 0.89, 1.06, 0.73 · `gap metronome path@4 to rect@6 1.34 apart` · weight ga -25.2%, gc -27.3% · contrast ga 46%, gb 45%, gc 47%
+21. `ok`; blind read 5 passed, craft read 5 failed
+
+`check.mjs --print`, run by the controller on the final folder (exit 0):
+
+```
+┌─────────┬──────────────┬──────┬──────┬──────┬───────┬─────────────┬────────┬───────┬───────┬───────┬──────────────────────────┬──────┐
+│ (index) │ icon         │ x0   │ y0   │ w    │ h     │ keyline     │ ink    │ dx    │ dy    │ line% │ joins                    │ infl │
+├─────────┼──────────────┼──────┼──────┼──────┼───────┼─────────────┼────────┼───────┼───────┼───────┼──────────────────────────┼──────┤
+│ 0       │ 'drum'       │ 4    │ 8.5  │ 40   │ 32    │ 'landscape' │ 375.67 │ 0     │ 0.5   │ 31    │ '8 smooth · 5 corners'   │ 0    │
+│ 1       │ 'guitar'     │ 5.5  │ 5.5  │ 37   │ 37    │ 'square'    │ 279.98 │ -1.54 │ 1.54  │ 42    │ '11 smooth · 10 corners' │ 6    │
+│ 2       │ 'headphones' │ 5.75 │ 6.25 │ 36.5 │ 36.25 │ 'square'    │ 415.79 │ 0     │ 1.27  │ 41    │ '24 smooth · 6 corners'  │ 0    │
+│ 3       │ 'metronome'  │ 8    │ 4    │ 32   │ 40    │ 'portrait'  │ 359.69 │ 0     │ 1.61  │ 34    │ '0 smooth · 12 corners'  │ 0    │
+│ 4       │ 'microphone' │ 8    │ 4    │ 32   │ 40    │ 'portrait'  │ 354.28 │ 0     │ -1.49 │ 45    │ '2 smooth · 4 corners'   │ 0    │
+│ 5       │ 'record'     │ 4    │ 4    │ 40   │ 40    │ 'circle'    │ 413.12 │ 0     │ 0     │ 34    │ '0 smooth · 2 corners'   │ 0    │
+└─────────┴──────────────┴──────┴──────┴──────┴───────┴─────────────┴────────┴───────┴───────┴───────┴──────────────────────────┴──────┘
+ok
+```
+
+The agent's reads, each by a fresh reader it opened:
+- Blind: passed all five rounds. Round 5: headphones "over-ear headband with two cups", microphone "studio mic on a stand", record "vinyl disc with concentric grooves", metronome "trapezoid body with pendulum arm", drum "cylinder with zigzag snare lines", guitar "acoustic guitar, angled, with neck".
+- Craft: failed five rounds. Round 5: guitar "floating-looking neck/headstock join", headphones "uneven weight, band heavier than cups", metronome "weight slider too small to read"; also named, off read.md's list, microphone "grille lines nearly touch the outline", record "grooves faint, inner rings crowded", drum "zigzag slightly crowded". The agent stopped there: readers swung on the headphones band (thin, thick, thin, thick), and the guitar's fix broke contrast, weight and gap.
+- It ran emit anyway, into its own folder; emit also wrote an `index.ts`.
+
+The set read, by the controller's fresh reader on the final sheet:
+
+> These 6 icons are from one app. Name every icon that looks like it comes from a different set than the others, and in five words or fewer say why. Say 'one set' if none does.
+
+> metronome, microphone: heavier strokes, flat grey fill
+
+Verdict: **held**. `check.mjs` first printed `ok` on run 3 (runs 1 and 2: guitar gravity and gap, headphones contour, contrast on headphones and microphone — rules-filled 04, 06, 08, 11), and the set read named two icons.
+
+### dashboard
+
+The prompt as sent:
+
+> Your working directory for this whole task is `<scratch>/trial-dash.4WONgr`. It is empty, and there is no app in it. Run every command from there (cd into it first in each shell command), and write nothing outside it.
+>
+> Use the skill in `/Users/lucasmarques/estudos/skills/skills/pretty-icons/SKILL.md` to draw ten icons for the sidebar of a SaaS dashboard with AI features. The sidebar text is 14px. The icons are: dashboard, analytics, inbox, team, settings, billing, notifications, ai-assistant, agents, workflows. Nobody is available to answer questions, so where the skill says to ask, take its recommendation and say so. Follow every step. Before each `check.mjs` run, say "check run N". Stop at the hand-over and report what `check.mjs` printed each time, the finish and grid you chose and why, and each icon's concept line.
+
+The agent chose duotone on the 16 grid ("the skill's pick for a sidebar"; 14px text) and plain `.svg` (no app). Concepts: dashboard panel board · analytics pie chart · inbox tray · team two people · settings sliders · billing credit card · notifications bell · ai-assistant chat bubble with a sparkle (a lone sparkle measured 30–34% light) · agents robot head · workflows two squares and an elbow link.
+
+Each check run, as the agent reported it (`pixel` notes printed on every run and never failed it):
+
+1. fail: `gravity team mass -0.26,+0.55` · `gap team circle@2 to path@4 1.48 apart` · `weight ai-assistant 54.91 (-31.8% median 80.55; -34.2% ref)` · `weight billing 92.87 (+15.3%)` · `weight dashboard 101.12 (+25.5%; +21.1% ref)` · `weight inbox 95.2 (+18.2%)` · `weight notifications 63.58 (-21.1%; -23.9% ref)` · `weight workflows 62.85 (-22.0%; -24.7% ref)`
+2. fail: `gravity notifications +0,+0.65` · `gravity team -0.03,+0.51` · `gap team path@3 to path@4 1.08` · `weight ai-assistant 58.22 (-27.5% median 80.33; -30.3% ref)` · `weight dashboard 97.22 (+21.0%)` · `weight inbox 92.6 (+15.3%)`
+3. fail: `live team ink 1.25,1–15.06,14.5 → inside 1–15` · `weight workflows 71.37 (-15.7% median 84.62)`
+4. `ok`
+5. `ok`
+6. fail: `gap ai-assistant path@2 to path@3 1.49` · `weight workflows 71 (-16.6% median 85.12)`
+7. `ok`
+8. `ok`
+9. fail: `gap ai-assistant path@2 to path@3 1.49 apart → ≥ 1.5 apart, or crossing` (a larger sparkle, reverted)
+10. `ok`
+11. `ok`
+
+`check.mjs --print`, run by the controller on the final folder (exit 0; the `pixel` notes left out):
+
+```
+┌─────────┬─────────────────┬──────┬──────┬───────┬───────┬─────────────┬───────┬───────┬───────┬────────────────────────┬──────┐
+│ (index) │ icon            │ x0   │ y0   │ w     │ h     │ keyline     │ ink   │ dx    │ dy    │ joins                  │ infl │
+├─────────┼─────────────────┼──────┼──────┼───────┼───────┼─────────────┼───────┼───────┼───────┼────────────────────────┼──────┤
+│ 0       │ 'agents'        │ 1.75 │ 1    │ 12.5  │ 12.5  │ 'square'    │ 81.71 │ 0     │ 0.01  │ '0 smooth · 0 corners' │ 0    │
+│ 1       │ 'ai-assistant'  │ 1    │ 1.47 │ 13.53 │ 13.53 │ 'circle'    │ 87.82 │ -0.26 │ 0.26  │ '0 smooth · 7 corners' │ 0    │
+│ 2       │ 'analytics'     │ 1    │ 1    │ 14    │ 14    │ 'circle'    │ 91.05 │ 0.19  │ -0.19 │ '0 smooth · 1 corners' │ 0    │
+│ 3       │ 'billing'       │ 1    │ 2.75 │ 14    │ 10.5  │ 'landscape' │ 90.27 │ 0     │ -0.18 │ '0 smooth · 0 corners' │ 0    │
+│ 4       │ 'dashboard'     │ 2    │ 2    │ 12    │ 12    │ 'square'    │ 91.47 │ 0.04  │ -0.03 │ '0 smooth · 0 corners' │ 0    │
+│ 5       │ 'inbox'         │ 1.25 │ 2.75 │ 13.5  │ 10.5  │ 'landscape' │ 91.02 │ 0     │ 0.19  │ '0 smooth · 4 corners' │ 0    │
+│ 6       │ 'notifications' │ 1    │ 1    │ 14    │ 13.75 │ 'circle'    │ 75.22 │ 0     │ 0.47  │ '4 smooth · 2 corners' │ 0    │
+│ 7       │ 'settings'      │ 1    │ 1    │ 14    │ 14    │ 'circle'    │ 77.34 │ 0     │ 0     │ '0 smooth · 0 corners' │ 0    │
+│ 8       │ 'team'          │ 1.25 │ 1    │ 13.75 │ 13.5  │ 'circle'    │ 81.47 │ 0.06  │ 0.46  │ '5 smooth · 2 corners' │ 0    │
+│ 9       │ 'workflows'     │ 1    │ 1    │ 14    │ 14    │ 'circle'    │ 74.48 │ -0.38 │ 0.39  │ '2 smooth · 0 corners' │ 0    │
+└─────────┴─────────────────┴──────┴──────┴───────┴───────┴─────────────┴───────┴───────┴───────┴────────────────────────┴──────┘
+notes
+ok
+```
+
+The agent's reads, each by a fresh reader it opened:
+- Blind: rounds 1 and 3 passed 10 of 10; rounds 2 and 4 failed agents and ai-assistant as a pair. Round 4, on the final files: "3 and 8 compete for the AI names… That split is a judgment call, not a clear read."
+- Craft: round 3 named seven — agents "antenna knob tiny, floating", ai-assistant "sparkle detail too small", billing "stripe bar heavy, plain", inbox "confused silhouette, tray unclear", notifications "clapper floats, uneven weight", team "confused silhouette, second person", workflows "confused silhouette, floating nodes". Round 4's redraws (workflows, team, ai-assistant) were not read for craft.
+- agents: rule 09 asks a plural name not to be one object; six two-robot drafts failed the element limit, the gap rule or the gravity check, or read as a padlock or a box with a bracket. It kept one robot head and asks the person: a new concept, a 20 or 24 grid, or the single robot.
+- Every craft reader quoted the ink and mass captions printed under the sheet's tiles.
+
+The set read, by the controller's fresh reader on the final sheet:
+
+> These 10 icons are from one app. Name every icon that looks like it comes from a different set than the others, and in five words or fewer say why. Say 'one set' if none does.
+
+> notifications, team: thinner/lighter, differing stroke weight.
+>
+> Correction, answering strictly from the picture: icons look mostly consistent in outlined style. The most plausible outliers are workflows (filled square nodes) and analytics (filled pie). If forced to pick: workflows — filled nodes.
+
+Verdict: **held**. `check.mjs` first printed `ok` on run 4 (runs 1–3: rules 01, 05, 06 and 08, on team, ai-assistant, notifications, workflows, dashboard, inbox, billing), and the set read named two icons in its answer; its "if forced" pick is not counted (R17).
+
+Left for the person: both trials reached `ok` but not on run 1 or 2, and neither set read passed. The music set passed every blind read and no craft read; the dashboard set's two AI names compete at 16, and agents has no plural that fits rule 09 at that size. The craft readers lean on the sheet's printed numbers.
