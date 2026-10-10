@@ -12,6 +12,7 @@
  *   wedge     a slice: apex, two sides, a crust    --angle 15..120
  *   scoop     a box with one side dished in       --depth 0..1, --side top|right|bottom|left, --rx
  *   blob      your own anchors                     --anchors "x,y[,t][,c] …" (c a cusp, t the handle length)
+ *   ring      a body with a hole: a rim, a tyre       --r <outer> --hole <inner> (the filled finish only)
  *
  * Every primitive takes --w --h (its box before rotation, default the live area), --at x,y (default the
  * centre), --rot (steps of 15), --bulge (handle length, default 0.55), --lean -1..1 (the belly slides to one side), --grid (default 48).
@@ -294,7 +295,9 @@ function fallbacks(s, side, seam) {
 
 /** The elements a body takes at its grid's finish, as lines of SVG; `given` a body already drawn (--from), unshaded unless asked. */
 export function finishOf(name, o = {}, given = null) {
-  const G = o.grid ?? 48, p = preset(G), s = given ?? shape(name, o);
+  const G = o.grid ?? 48, p = preset(G);
+  if (name === "ring") return ring(o, G, p);
+  const s = given ?? shape(name, o);
   if (p.finish !== "filled") return [`<path d="${s.d}" fill="currentColor" fill-opacity="${FILL}" />`];
   const out = [toneLine(s.d)];
   const side = o.shade ?? (s.P ? "right" : "none");
@@ -314,6 +317,28 @@ export function finishOf(name, o = {}, given = null) {
   }
   out.push(contourLine(s.d, p));
   return out;
+}
+
+/**
+ * A ring at the filled finish: the outer circle's tone, the shade (the ring's lower half, closed by the two
+ * circles' arcs), its contour, the hole in paper and the hole's contour. What a rim or a tyre is drawn as,
+ * in place of a bar: two contours at 2, the body between them. `--r` defaults to the circle body (19 at 48),
+ * `--hole` to 6 less.
+ */
+export function ring(o = {}, G = 48, p = preset(G)) {
+  if (p.finish !== "filled") refuse("ring: the filled finish only (--grid 48)");
+  const [cx, cy] = (o.at ?? [G / 2, G / 2]).map(snap), R = snap(o.r ?? p.live / 2 - p.contour / 2), H = snap(o.hole ?? R - 6);
+  if (H <= 0) refuse(`ring: hole ${fmt(H)}: a ring needs a hole; for a disc, draw a circle body`);
+  if (H + 3 > R) refuse(`ring: hole ${fmt(H)} + 3 > r ${fmt(R)}: the ring would be thinner than a contour and its gap`);
+  const c = (r, paint) => `<circle cx="${fmt(cx)}" cy="${fmt(cy)}" r="${fmt(r)}" ${paint} />`;
+  const shade = `M${fmt(cx - R)} ${fmt(cy)}A${fmt(R)} ${fmt(R)} 0 0 0 ${fmt(cx + R)} ${fmt(cy)}L${fmt(cx + H)} ${fmt(cy)}A${fmt(H)} ${fmt(H)} 0 0 1 ${fmt(cx - H)} ${fmt(cy)}Z`;
+  return [
+    c(R, `fill="${PALETTE.fill}" stroke="none"`),
+    shadeLine(shade),
+    c(R, `stroke-width="${p.contour}"`),
+    c(H, `fill="${PALETTE.paper}" stroke="none"`),
+    c(H, `stroke-width="${p.contour}"`),
+  ];
 }
 
 /**
@@ -362,7 +387,7 @@ export function repairFile(text) {
 }
 
 // every flag parseArgs takes, by the value it takes: a number, an x,y pair, a word or text, none
-const NUMERIC = ["w", "h", "rot", "bulge", "lean", "grid", "tip", "skew", "waist", "thick", "narrow", "angle", "depth", "rx"];
+const NUMERIC = ["w", "h", "rot", "bulge", "lean", "grid", "tip", "skew", "waist", "thick", "narrow", "angle", "depth", "rx", "r", "hole"];
 const TEXT = ["shade", "seam", "side", "anchors", "from"];
 export const FLAGS = [...NUMERIC, "at", ...TEXT, "sharp"];
 export const USAGE = [
@@ -378,6 +403,7 @@ export const USAGE = [
   "  wedge     --angle 15..120",
   "  scoop     --depth 0..1 --side top|right|bottom|left --rx N",
   "  blob      --anchors \"x,y[,t][,c] …\" (absolute anchors; c a cusp, t the handle length)",
+  "  ring      --r N --hole N (the filled finish only: a body with a hole, five elements)",
 ].join("\n");
 
 export function parseArgs(argv) {

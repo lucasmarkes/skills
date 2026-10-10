@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { shape, finishOf, collinear, reconcile, repair, repairFile, shadeOf, parseArgs, ShapeError, drop, wedge, USAGE, FLAGS } from "../../skills/pretty-icons/shapes.mjs";
+import { shape, finishOf, collinear, reconcile, repair, repairFile, shadeOf, parseArgs, ShapeError, drop, wedge, ring, USAGE, FLAGS } from "../../skills/pretty-icons/shapes.mjs";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -102,7 +102,7 @@ test("the usage names every flag the parser takes, each per-primitive flag on it
     assert.notEqual(parseArgs(argv), null, `parseArgs takes --${f}`);
   }
   assert.equal(parseArgs(["drop", "--colour", "red"]), null);
-  const own = { drop: ["tip"], leaf: ["skew"], bean: ["waist"], crescent: ["thick"], taper: ["narrow", "sharp"], wedge: ["angle"], scoop: ["depth", "side", "rx"], blob: ["anchors"] };
+  const own = { drop: ["tip"], leaf: ["skew"], bean: ["waist"], crescent: ["thick"], taper: ["narrow", "sharp"], wedge: ["angle"], scoop: ["depth", "side", "rx"], blob: ["anchors"], ring: ["r", "hole"] };
   const lines = USAGE.split("\n");
   for (const [name, flags] of Object.entries(own)) {
     const l = lines.find((x) => x.trim().startsWith(`${name} `));
@@ -216,4 +216,26 @@ test("the kit's shade passes the light check at every turn: a leaf and a lens fr
 test("where the shade already passed, the kit prints it as before", () => {
   assert.equal(finishOf("leaf", { w: 36, h: 16, rot: 15 })[1], '<path d="M27.5 17.75C35 19.75 34.25 26.5 40.5 28.5C34 27 31.25 33.25 23.75 31.25Z" fill="#cfcfcb" stroke="none" />');
   assert.equal(finishOf("lens", { w: 36, h: 16 })[1], '<path d="M24 17C29.75 17 34.25 26.25 41 24C34.25 21.75 29.75 31 24 31Z" fill="#cfcfcb" stroke="none" />');
+});
+
+test("ring: five elements, tone, shade, contour, hole, hole's contour; it passes the finish's checks", () => {
+  assert.deepEqual(ring(), [
+    '<circle cx="24" cy="24" r="19" fill="#ececea" stroke="none" />',
+    '<path d="M5 24A19 19 0 0 0 43 24L37 24A13 13 0 0 1 11 24Z" fill="#cfcfcb" stroke="none" />',
+    '<circle cx="24" cy="24" r="19" stroke-width="2" />',
+    '<circle cx="24" cy="24" r="13" fill="#ffffff" stroke="none" />',
+    '<circle cx="24" cy="24" r="13" stroke-width="2" />',
+  ]);
+  assert.deepEqual(finishOf("ring", {}), ring());
+  const svg = `<svg viewBox="0 0 48 48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">\n${ring().join("\n")}\n</svg>`;
+  assert.deepEqual(filledChecks("ring", parse(svg), 48), []);
+});
+
+test("ring: off-centre with --at, refused when the hole leaves less than a contour and its gap, or is no hole", () => {
+  const r = ring({ r: 10, hole: 7, at: [12, 30] });
+  assert.equal(r[1], '<path d="M2 30A10 10 0 0 0 22 30L19 30A7 7 0 0 1 5 30Z" fill="#cfcfcb" stroke="none" />');
+  assert.equal(r[3], '<circle cx="12" cy="30" r="7" fill="#ffffff" stroke="none" />');
+  refused(() => ring({ r: 10, hole: 7.25 }), "ring: hole 7.25 + 3 > r 10");
+  refused(() => ring({ r: 10, hole: 0 }), "ring: hole 0: a ring needs a hole; for a disc, draw a circle body");
+  refused(() => finishOf("ring", { grid: 16 }), "ring: the filled finish only (--grid 48)");
 });
