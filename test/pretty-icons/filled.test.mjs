@@ -100,8 +100,8 @@ test("the worked traffic light passes the text layer", () => {
 test("stroke: the root draws in the line tone at 1.5; an element takes 2 on a contour, never 3.5", () => {
   assert.deepEqual(lines(check(LIGHT.replace('stroke="#25262a" stroke-width="1.5"', 'stroke="#2e3955" stroke-width="1.5"'))), ["stroke  traffic-light  stroke #2e3955 → #25262a, the line tone"]);
   assert.deepEqual(lines(check(LIGHT.replace('stroke-width="1.5" stroke-linecap', 'stroke-width="2.5" stroke-linecap'))), ["stroke  traffic-light  stroke-width 2.5 → 1.5"]);
-  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="3.5" />'))), ["stroke  traffic-light  path@9 stroke-width 3.5 → 1.5, or 2 on a contour"]);
-  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="2.5" />'))), ["stroke  traffic-light  path@9 stroke-width 2.5 → 1.5, or 2 on a contour"]);
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="3.5" />'))), ["stroke  traffic-light  path@9 stroke-width 3.5 → not set: the root's 1.5, or 2 on a contour"]);
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="2.5" />'))), ["stroke  traffic-light  path@9 stroke-width 2.5 → not set: the root's 1.5, or 2 on a contour"]);
 });
 
 test("palette: every fill and stroke is one of the five tones", () => {
@@ -127,7 +127,7 @@ test("construction: tone, shade, contour, in that order, the contour pasted", ()
 
 test("the hierarchy: a contour at 2, the parts' line at 1.5, a closed line at 2 is a contour without a tone", () => {
   assert.deepEqual(lines(check(LIGHT.replace(CONTOUR, CONTOUR.replace(' stroke-width="2"', "")))), ["stroke  traffic-light  rect@5 contour at 1.5 → 2"]);
-  assert.deepEqual(lines(check(LIGHT.replace(CONTOUR, CONTOUR.replace('stroke-width="2"', 'stroke-width="3.5"')))), ["stroke  traffic-light  rect@5 stroke-width 3.5 → 1.5, or 2 on a contour", "stroke  traffic-light  rect@5 contour at 3.5 → 2"]);
+  assert.deepEqual(lines(check(LIGHT.replace(CONTOUR, CONTOUR.replace('stroke-width="2"', 'stroke-width="3.5"')))), ["stroke  traffic-light  rect@5 stroke-width 3.5 → not set: the root's 1.5, or 2 on a contour", "stroke  traffic-light  rect@5 contour at 3.5 → 2"]);
   assert.deepEqual(lines(check(add('<circle cx="24" cy="24" r="2" stroke-width="2" />'))), ["construction  traffic-light  circle@9 contour without a tone → a tone before it with the same geometry, or the root's line"]);
   assert.deepEqual(lines(check(add('<circle cx="24" cy="24" r="2" />'))), [], "a closed line at the root's width is a part");
   const none = check(LIGHT.replace(`  ${TONE}\n`, "").replace(`  ${SHADE}\n`, ""));
@@ -149,8 +149,11 @@ test("solid: the line tone fills only a dot of r ≤ 2.5", () => {
 });
 
 test("one line weight: an open line or a mark at 2 is refused like 3.5; a root-width part passes", () => {
-  for (const w of ["2", "3.5", "2.5"]) assert.deepEqual(lines(check(add(`<path d="M24 44V40" stroke-width="${w}" />`))), [`stroke  traffic-light  path@9 stroke-width ${w} → 1.5, or 2 on a contour`], w);
-  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="2" stroke="#8b8c90" />'))), ["stroke  traffic-light  path@9 stroke-width 2 → 1.5, or 2 on a contour"]);
+  for (const w of ["3.5", "2.5"]) assert.deepEqual(lines(check(add(`<path d="M24 44V40" stroke-width="${w}" />`))), [`stroke  traffic-light  path@9 stroke-width ${w} → not set: the root's 1.5, or 2 on a contour`], w);
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="2" />'))), ["stroke  traffic-light  path@9 stroke-width 2 → not set: the root's 1.5; 2 only on a contour"]);
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="2" stroke="#8b8c90" />'))), ["stroke  traffic-light  path@9 stroke-width 2 → not set: the root's 1.5; 2 only on a contour"]);
+  // the refusal does not name the rejected value as the fix
+  assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke-width="1.5" />'))), ["stroke  traffic-light  path@9 stroke-width 1.5 → not set: the root's 1.5, or 2 on a contour"]);
   assert.deepEqual(lines(check(add('<path d="M24 44V40" />'))), []);
 });
 
@@ -243,4 +246,11 @@ test("the GREEN set: six travel icons a fresh agent drew with the skill pass eve
   assert.equal(r.measured, true);
   assert.deepEqual(lines(r), []);
   assert.deepEqual(r.rows.map((x) => x.icon).sort(), ["camera", "compass", "map", "suitcase", "tent", "ticket"]);
+});
+
+test("a closed shape in the fill tone is refused; paper and the shade tone pass", () => {
+  const shape = (fill) => add(`<rect x="22" y="11" width="4" height="4" rx="1" fill="${fill}" />`);
+  assert.deepEqual(lines(check(shape("#ececea"))), ["construction  traffic-light  rect@9 fill #ececea with a stroke → a shape in paper or the shade tone; a body in the fill tone is a tone, then its contour"]);
+  assert.deepEqual(lines(check(shape("#ffffff"))), []);
+  assert.deepEqual(lines(check(shape("#cfcfcb"))), []);
 });

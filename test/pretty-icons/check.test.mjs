@@ -194,8 +194,8 @@ test("check judges a kinked curve once, even when a contour repeats its tone's p
 test("contrast: the line tone's share of the paint, 20% to 45%, too much and too little", async () => {
   const r = await checkSet(fix("contrast"));
   const c = r.failures.filter((f) => f.rule === "contrast").map((f) => `${f.rule}  ${f.icon}  ${f.got} → ${f.want}`);
-  assert.deepEqual(c.sort(), ["contrast  plate  line tone on 1% of the paint → 20% to 45%", "contrast  wheel  line tone on 65% of the paint → 20% to 45%"]);
-  assert.equal(r.rows.find((x) => x.icon === "box")["line%"], 28);
+  assert.deepEqual(c.sort(), ["contrast  plate  line tone on 1.0% of the paint → 20% to 45%", "contrast  wheel  line tone on 64.8% of the paint → 20% to 45%"]);
+  assert.equal(r.rows.find((x) => x.icon === "box")["line%"], 27.6);
   // plate fails the text rules too (a tone with no contour), and is still measured
   assert.ok(r.failures.some((f) => f.icon === "plate" && f.rule === "construction"));
 });
@@ -213,6 +213,13 @@ test("contrast: a badged icon is measured without its badge", async (t) => {
   const full = await shares(badged, 48);
   assert.ok(row("box-new") <= row("box"), `${row("box-new")} and ${row("box")}`);
   assert.ok(row("box-new") < Math.round((100 * full.dark) / full.paint), `${row("box-new")} and ${Math.round((100 * full.dark) / full.paint)}`);
+});
+
+test("contrast: an empty icon gets the ink failure only, not a second one", async (t) => {
+  const dir = tmp(t);
+  writeFileSync(join(dir, "empty.svg"), '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></svg>');
+  const r = await checkSet(dir);
+  assert.ok(!r.failures.some((f) => f.rule === "contrast"), r.failures.map((f) => f.got).join("\n"));
 });
 
 test("contrast: duotone has no line% and no contrast", async () => {

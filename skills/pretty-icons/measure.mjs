@@ -89,7 +89,7 @@ export async function measuredChecks(set, G) {
       const sub = parts[i];
       if (sub.length > 1) for (let a = 0; a < sub.length; a++) for (let b = a + 1; b < sub.length; b++) gap(sub[a], sub[b], `${els[i].at}[${a}]`, `${els[i].at}[${b}]`);
     }
-    rows.push({ icon: name, x0: r2(box.x0), y0: r2(box.y0), w: r2(box.w), h: r2(box.h), keyline: fits ? k.format : "—", ink: r2(ink), dx: r2(dx), dy: r2(dy), ...(share ? { "line%": share.paint ? Math.round((100 * share.dark) / share.paint) : 0 } : {}) });
+    rows.push({ icon: name, x0: r2(box.x0), y0: r2(box.y0), w: r2(box.w), h: r2(box.h), keyline: fits ? k.format : "—", ink: r2(ink), dx: r2(dx), dy: r2(dy), ...(share ? { "line%": share.paint ? Math.round((1000 * share.dark) / share.paint) / 10 : 0 } : {}) });
   }
 
   // weight: a set of three or more against its own median and, looser, the reference, so a set
@@ -111,8 +111,9 @@ export async function measuredChecks(set, G) {
   }
   // contrast: the line tone's share of the paint, the base as written (a modifier left out, like weight)
   if (p.contrast) for (const { name, share } of measures) {
-    const s = share.paint ? share.dark / share.paint : 0;
-    if (s < p.contrast[0] || s > p.contrast[1]) fail(failures, "contrast", name, `line tone on ${Math.round(s * 100)}% of the paint`, `${pct(p.contrast[0])}% to ${pct(p.contrast[1])}%`);
+    if (!share.paint) continue; // an empty icon: the ink rule reports it
+    const s = share.dark / share.paint;
+    if (s < p.contrast[0] || s > p.contrast[1]) fail(failures, "contrast", name, `line tone on ${(s * 100).toFixed(1)}% of the paint`, `${pct(p.contrast[0])}% to ${pct(p.contrast[1])}%`);
   }
   return { failures, rows };
 }

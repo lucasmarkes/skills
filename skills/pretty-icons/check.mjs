@@ -94,7 +94,7 @@ export function textChecks(icon, text, expectG) {
   for (const el of parsed.elements) {
     const a = el.attrs, where = el.at;
     for (const k of FORBIDDEN_ATTRS) if (k in a && !(k === "stroke-opacity" && isModifier(el))) fail(failures, "stroke", icon, `${where} ${k}`, "not set");
-    if ("stroke-width" in a && !p.weights.includes(num(a, "stroke-width"))) fail(failures, "stroke", icon, `${where} stroke-width ${a["stroke-width"]}`, p.finish === "filled" ? `${p.stroke}, or ${p.contour} on a contour` : p.weights.length ? `the root's, or ${p.weights.join(" or ")}` : "the root's");
+    if ("stroke-width" in a && !p.weights.includes(num(a, "stroke-width"))) fail(failures, "stroke", icon, `${where} stroke-width ${a["stroke-width"]}`, p.finish === "filled" ? `not set: the root's ${p.stroke}, or ${p.contour} on a contour` : p.weights.length ? `the root's, or ${p.weights.join(" or ")}` : "the root's");
     for (const k of ROUND_ATTRS) if (k in a && a[k] !== "round") fail(failures, "stroke", icon, `${where} ${k} ${a[k]}`, "round");
     if ("stroke-dasharray" in a) checkDash(failures, icon, where, a["stroke-dasharray"], p.stroke);
   }

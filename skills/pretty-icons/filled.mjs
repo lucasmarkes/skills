@@ -79,6 +79,7 @@ export function filledChecks(icon, parsed, G) {
     const s = tone(el.attrs.stroke);
     if (s === "fill" || s === "shade") fail(failures, "construction", icon, `${el.at} stroke ${el.attrs.stroke}`, `the ${s} tone only as a fill`);
   }
+  for (const el of c.shapes) if (tone(el.attrs.fill) === "fill") fail(failures, "construction", icon, `${el.at} fill ${el.attrs.fill} with a stroke`, `a shape in paper or the shade tone; a body in the fill tone is a tone, then its contour`);
   for (const el of c.solids) fail(failures, "solid", icon, `${el.at}${el.tag === "circle" ? ` r ${el.attrs.r}` : ""} filled in the line tone`, `a body (tone, shade, contour), or a dot of r ≤ ${DOT}`);
   if (els.length && ![...c.tones, ...c.shapes].some((el) => tone(el.attrs.fill) === "fill")) fail(failures, "construction", icon, "no body", `a closed element in the fill tone, ${PALETTE.fill}`);
 
@@ -102,7 +103,7 @@ export function filledChecks(icon, parsed, G) {
     fail(failures, "construction", icon, `${el.at} contour without a tone`, "a tone before it with the same geometry, or the root's line");
   // one line weight: an open line or mark at 2 is a part drawn as a contour
   for (const el of [...c.lines, ...c.marks]) if (!isClosed(el) && num(el.attrs, "stroke-width", rootW) === CONTOUR)
-    fail(failures, "stroke", icon, `${el.at} stroke-width ${el.attrs["stroke-width"]}`, `${p.stroke}, or ${CONTOUR} on a contour`);
+    fail(failures, "stroke", icon, `${el.at} stroke-width ${el.attrs["stroke-width"]}`, `not set: the root's ${p.stroke}; ${CONTOUR} only on a contour`);
   // a shade sits inside a body: after its tone, before its contour, below or right of its centre
   for (const s of c.shades) {
     const t = [...contourOf.keys()].reverse().find((x) => at(x) < at(s) && at(contourOf.get(x)) > at(s));
