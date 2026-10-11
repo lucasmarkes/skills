@@ -1,7 +1,5 @@
 <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <rect x="2.75" y="3.75" width="11" height="9" rx="1.5" fill="currentColor" fill-opacity=".2" stroke="none" />
-  <path d="M9.75 12.75L4.25 12.75A1.5 1.5 0 0 1 2.75 11.25L2.75 5.25A1.5 1.5 0 0 1 4.25 3.75L12.25 3.75A1.5 1.5 0 0 1 13.75 5.25L13.75 9.75" data-cut="split" />
-  <path d="M8.25 3.75V1.75" />
-  <rect x="5.75" y="6.75" width="5" height="3" rx="1" />
-  <circle cx="13.5" cy="13.5" r="1.5" fill="currentColor" stroke="none" data-modifier="dot" />
+  <rect x="2.25" y="3.75" width="11.5" height="9" rx="1.5" fill="currentColor" fill-opacity=".2" />
+  <path d="M8 3.75V1.75" />
+  <rect x="5" y="6.75" width="6" height="3" rx="1" fill="currentColor" fill-opacity=".2" />
 </svg>
