@@ -48,6 +48,14 @@ The craft read judges each icon. It cannot say one belongs to another set. Every
 
 The set passes when the reader says "one set" or names one icon; say that icon in the hand-over with the reader's words. An icon named with a hedge ("possibly", "borderline") still counts as named. Two or more named go back to the drawing (`SKILL.md` step 3), each with the reader's words: the finish's rules file says where: at the filled finish (`rules-filled.md`), "thick lines" is the line weight (03), "too dark" or "solid" is contrast (11), "cartoon" or "another library" is usually a second contour or a part filled in the line tone (04); at duotone (`rules.md`), "thick" or "heavy" is weight (05), "cartoon" or "another library" is usually construction (04) or the metaphor (09). Then the whole set runs `check.mjs`, `sheet.mjs` and the three reads again, each with a **new** reader. "Floating" said of a modifier does not count, as in the craft read.
 
+## The shadow read
+
+At the filled finish only, once the set passes the blind, craft and set reads, and again whenever an icon changes. Run `node <skill-dir>/sheet.mjs pretty-icons/ --shadow-pair`: it writes `pretty-icons-shadow-A.png` and `pretty-icons-shadow-B.png`, the same blind sheet with and without the shadow, and prints the key (`key: A on · B off`), for you alone. Open a fresh agent, one that has seen none of your work and none of the other readers' answers, and give it both images and this prompt, with N filled in:
+
+> These are two versions of one set of N icons, A and B. Which set looks better as a set, A or B? Answer with the letter and, in five words or fewer, why.
+
+The reader's pick stands unless the person overrules it: `shadow.mjs --on` for the shadowed one, `shadow.mjs --off` for the other, run as `node <skill-dir>/shadow.mjs pretty-icons/ --on` or `--off`. Then `check.mjs` once more. Say in the hand-over which was picked and the reader's words. Without a reader, leave the set unshadowed and say **not read for the shadow**.
+
 ## Without a second agent
 
-Say so in the hand-over, in these words: **not read blind**, **not read for craft** and **not read as a set**. Do not read the sheet yourself and call it read.
+Say so in the hand-over, in these words: **not read blind**, **not read for craft**, **not read as a set** and, at the filled finish, **not read for the shadow**. Do not read the sheet yourself and call it read.

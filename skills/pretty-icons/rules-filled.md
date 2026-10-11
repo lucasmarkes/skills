@@ -1,8 +1,8 @@
-# The ten rules at the filled finish
+# The rules at the filled finish
 
-The grid names the finish: 16, 20 and 24 are duotone (`rules.md`), 48 is filled. The ten rules keep their names and numbers, and an eleventh, 11 · contrast, is the finish's own; this file says where each reads differently at 48, and the rest is `rules.md`'s text. An icon at 48 is shown at 16 to 64 px by CSS, wherever the person chose the filled finish. It is sharpest from 32 up, where the line is a whole pixel; below 32 it softens on a 1× screen. `examples/garage`, ten icons for one car app, is the finish; its metaphors are not the bar (rule 09).
+The grid names the finish: 16, 20 and 24 are duotone (`rules.md`), 48 is filled. The rules keep their names and numbers, and three are the finish's own: 11 · contrast, 12 · air, loose and diagonal, and 13 · shadow; this file says where each reads differently at 48, and the rest is `rules.md`'s text. An icon at 48 is shown at 16 to 64 px by CSS, wherever the person chose the filled finish. It is sharpest from 32 up, where the line is a whole pixel; below 32 it softens on a 1× screen. `examples/garage`, ten icons for one car app, is the finish; its metaphors are not the bar (rule 09).
 
-What the finish is: a thin line over a light body, in five neutral tones and no colour. The light comes from the top: the side of the body away from it is shaded inside the body, under the line. No offset shadow, no highlight. The one exception is the paper sheen on glass (`rules.md` 09): a small paper fill, never a stroke. The line tone is the line: it fills only a dot of r 2.5 or less (a hub, a rivet); everything larger is a body, or paper (glass, a lamp that is on, a hole). Everything is told apart by paint and by order:
+What the finish is: a thin line over a light body, in five neutral tones and no colour. The light comes from the top: the side of the body away from it is shaded inside the body, under the line. Depth is the shade inside the body, and, for a set chosen to have one, the offset shadow (13), which `shadow.mjs` writes, never the drawer. No white shine, no highlight. The one exception is the paper sheen on glass (`rules.md` 09): a small paper fill, never a stroke. The line tone is the line: it fills only a dot of r 2.5 or less (a hub, a rivet); everything larger is a body, or paper (glass, a lamp that is on, a hole). Everything is told apart by paint and by order:
 
 | Element | What it is | Paint |
 | --- | --- | --- |
@@ -18,7 +18,7 @@ What the finish is: a thin line over a light body, in five neutral tones and no 
 
 | Grid | Stroke | Contour | Weights | Padding | Live | Step | Circle | Square | Portrait | Landscape | Gap line · mark |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 48 | 1.5 | 2 | 2 | 4 | 40 | 0.25 | 40 | 36 | 32 × 40 | 40 × 32 | 1.5 · 0.75 |
+| 48 | 1.5 | 2 | 2 | 4 | 40 | 0.25 | 40 | 36 | 32 × 40 | 40 × 32 | 2.25 · 1.125 |
 
 ## The hierarchy
 
@@ -127,15 +127,15 @@ Its horns are the two cusps (`c`), and they turn in: a crescent whose horns poin
 
 ## 05 · weight
 
-Ink is the line alone: tones, shades and dots dropped, every other stroke read in the line tone. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a shape its outline at 1.5. Where lines cross, they count once. A tyre is a `ring` (`shapes.mjs`), its tone and its contour; paint adds nothing. Within 25% of the set's median and of the reference, 337.5, the median of `examples/garage`.
+Ink is the line alone: tones, shades, dots and the shadow dropped, every other stroke read in the line tone. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a shape its outline at 1.5. Where lines cross, they count once. A tyre is a `ring` (`shapes.mjs`), its tone and its contour; paint adds nothing. Within 25% of the set's median and of the reference, 337.5, the median of `examples/garage`.
 
 A body at its keyline weighs about 240 to 250: the circle 239, a rect with `rx 6` 251. The details carry the other 90 or so: a line 60 long. A thin object (a bone, a brush, a key) has less outline than a body at its keyline, and comes in light. A bulky one with a second body (a cage, a jar, a bowl of food) comes in heavy.
 
 - **Keep it, after a run:** the percentage is the move. Read it against the number the line names, not against the icon: `-30%` of 340 leaves the icon about 100 short, so add about 100, a third of the reference, which is about 43% of the icon's own ink; `+30%` is about 100 over, so take about 100 away. A minus adds line, a plus takes it away. Aim at the reference, not the edge: the set's median moves as the others change.
 - **Keep it, for a light icon:** give it what the object has: a hole, a slot, a tick. The wrench gained a hole and passed.
 - **Keep it, for a thin object:** fill its keyline first, its ends out to the box's sides or corners. Then draw a handle or a shaft as a body, two contours, not one line: a pill 20 × 4 weighs 89, its line 32. Give it larger ends (a bone's knobs, a brush's head), or a band across it, as a second body: a ferrule.
-- **Keep it, for a heavy icon:** a double ring, a third spoke, a fourth tread: drop one, or shrink the hole. For a bulky object: a smaller second body or detail. `examples/garage/tyre.svg` weighs 391 with its two rows of treads, and 357 with one row dropped; `gearshift.svg` weighs 357 with its gate at the root's line, and 340.6 with its middle stroke dropped.
-- **Rejected when:** `weight  wrench  ink 246.01 (-27.7%) → within ±25% of the set's median 340.37` and `weight  wrench  ink 246.01 (-27.7%) → within ±25% of the reference 340.4`, `examples/garage` with the wrench's hole taken out and its jaw's notch filled in (a straight edge from 32.5 20.5 to 35.25 7.75); `weight  brush  ink 229.19 (-33.1%) → within ±25% of the set's median 342.51`, a brush at 255 the run before, moved the wrong way.
+- **Keep it, for a heavy icon:** a double ring, a third spoke, a fourth tread: drop one, or shrink the hole. For a bulky object: a smaller second body or detail. `examples/garage/tyre.svg` weighs 408 with its two rows of treads, and 366 with one row dropped; `gearshift.svg` weighs 356 with its gate at the root's line, and 340 with its middle stroke dropped.
+- **Rejected when:** `weight  wrench  ink 246.01 (-27.1%) → within ±25% of the set's median 337.54` and `weight  wrench  ink 246.01 (-27.1%) → within ±25% of the reference 337.5`, `examples/garage` with the wrench's hole taken out and its jaw's notch filled in (a straight edge from 32.5 20.5 to 35.25 7.75); `weight  brush  ink 229.19 (-33.1%) → within ±25% of the set's median 342.51`, a brush at 255 the run before, moved the wrong way.
 
 ## 06 · gravity
 
@@ -154,11 +154,11 @@ By character, by the smaller side: the radii table. A rect whose `rx` is none of
 
 ## 08 · gap
 
-Line to line: touch, or one stroke apart, 1.5, outer edge to outer edge. A mark from anything: touch, or half a stroke apart, 0.75. `check.mjs` measures centrelines, and counts every stroke as 1.5, a contour's 2 too: two touch at 0.1 or less, and sit a stroke apart at 3 or more, 2.25 from a mark. Between is almost. Tones, shades and dots are paint and are left out.
+Line to line: touch, or one and a half strokes apart, 2.25, outer edge to outer edge. A mark from anything: touch, or half that apart, 1.125. `check.mjs` measures centrelines, and takes each stroke at its own width, a contour's 2 too: two touch at 0.1 or less, and sit apart at 3.75 or more for two lines at the root's width, 4 for a line and a contour, 2.625 from a mark. Between is almost. Tones, shades and dots are paint and are left out.
 
 - **Keep it, for a part that meets a body:** end it on the contour's centreline at an anchor or on a straight side, where the point is on the grid: the fuel pump's nozzle ends on the pump's straight side, at 30.75, 13. Or cross it: run the part on into the body and draw it before the body's tone, so the tone covers its end, as the gearshift's stem. Ending near a curve between anchors is a guess: a stem that stops 0.25 short of a leaf's edge is already almost.
 - **Keep it, for two bodies that meet** (two leaves on a stem, a lid on a pot): give both contours the same anchor, or let one cross the other.
-- **Rejected when:** `gap  wrench  path@4 to circle@5 0.07 apart → ≥ 1.5 apart, or crossing`; `gap  seedling  path@2 to path@6 overlapping, centrelines 0.5 apart → ≥ 1.5 apart, or crossing`: a part stopped near a leaf's edge, neither on it nor through it.
+- **Rejected when:** `gap  wrench  path@4 to circle@5 0.07 apart → ≥ 2.25 apart, or crossing`; `gap  seedling  path@2 to path@6 overlapping, centrelines 0.5 apart → ≥ 2.25 apart, or crossing`: a part stopped near a leaf's edge, neither on it nor through it.
 
 ## 09 · metaphor
 
@@ -180,6 +180,21 @@ The line tone is 20% to 45% of the icon's paint, `CONTRAST_BAND` in `presets.mjs
 - **Keep it, for a pale icon:** give it a line: the contour it lacks, a printed detail, a part.
 - **Rejected when:** `contrast  wheel  line tone on 64.8% of the paint → 20% to 45%`, a ring of r 10 and a cross; `contrast  plate  line tone on 1.0% of the paint → 20% to 45%`, a tone with no contour and one short line.
 
+## 12 · air, loose and diagonal
+
+As `rules.md` 08, 11 and 12, at 48. The stroke is the line, 1.5: paper between inks is at least 2.25 wide, edge to edge, a counter at least 3 across. A contour's edge is taken at its own width, 2. A detail inside a body (a seam, a score, a label) stops 1.5 short of the contour, edge to edge: its centreline 3.25 inside the contour's. At most three in ten icons lie on the diagonal.
+
+- **Rejected when:** `air  oil  paper 1.1 strokes wide at 24, 22.5 → ≥ 1.5 apart, or touching`, two lines 3 apart; `loose  toolbox  path#3@1 touches rect#1@1 → end it ≥ 1 stroke inside the contour`, a seam run across a box from edge to edge.
+
+## 13 · shadow: chosen per set
+
+A set may cast a shadow: a copy of every element in the shade tone, 1.5 down and right, under the icon. It lifts some sets and muddies others, so it is chosen per set, by a read, never per icon.
+
+- **Add it:** never by hand. `node <skill-dir>/shadow.mjs pretty-icons/ --on` writes it into every icon of the folder: each element's copy, first in the file, one per line, marked `data-shadow=""`. `--off` takes it out, and the file is byte for byte as before. Run `--on` again after any edit; it writes the shadow fresh. A modifier goes on before the shadow: take the shadow off, add the modifier, put it back.
+- **Choose it:** `node <skill-dir>/sheet.mjs pretty-icons/ --shadow-pair` writes the blind sheet twice, shadowed and not, under shuffled letters, and prints which is which. Give both to a fresh reader (`read.md`, the shadow read). Its pick stands unless the person overrules it.
+- **What is measured:** every other rule reads the icon without its shadow: weight, gravity, contrast, keyline, the element cap. The live area runs 1.5 further, down and right, for the shadow alone.
+- **Rejected when:** `check.mjs` prints `shadow`: `shadow  set  6 of 10 shadowed → all or none (shadow.mjs --on|--off)`; a copy taken out, `shadow  tyre  circle@8 not in the shadow → re-run shadow.mjs --on`; a copy moved, `shadow  tyre  circle@2 transform translate(2 2) → translate(1.5 1.5): re-run shadow.mjs --on`. A shadow drawn by hand, a shade copy with a `transform` and no mark, is the stray `transform` that 01 quotes.
+
 ## How check.mjs measures
 
-Keyline and gravity are read from a render of the icon as drawn, every painted pixel at full weight; light from the boxes of a shade and its tone; weight from a render of its lines alone (`linesOf` in `filled.mjs`); contrast from a render of the base as written, its tones kept (`shares` in `raster.mjs`); gap from the centrelines of every element but the paint. `--print` shows the object's box, its line ink and its `line%`.
+Keyline and gravity are read from a render of the icon as drawn, every painted pixel at full weight; light from the boxes of a shade and its tone; weight from a render of its lines alone (`linesOf` in `filled.mjs`); contrast from a render of the base as written, its tones kept (`shares` in `raster.mjs`); gap from the centrelines of every element but the paint. `--print` shows the object's box, its line ink and its `line%`. A shadowed icon is measured without its `data-shadow` copies; `shadow` alone reads them.
