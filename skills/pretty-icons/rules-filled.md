@@ -2,7 +2,7 @@
 
 The grid names the finish: 16, 20 and 24 are duotone (`rules.md`), 48 is filled. The ten rules keep their names and numbers, and an eleventh, 11 · contrast, is the finish's own; this file says where each reads differently at 48, and the rest is `rules.md`'s text. An icon at 48 is shown at 16 to 64 px by CSS, wherever the person chose the filled finish. It is sharpest from 32 up, where the line is a whole pixel; below 32 it softens on a 1× screen. `examples/garage`, ten icons for one car app, is the finish; its metaphors are not the bar (rule 09).
 
-What the finish is: a thin line over a light body, in five neutral tones and no colour. The light comes from the top: the side of the body away from it is shaded inside the body, under the line. No offset shadow, no highlight. The one exception is the paper sheen on glass (`rules.md` 09): a small paper fill, never a stroke. The line tone is the line: it fills only a dot of r 2.5 or less (a hub, a lamp that is on); everything larger is a body, or paper (glass, a lamp that is off, a hole). Everything is told apart by paint and by order:
+What the finish is: a thin line over a light body, in five neutral tones and no colour. The light comes from the top: the side of the body away from it is shaded inside the body, under the line. No offset shadow, no highlight. The one exception is the paper sheen on glass (`rules.md` 09): a small paper fill, never a stroke. The line tone is the line: it fills only a dot of r 2.5 or less (a hub, a rivet); everything larger is a body, or paper (glass, a lamp that is on, a hole). Everything is told apart by paint and by order:
 
 | Element | What it is | Paint |
 | --- | --- | --- |
@@ -12,7 +12,7 @@ What the finish is: a thin line over a light body, in five neutral tones and no 
 | shape | a closed element filled and drawn in one: glass, a hole, a base | `fill` paper or the shade tone, never the line; no `stroke` |
 | line | a part (a hose, a needle, a sign) | no `fill`, no `stroke`, no `stroke-width`: the root's line |
 | mark | a secondary mark printed on the object: a minor tick, a seam (a tick or tread that names the object, a gauge's scale or a tyre's tread, takes the line tone) | `stroke` the mark tone |
-| dot | a circle of r 2.5 or less: a hub, a rivet, a lamp that is on | `fill` a tone, `stroke="none"`; the one place the line tone fills |
+| dot | a circle of r 2.5 or less: a hub, a rivet | `fill` a tone, `stroke="none"`; the one place the line tone fills |
 
 ## The preset
 
@@ -42,7 +42,7 @@ Five tones, nothing else. A file holds the light ones; a dark page swaps each fo
 | line | `#25262a` | `#f1f1ee` | every contour, parts, dots |
 | fill | `#ececea` | `#3d3e43` | the body |
 | shade | `#cfcfcb` | `#2c2d31` | the side away from the light, a base |
-| paper | `#ffffff` | `#5a5b61` | glass, a lamp that is off, a hole |
+| paper | `#ffffff` | `#5a5b61` | glass, a lamp that is on, a hole |
 | mark | `#8b8c90` | `#9d9ea3` | minor ticks and seams, as a stroke only; a scale or a tread that names the object takes the line |
 
 ## The radii
@@ -75,12 +75,12 @@ Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded
   <path d="M26.25 5A8 8 0 0 1 34.25 13V35A8 8 0 0 1 26.25 43Z" fill="#cfcfcb" stroke="none" />
   <rect x="13.75" y="5" width="20.5" height="38" rx="8" stroke-width="2" />
   <circle cx="24" cy="13" r="3.5" fill="#ffffff" />
-  <circle cx="24" cy="24" r="3.5" fill="#ffffff" />
-  <circle cx="24" cy="35" r="3.5" fill="#ffffff" />
+  <circle cx="24" cy="24" r="3.5" fill="#cfcfcb" />
+  <circle cx="24" cy="35" r="3.5" fill="#cfcfcb" />
 </svg>
 ```
 
-The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="none"`; the shade is the right third of it, its corners the same arcs, so the contour pasted after it covers the seam; the contour is the tone's rect again, at 2. The side panels come first, one shape in the shade tone: each ends on the housing's straight side, between its corner arcs, so the contour covers its seam. A bracket of one line goes thin at 16 to 24 px; a panel 5 wide holds. The three lenses are paper, drawn by the root's line; a lamp that is on would be a dot in the line tone inside a lens, but the ring of paper around a dot that small is under 2 strokes across, which `air` refuses: a dot sits on open paper, or a lens stays empty.
+The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="none"`; the shade is the right third of it, its corners the same arcs, so the contour pasted after it covers the seam; the contour is the tone's rect again, at 2. The side panels come first, one shape in the shade tone: each ends on the housing's straight side, between its corner arcs, so the contour covers its seam. A bracket of one line goes thin at 16 to 24 px; a panel 5 wide holds. The three lenses are drawn by the root's line. The lamp that is on is the lens in paper (glass and lit lamps are paper); the two that are off are the lens in the shade tone. A lens filled in the line tone is a solid and is refused (`solid`), and a dot of the line tone inside a lens leaves a ring of paper under 2 strokes across, which `air` refuses.
 
 ## 01 · grid
 
@@ -121,9 +121,9 @@ Tone, shade, contour, in that order, for every body (a small part may leave its 
 Its horns are the two cusps (`c`), and they turn in: a crescent whose horns point straight down reads as a bell. The seams stop clear of the contour, 4 from its centreline, so they do not touch it by almost (08). Its ink is 40 × 32.5, its mass 1.5 high, its line ink 274.9.
 - **Keep it, for the light:** `check.mjs` compares the centre of the shade's box with the centre of its tone's box. The shade passes when its centre is lower, or further right. A shade run from end to end of a slanted body (a leaf or a lens at 30° to 60°) has the tone's own box, centre on centre, and fails on either side. Never shade a body with a copy of its whole tone. The kit's shade passes the light check at every `--rot`; when it cannot, it says so. At a slant it shades one segment, from the lower belly to a tip (the tip on the right with `--shade right`), closed by its chord, even with `--seam curved`. For a body you drew yourself, or with `--from`, do the same by hand: copy that segment from the contour and close it with `Z`. For `leaf --w 16 --h 8 --at 16,12 --rot -45` that is `M21 7C19.25 9 20.5 11.75 18.5 13.75Z`, the kit's own shade. A small part beside a larger body (a leaf on a stem, a grain on an ear) may take `--shade none`; the larger body carries the light.
 - **Keep it, for a ring** (a rim, a tyre, a hoop): a body with a hole. `node <skill-dir>/shapes.mjs ring --r 19 --hole 10` prints five elements: the tone, the shade (the ring's lower half), the contour, the hole in paper and its contour, both contours at 2. Refused when the hole leaves less than a contour and its gap: `--hole` at most `--r` less 3.
-- **Keep it, for a small dark part:** a hub, a rivet, a lamp that is on: a dot, a circle of r 2.5 or less in the line tone, `stroke="none"`. A wheel, a lens, a band or a cap larger than that is a body (tone, shade, contour), or paper. Glass and a hole: paper.
+- **Keep it, for a small dark part:** a hub, a rivet: a dot, a circle of r 2.5 or less in the line tone, `stroke="none"`. A wheel, a lens, a band or a cap larger than that is a body (tone, shade, contour), or paper. Glass and a hole: paper.
 - **Keep it, for what is printed:** a tick or tread that names the object (a gauge's scale, a tyre's tread) is a line, in the line tone at the root's width; the mark tone stays for secondary marks, a minor tick or a seam, at the root's width.
-- **Rejected when:** `light  seedling  path@5 shade centred at 16.25, 12.5 → below or right of path@4's centre 16.25, 12.5: the light comes from the top`; `construction  traffic-light  rect@3 fill #ececea stroke none → its contour after it: the same geometry, no fill, at 2`; `construction  traffic-light  path@5 shade → between a body's tone and its contour, so the line covers its edge`; `construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lamp that is off)`; `construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke`; `construction  traffic-light  path@9 stroke #ececea → the fill tone only as a fill`; `solid  traffic-light  circle@9 r 3 filled in the line tone → a body (tone, shade, contour), or a dot of r ≤ 2.5`; `stroke  traffic-light  rect@5 contour at 1.5 → 2`; `construction  traffic-light  circle@9 contour without a tone → a tone before it with the same geometry, or the root's line`; `construction  traffic-light  no body → a closed element in the fill tone, #ececea`.
+- **Rejected when:** `light  seedling  path@5 shade centred at 16.25, 12.5 → below or right of path@4's centre 16.25, 12.5: the light comes from the top`; `construction  traffic-light  rect@3 fill #ececea stroke none → its contour after it: the same geometry, no fill, at 2`; `construction  traffic-light  path@5 shade → between a body's tone and its contour, so the line covers its edge`; `construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lamp that is on)`; `construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke`; `construction  traffic-light  path@9 stroke #ececea → the fill tone only as a fill`; `solid  traffic-light  circle@9 r 3 filled in the line tone → a body (tone, shade, contour), or a dot of r ≤ 2.5`; `stroke  traffic-light  rect@5 contour at 1.5 → 2`; `construction  traffic-light  circle@9 contour without a tone → a tone before it with the same geometry, or the root's line`; `construction  traffic-light  no body → a closed element in the fill tone, #ececea`.
 
 ## 05 · weight
 

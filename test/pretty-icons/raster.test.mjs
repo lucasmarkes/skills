@@ -116,3 +116,12 @@ test("air: a filled body, a V and a T leave no narrow paper", async () => {
   assert.deepEqual(await air(one('<path d="M3 3L8 13L13 3" />'), 16, 1), []);
   assert.deepEqual(await air(one('<path d="M3 3H13M8 3V13" />'), 16, 1), []);
 });
+
+test("air: a speck of paper pinched where three strokes meet (a small triangle's inside) is not reported", async () => {
+  const speck = await air(one('<path d="M6 6H9L7.5 8.5Z" />'), 16, 1);
+  assert.deepEqual(speck, []);
+  // a little larger, the same pocket is a counter of area >= 1: the speck test is the area, not the shape
+  const pocket = await air(one('<path d="M6 6H9.5L7.75 9Z" />'), 16, 1);
+  assert.deepEqual(pocket.map((x) => x.kind), ["counter"]);
+  assert.ok(pocket[0].area >= 1);
+});

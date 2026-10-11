@@ -112,7 +112,7 @@ test("palette: every fill and stroke is one of the five tones", () => {
 test("construction: no offset shadow, no highlight", () => {
   const shadow = check(LIGHT.replace(TONE, `${TONE.replace("#ececea", "#cfcfcb").replace(" />", ' transform="translate(3 3)" />')}\n  ${TONE}`));
   assert.ok(lines(shadow).includes("construction  traffic-light  rect@3 transform → no offset shadow: the shade sits inside the body"), lines(shadow).join("\n"));
-  assert.deepEqual(lines(check(add('<path d="M17 10V16" stroke="#ffffff" />'))), ["construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lamp that is off)"]);
+  assert.deepEqual(lines(check(add('<path d="M17 10V16" stroke="#ffffff" />'))), ["construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lamp that is on)"]);
 });
 
 test("construction: tone, shade, contour, in that order, the contour pasted", () => {
@@ -134,7 +134,7 @@ test("the hierarchy: a contour at 2, the parts' line at 1.5, a closed line at 2 
 });
 
 test("construction: the mark tone only as a stroke; the fill and shade tones only as a fill", () => {
-  assert.deepEqual(lines(check(LIGHT.replace('cy="35" r="3.5" fill="#ffffff"', 'cy="35" r="4" fill="#8b8c90"'))), ["construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke"]);
+  assert.deepEqual(lines(check(LIGHT.replace('cy="35" r="3.5" fill="#cfcfcb"', 'cy="35" r="4" fill="#8b8c90"'))), ["construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke"]);
   assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke="#ececea" />'))), ["construction  traffic-light  path@9 stroke #ececea → the fill tone only as a fill"]);
   assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke="#cfcfcb" />'))), ["construction  traffic-light  path@9 stroke #cfcfcb → the shade tone only as a fill"]);
 });
