@@ -201,3 +201,9 @@ test("cut: a leading crumb no handles can calm is dropped like a trailing one, t
   assert.deepEqual(bendsOf(out, 1), []);
   assert.match(out, /^M[\d. ]+A/, "one run, starting on the arc");
 });
+
+test("cut: a run whose every piece is dropped leaves no bare move", () => {
+  // minR 1: the cubic's piece outside the halo cannot be calmed, so it goes, and its run with it
+  assert.equal(cut("M2.5 8C4.5 9.25 4.75 2 7.75 14.25", { ...halo(16, "badge:plus", "bl"), minR: 1 }), "M7.5 13C7.5 13.5 7.75 14.25 7.75 14.25");
+  assert.equal(cut("M10 4.75C14 10.25 8.25 2 10.5 12.25", { ...halo(16, "badge:check", "br"), minR: 1 }), "");
+});

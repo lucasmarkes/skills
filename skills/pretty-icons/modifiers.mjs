@@ -279,7 +279,8 @@ export function cut(d, { inside, minR = 0 }) {
       const text = piece(p.s, p.t0, p.t1, [endOf(p, p.t0), endOf(p, p.t1)], minR);
       d0 = text.startsWith("M") ? text : d0 + text; // a dropped leading piece restarts the run
     }
-    out.push(d0);
+    // a run whose every piece was dropped is a bare move: nothing to draw
+    if (/[a-ln-z]/i.test(d0)) out.push(d0);
   }
   return out.join("");
 }

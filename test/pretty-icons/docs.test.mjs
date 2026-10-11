@@ -180,11 +180,15 @@ test("rules.md: the live, gap and weight lines and the numbers it works from, as
     ...await tool("gap", 16, ["marks", rows16(['<path d="M2 8H5" />', '<circle cx="7.8" cy="8" r="1.5" />'])]),
     ...await tool("gap", 16, ["overlap", rows16(['<rect x="2" y="2" width="8" height="8" rx="1.5" />', '<path d="M2.75 5V8" />'])]),
     ...await tool("gap", 16, ["dots", rows16(['<rect x="1.75" y="1.75" width="12.5" height="12.5" rx="1.5" />', '<path d="M5 8h0M6 8h0" />'])]),
+    ...await tool("gap", 16, ["lid", rows16([`<rect x="2.25" y="4.25" width="11.5" height="9.5" rx="1.5" ${TINT} />`, '<path d="M5 3h6" />'])]),
     ...await tool("weight", 16, ["machines", rows16(['<circle cx="8" cy="8" r="5" />'])]),
     ...(await tool("weight", 24, ...["rack", "shelf", "cabinet"].map((n) => [n, rows24([BODY24, ...[8, 12, 16].map((y) => `<path d="M6 ${y}h5" />`)])]))).filter((l) => l.includes("rack")),
     ...(await tool("weight", 24, ...["cup", "pot"].map((n) => [n, rows24([BODY24, '<path d="M6 8h8" />'])]), ["java", rows24(['<rect x="4" y="4" width="16" height="16" rx="2" ' + TINT + ' />', '<path d="M7 12h8" />'])])).filter((l) => l.includes("java")),
   ];
-  assert.equal(quoted.length, 7, quoted.join("\n"));
+  assert.equal(quoted.length, 8, quoted.join("\n"));
+  assert.deepEqual(await tool("gap", 16, ["lid", rows16([`<rect x="2.25" y="4.25" width="11.5" height="9.5" rx="1.5" ${TINT} />`, '<path d="M5 1.75h6" />'])]), [], "the lid 2.5 above the box is clear");
+  assert.ok(rules.includes("3.125 (3.25 on the quarter grid) on 20") && !rules.includes("3.25 on 20"), "08's gap on 20 is 2.5 × 1.25");
+  assert.ok(!rules.includes("`M6.5 12h3` sits 2.5 above"), "08's clear example is a pair gap judges, not an interior detail");
   assert.deepEqual(quoted.filter((l) => !rules.includes(`\`${l}\``)), [], "rules.md quotes these lines");
   const house = await rowOf("house", rows16(HOUSE(5, "M6.5 10.5V8.5h3v2")));
   assert.deepEqual(house.lines, []);
@@ -229,4 +233,13 @@ test("rules-filled.md: the weights it works from are the garage's own", async (t
   const gap = holed.lines.filter((l) => l.startsWith("gap  wrench"));
   assert.equal(gap.length, 1, holed.lines.join("\n"));
   assert.ok(filled.includes(`\`${gap[0]}\`, a hole of r 3.75 in the wrench's handle`), gap[0]);
+});
+
+test("SKILL.md step 4 names its target, step 3 (Draw); rules.md 09 describes interfaces as drawn", () => {
+  const step4 = doc("SKILL.md").split("## 4. Check")[1].split("\n## ")[0];
+  assert.ok(!/back to step 3[,.]/.test(step4), "every return in step 4 says step 3 (Draw)");
+  assert.ok(step4.includes("A failure goes back to step 3 (Draw), then all of step 4"));
+  const interfaces = readFileSync(new URL("../../skills/pretty-icons/examples/hairline/interfaces.svg", import.meta.url), "utf8");
+  assert.ok(interfaces.includes('data-modifier="dot"') && interfaces.includes('<circle cx="13.5" cy="13.5"'), "interfaces carries a dot, lower right");
+  assert.ok(doc("rules.md").includes("its interfaces a pointer in a window, with a `dot` modifier in the window's lower-right corner."));
 });

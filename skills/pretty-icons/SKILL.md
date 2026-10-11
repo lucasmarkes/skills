@@ -45,10 +45,10 @@ A state (add, off, locked, new) is the base icon plus `node <skill-dir>/modifier
 
 1. `node <skill-dir>/check.mjs pretty-icons/`. Fix each line by its rule until it prints `ok`; a `join` line is mended by step 3's repair. The first run installs `@resvg/resvg-js` into a cache (`PRETTY_ICONS_CACHE` moves it).
 2. `node <skill-dir>/sheet.mjs pretty-icons/`. It writes `pretty-icons-sheet.png` and `pretty-icons-blind.png` to a temp folder of this set's own (`--out=<dir>` moves them) and prints their paths and the key. Never put them in the app. Look at the sheet.
-3. `node <skill-dir>/sheet.mjs pretty-icons/ --showcase` writes `pretty-icons-showcase.png`: the set alone, five to a row. Look at it whole: an icon heavier, darker or more crowded than its neighbours goes back to step 3.
-4. Do the blind read in `read.md`. A failure goes back to step 3, then all of step 4, with a new reader.
-5. Do the craft read in `read.md`, with another new reader, once the blind read passes. A named defect goes back to step 3, then all of step 4.
-6. Do the set read in `read.md`, with a third new reader, every round beside the craft read, whatever the craft read says. Two or more icons named go back to step 3, then all of step 4.
+3. `node <skill-dir>/sheet.mjs pretty-icons/ --showcase` writes `pretty-icons-showcase.png`: the set alone, five to a row. Look at it whole: an icon heavier, darker or more crowded than its neighbours goes back to step 3 (Draw).
+4. Do the blind read in `read.md`. A failure goes back to step 3 (Draw), then all of step 4, with a new reader.
+5. Do the craft read in `read.md`, with another new reader, once the blind read passes. A named defect goes back to step 3 (Draw), then all of step 4.
+6. Do the set read in `read.md`, with a third new reader, every round beside the craft read, whatever the craft read says. Two or more icons named go back to step 3 (Draw), then all of step 4.
 7. Do the shadow read in `read.md`, at the filled finish, with a fourth new reader, once the other reads pass: `sheet.mjs --shadow-pair`, the reader picks, `shadow.mjs --on` or `--off` follows the pick, and `check.mjs` once more.
 
 On exit 2, sheet and emit refuse; without Node, answer the text checks atop `check.mjs` by hand. Either way, deliver the `.svg` files; say `not measured`, **not read blind**, **not read for craft** and **not read as a set**, and, at the filled finish, **not read for the shadow**.
