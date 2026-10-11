@@ -58,7 +58,8 @@ test("gap: crossing counts as touching, almost does not", async (t) => {
   writeFileSync(join(dir, "almost.svg"), disc.replace('<circle cx="8" cy="8" r="1.25" />', '<circle cx="8" cy="8" r="4.5" />'));
   const r = await checkSet(dir);
   assert.ok(!of(r, "gap").includes("cross"), "a line across the body's edges touches it");
-  assert.ok(of(r, "gap").includes("almost"), "two rings 1.75 apart centre to centre are 0.75 apart outer edge to outer edge");
+  assert.ok(of(r, "loose").includes("almost"), "a ring 1.75 from its body's contour, centre to centre, is 0.75 apart edge to edge: loose's pair now");
+  assert.ok(!of(r, "gap").includes("almost"), "and no longer gap's");
 });
 
 test("gap: strokes that overlap without their centrelines meeting say so", async (t) => {
@@ -67,15 +68,17 @@ test("gap: strokes that overlap without their centrelines meeting say so", async
   // the line's ends sit 0.75 from the tile's sides: the strokes overlap, the centrelines do not meet
   writeFileSync(join(dir, "overlap.svg"), readFileSync(join(fix("good-16"), "tile.svg"), "utf8").replace('d="M5.5 8h5"', 'd="M3 8h10"'));
   const r = await checkSet(dir);
-  const g = r.failures.filter((f) => f.rule === "gap" && f.icon === "overlap");
-  assert.ok(g.length > 0, "gap fires");
-  for (const f of g) assert.match(f.got, /overlapping/);
+  // the line is a detail inside the tile's body, so the pair is loose's, which says it touches
+  const g = r.failures.filter((f) => f.rule === "loose" && f.icon === "overlap");
+  assert.ok(g.length > 0, "loose fires");
+  for (const f of g) assert.match(f.got, /touches/);
+  assert.ok(!r.failures.some((f) => f.rule === "gap" && f.icon === "overlap"));
 });
 
 test("live: ink past the padding", async (t) => {
   const dir = tmp(t);
   cpSync(fix("good-16"), dir, { recursive: true });
-  writeFileSync(join(dir, "wide.svg"), readFileSync(join(fix("good-16"), "card.svg"), "utf8").replace('d="M1.75 6.25h12.5"', 'd="M1 6.25h14"'));
+  writeFileSync(join(dir, "wide.svg"), readFileSync(join(fix("good-16"), "card.svg"), "utf8").replace('d="M3.75 6.25h8.5"', 'd="M1 6.25h14"'));
   const r = await checkSet(dir);
   assert.ok(of(r, "live").includes("wide"));
 });
@@ -243,4 +246,28 @@ test("gap: a contour is taken at its own width, 2", async () => {
   const body = '<rect x="5" y="9" width="38" height="30" rx="6" fill="#ececea" stroke="none" />\n<rect x="5" y="9" width="38" height="30" rx="6" stroke-width="2" />';
   assert.deepEqual(await gaps(s48(`${body}\n<path d="M10 43H38" />`), 48), []);
   assert.deepEqual(await gaps(s48(`${body}\n<path d="M10 42.75H38" />`), 48), ["rect@2 to path@3 2 apart → ≥ 2.25 apart, or crossing"]);
+});
+
+const CARD = '<rect x="2" y="2" width="12" height="12" rx="1.5" fill="currentColor" fill-opacity=".2" />';
+const looses = async (text, G) => (await measuredChecks([{ name: "billing", text }], G)).failures.filter((f) => f.rule === "loose").map((f) => `${f.got} → ${f.want}`);
+
+test("loose: a detail inside a body ends a stroke inside its contour", async () => {
+  assert.deepEqual(await looses(s16(`${CARD}\n<path d="M2 8H14" />`), 16), ["path@2 touches rect@1 → end it ≥ 1 stroke inside the contour"]);
+  assert.deepEqual(await looses(s16(`${CARD}\n<path d="M3.5 8H12.5" />`), 16), ["path@2 0.5 strokes from rect@1 → ≥ 1 stroke inside the contour"]);
+  assert.deepEqual(await looses(s16(`${CARD}\n<path d="M4 8H12" />`), 16), []);
+});
+
+test("loose: a part meeting the body from outside is not a detail", async () => {
+  assert.deepEqual(await looses(s16(`${CARD}\n<path d="M14 8H15" />`), 16), []);
+});
+
+test("loose: a detail and its body are loose's, not gap's", async () => {
+  assert.deepEqual(await gaps(s16(`${CARD}\n<path d="M4 8H12" />`), 16), []);
+});
+
+test("loose: at 48 the tone is the body, and its contour is not held apart by gap", async () => {
+  const body = '<rect x="5" y="9" width="38" height="30" rx="6" fill="#ececea" stroke="none" />\n<rect x="5" y="9" width="38" height="30" rx="6" stroke-width="2" />';
+  assert.deepEqual(await looses(s48(`${body}\n<path d="M5 24H43" />`), 48), ["path@3 touches rect@1 → end it ≥ 1 stroke inside the contour"]);
+  assert.deepEqual(await looses(s48(`${body}\n<path d="M9 24H39" />`), 48), []);
+  assert.deepEqual(await gaps(s48(`${body}\n<path d="M9 24H39" />`), 48), []);
 });

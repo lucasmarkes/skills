@@ -9,12 +9,14 @@
  * so a modified icon is judged for live (the whole) and gap (without the modifier, whose halo is the modifier
  * rule's) only: not keyline, gravity or weight, and it stays out of the median. Its base is judged for those. In duotone the
  * paint is a split body's fill (stroke none): its edge is its contour's, so it is left out of gap too.
+ * loose: an unfilled stroke whose midpoint lies inside a filled body is an interior detail; it stops one stroke
+ * inside the body's contour, edge to edge, and gap leaves that pair to it.
  */
-import { preset, TOUCH, FORMATS, referenceInk, AIR } from "./presets.mjs";
+import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE } from "./presets.mjs";
 import { measure, shares, resvg, NO_RASTER } from "./raster.mjs";
-import { parse, compose, num } from "./svg.mjs";
+import { parse, compose, num, geometryKey } from "./svg.mjs";
 import { isModifier } from "./modifiers.mjs";
-import { sampleParts, minDistance } from "./geometry.mjs";
+import { sampleParts, minDistance, interior } from "./geometry.mjs";
 import { objectOf, linesOf, classify } from "./filled.mjs";
 
 // `+ 0` turns -0 into 0, so a centred icon prints 0, not -0.
@@ -30,6 +32,28 @@ export function nearestKeyline(G, w, h) {
   }
   const { format, dw, dh } = best;
   return { format, dw, dh };
+}
+
+const isNone = (v) => v === undefined || String(v).trim().toLowerCase() === "none";
+
+/**
+ * An icon's interior details: an unfilled, uncut stroke whose midpoint lies inside a filled body.
+ * The bodies: at the filled finish its tones (read at the contour's width) and shapes; in duotone
+ * every currentColor-filled element. Each detail comes back with its body and the widths to read them at.
+ */
+function interiorDetails(parsed, els, p, c, rootW) {
+  const filled = p.finish === "filled", own = (el) => num(el.attrs, "stroke-width", rootW);
+  const bodies = filled ? [...c.tones, ...c.shapes] : els.filter((el) => String(el.attrs.fill ?? "").trim().toLowerCase() === "currentcolor");
+  const widthOf = (b) => (filled && c.tones.includes(b) ? p.contour : own(b));
+  const keys = new Set(bodies.map(geometryKey));
+  const candidates = (filled ? [...c.lines, ...c.marks] : els.filter((el) => isNone(el.attrs.fill ?? parsed.attrs.fill)))
+    .filter((el) => !("data-cut" in el.attrs) && !keys.has(geometryKey(el)));
+  const out = [];
+  for (const el of candidates) {
+    const body = interior(el, bodies);
+    if (body) out.push({ el, body, w: own(el), wb: widthOf(body) });
+  }
+  return out;
 }
 
 export async function measuredChecks(set, G) {
@@ -55,14 +79,18 @@ export async function measuredChecks(set, G) {
         ? { ...(await measure(objectOf(base), G)), live: whole.box, ink: (await measure(linesOf(base), G)).ink }
         : { ...(await measure(base, G)), live: whole.box };
       const share = filled ? await shares(base, G) : null;
-      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW });
+      const inner = interiorDetails(parsed, els, p, c, rootW), innerAt = new Set(inner.map((x) => x.el.at));
+      // a detail and its body (and the body's contour, the same geometry) are loose's, not gap's
+      const skip = new Set();
+      for (const { el, body } of inner) for (const x of els) if (geometryKey(x) === geometryKey(body)) skip.add(`${el.at}|${x.at}`).add(`${x.at}|${el.at}`);
+      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW, inner, innerAt, skip });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
     }
   }
 
-  for (const { name, els, parts, details, paint, m, modified, share, rootW } of measures) {
+  for (const { name, els, parts, details, paint, m, modified, share, rootW, inner, skip } of measures) {
     const { box, mass, ink, live } = m;
     // an empty icon has no box or mass to judge; count already reports it
     const inked = live.w > 0;
@@ -76,12 +104,19 @@ export async function measuredChecks(set, G) {
     // gravity: the object's mass about its keyline's centre
     const dx = mass.dx + G / 2 - p.centre[0], dy = mass.dy + G / 2 - p.centre[1];
     if (inked && !modified && (Math.abs(dx) > p.gravityTol || Math.abs(dy) > p.gravityTol)) fail(failures, "gravity", name, `mass ${r2(dx) >= 0 ? "+" : ""}${r2(dx)}, ${r2(dy) >= 0 ? "+" : ""}${r2(dy)}`, `within ±${p.gravityTol}`);
+    // loose: a detail inside a body stops a stroke inside its contour
+    for (const { el, body, w, wb } of inner) {
+      const centre = minDistance(sampleParts(el, 0.05).flat(), sampleParts(body, 0.05).flat()), edge = centre - (w + wb) / 2;
+      if (centre <= TOUCH || edge < 0) fail(failures, "loose", name, `${el.at} touches ${body.at}`, `end it ≥ ${LOOSE} stroke inside the contour`);
+      else if (edge < LOOSE * p.stroke - 1e-9) fail(failures, "loose", name, `${el.at} ${(edge / p.stroke).toFixed(1)} strokes from ${body.at}`, `≥ ${LOOSE} stroke inside the contour`);
+    }
     // gap, between every pair of elements, and between the subpaths of one path: merged dots
     // are as "almost" as separate ones. Touching (a shared end, a crossing) passes.
     // each element at its own width: a contour's edge is at 2, the parts' at the root's
     const width = new Map(els.map((el) => [el.at, num(el.attrs, "stroke-width", rootW)]));
     const gap = (A, B, a, b) => {
       const ka = a.replace(/\[\d+\]$/, ""), kb = b.replace(/\[\d+\]$/, "");
+      if (skip.has(`${ka}|${kb}`)) return;
       const min = (details.has(ka) || details.has(kb) ? AIR / 2 : AIR) * p.stroke;
       const centre = minDistance(A, B), outer = centre - (width.get(ka) + width.get(kb)) / 2;
       if (centre > TOUCH && outer < min - 1e-9) fail(failures, "gap", name, `${a} to ${b} ${outer < 0 ? `overlapping, centrelines ${r2(centre)} apart` : `${r2(outer)} apart`}`, `≥ ${+min.toFixed(3)} apart, or crossing`);

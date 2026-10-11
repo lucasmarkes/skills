@@ -60,6 +60,9 @@ export const REFERENCE_TOL = 0.2;
 export const GRAVITY_TOL = 0.5;
 /** Air, in strokes: two inks that do not touch sit this far apart, edge to edge (a mark, half). */
 export const AIR = 1.5;
+
+/** A detail inside a body ends at least this many strokes inside its contour, edge to edge. */
+export const LOOSE = 1;
 export const GRID_STEP = 0.25;
 export const TOUCH = 0.1;
 export const SCALE = 32;

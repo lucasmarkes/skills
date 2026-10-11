@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { sample, sampleParts, bounds, minDistance, pathPoints, pathParts } from "../../skills/pretty-icons/geometry.mjs";
+import { sample, sampleParts, bounds, minDistance, pathPoints, pathParts, midpoint, inside, interior, clearance } from "../../skills/pretty-icons/geometry.mjs";
 
 const near = (a, b, eps = 0.02) => assert.ok(Math.abs(a - b) < eps, `${a} ≈ ${b}`);
 const el = (tag, attrs) => ({ tag, attrs: Object.fromEntries(Object.entries(attrs).map(([k, v]) => [k, String(v)])) });
@@ -86,4 +86,19 @@ test("pathParts: one point list per subpath, split at each M or m", () => {
   assert.equal(pathParts("M0 0L4 0L4 4Z", 0.1).length, 1);
   assert.equal(sampleParts(el("path", { d: "M8 2.75v10.5M2.75 8h10.5" })).length, 2);
   assert.equal(sampleParts(el("rect", { x: 2, y: 3, width: 5, height: 4 })).length, 1);
+});
+
+const E = (tag, attrs) => ({ tag, attrs, at: `${tag}@1` });
+const CARD = E("rect", { x: "2", y: "2", width: "12", height: "12" });
+
+test("interior: a line whose midpoint lies inside a filled body", () => {
+  assert.equal(interior(E("path", { d: "M5 8H11" }), [CARD]), CARD);
+  assert.equal(interior(E("path", { d: "M14 8H15.5" }), [CARD]), null);
+  assert.deepEqual(midpoint(E("path", { d: "M2 8H6M10 8H14" })), [10, 8]);
+  assert.equal(inside([8, 8], [[2, 2], [14, 2], [14, 14], [2, 14]]), true);
+  assert.equal(inside([15, 8], [[2, 2], [14, 2], [14, 14], [2, 14]]), false);
+});
+
+test("clearance: edge to edge, each at its width", () => {
+  assert.ok(Math.abs(clearance(E("path", { d: "M4 8H12" }), CARD, 1, 1) - 1) < 0.01);
 });

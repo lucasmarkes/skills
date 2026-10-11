@@ -2,6 +2,6 @@
   <rect x="5" y="8.75" width="38" height="30.5" rx="2" fill="#ececea" stroke="none" />
   <path d="M31.5 8.75H41A2 2 0 0 1 43 10.75V37.25A2 2 0 0 1 41 39.25H35.5Z" fill="#cfcfcb" stroke="none" />
   <rect x="5" y="8.75" width="38" height="30.5" rx="2" stroke-width="2" />
-  <path d="M16.5 8.75L12.5 39.25M31.5 8.75L35.5 39.25" />
+  <path d="M16 12.25L13 35.75M32 12.25L35 35.75" />
   <path d="M24 33C24 33 19.75 28.5 19.75 24.5A4.25 4.25 0 0 1 28.25 24.5C28.25 28.5 24 33 24 33Z" fill="#ffffff" />
 </svg>

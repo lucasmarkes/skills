@@ -132,7 +132,7 @@ test("the worked examples in rules.md (house, sliders) pass in a set", async () 
   assert.equal(r.measured, true);
   assert.deepEqual(lines(r), []);
   const rules = readFileSync(new URL("../../skills/pretty-icons/rules.md", import.meta.url), "utf8");
-  for (const [name, d] of [["home", 'M2.25 6.5 8 1.5l5.75 5v5a1 1 0 0 1-1 1h-9.5a1 1 0 0 1-1-1z'], ["home", "M6.5 12.5v-3.5h3v3.5"], ["settings", "M7.5 4.5h7M1.5 11.5h7"]]) {
+  for (const [name, d] of [["home", 'M2.25 6.5 8 1.5l5.75 5v5a1 1 0 0 1-1 1h-9.5a1 1 0 0 1-1-1z'], ["home", "M6.5 10.5V8.5h3v2"], ["settings", "M7.5 4.5h7M1.5 11.5h7"]]) {
     assert.ok(read("worked-16", name).includes(`d="${d}"`), `${name} holds ${d}`);
     assert.ok(rules.includes(d), `rules.md gives ${d}`);
   }

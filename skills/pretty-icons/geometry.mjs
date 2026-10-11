@@ -161,3 +161,35 @@ export function sample(el, step = 0.1) {
 
 /** An element's centreline in parts: a path's subpaths, or the whole of any other element. */
 export const sampleParts = (el, step = 0.1) => (el.tag === "path" ? pathParts(el.attrs.d ?? "", step) : [sample(el, step)]);
+
+/** The point halfway along an element's length, its parts in order (the jump between subpaths is not length). */
+export function midpoint(el) {
+  const segs = [];
+  for (const part of sampleParts(el, 0.05)) for (let i = 1; i < part.length; i++) segs.push([part[i - 1], part[i], Math.hypot(part[i][0] - part[i - 1][0], part[i][1] - part[i - 1][1])]);
+  if (!segs.length) return sampleParts(el, 0.05).flat()[0];
+  let rest = segs.reduce((n, s) => n + s[2], 0) / 2;
+  for (const [a, b, l] of segs) {
+    if (rest < l) { const t = l ? rest / l : 0; return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; }
+    rest -= l;
+  }
+  return segs.at(-1)[1];
+}
+
+/** Whether a point lies inside a closed polygon, even-odd. */
+export function inside([x, y], poly) {
+  let n = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) n = !n;
+  }
+  return n;
+}
+
+/** The filled body an element's midpoint lies inside (each subpath of the body even-odd), or null. */
+export function interior(el, bodies) {
+  const m = midpoint(el);
+  return bodies.find((b) => sampleParts(b, 0.05).reduce((n, part) => n !== inside(m, part), false)) ?? null;
+}
+
+/** The least edge-to-edge distance from an element to a body's outline, each at its stroke width. */
+export const clearance = (el, body, wEl, wBody) => minDistance(sampleParts(el, 0.05).flat(), sampleParts(body, 0.05).flat()) - (wEl + wBody) / 2;
