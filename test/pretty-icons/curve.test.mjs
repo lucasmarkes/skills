@@ -88,15 +88,15 @@ test("grey rows: a span on whole pixels leaves none, one straddling them leaves 
   assert.equal(fewestGrey(2), 0);
 });
 
-test("pixel notes: a 1.5 stroke centred on a whole number at 16 is off at 16 and 32, in one line; at .75 it is not", () => {
-  const icon = (d) => parse(`<svg viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5"><path d="${d}" /></svg>`);
-  assert.deepEqual(pixelNotes("x", icon("M8 2V14"), 16).map((n) => n.got), ["1 of 1 straight strokes off the pixel at 16 px, 1 at 32 px"]);
-  assert.deepEqual(pixelNotes("x", icon("M7.75 2V14"), 16), []);
-  assert.equal(pixelNotes("x", icon("M8 2V14"), 16)[0].want, "their edges on whole pixels");
+test("pixel notes: a 1 stroke centred on a quarter at 16 is off at 16 and 32, in one line; at .5 it is not", () => {
+  const icon = (d) => parse(`<svg viewBox="0 0 16 16" stroke="currentColor" stroke-width="1"><path d="${d}" /></svg>`);
+  assert.deepEqual(pixelNotes("x", icon("M8.25 2V14"), 16).map((n) => n.got), ["1 of 1 straight strokes off the pixel at 16 px, 1 at 32 px"]);
+  assert.deepEqual(pixelNotes("x", icon("M7.5 2V14"), 16), []);
+  assert.equal(pixelNotes("x", icon("M8.25 2V14"), 16)[0].want, "their edges on whole pixels");
 });
 
 test("pixel notes skip what has no stroke and curves", () => {
-  const icon = parse(`<svg viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="10" height="10" rx="1.5" stroke="none" fill="currentColor" /><path d="M3 8C3 3 13 3 13 8" /></svg>`);
+  const icon = parse(`<svg viewBox="0 0 16 16" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="10" height="10" rx="1.5" stroke="none" fill="currentColor" /><path d="M3 8C3 3 13 3 13 8" /></svg>`);
   assert.deepEqual(pixelNotes("x", icon, 16), []);
 });
 

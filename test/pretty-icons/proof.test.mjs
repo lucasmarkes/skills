@@ -33,12 +33,12 @@ test("construction colours each join by its measure: a kink shows red", () => {
 test("construction draws a modifier's halo: a dashed circle for a badge, a band for a slash", async () => {
   const text = await addModifier(readSet(examples("hairline")).find((s) => s.name === "data").text, "badge:plus");
   assert.match(construction({ name: "d", text }, 16), /<circle [^>]*stroke="#9333ea"[^>]*stroke-dasharray/);
-  const slashed = await addModifier(readSet(examples("hairline")).find((s) => s.name === "security").text, "slash");
+  const slashed = await addModifier(readSet(examples("hairline")).find((s) => s.name === "devices").text, "slash");
   assert.match(construction({ name: "s", text: slashed }, 16), /<path d="M[\d.]+,[\d.]+L[\d.]+,[\d.]+" stroke="#9333ea" stroke-opacity=".15"/);
 });
 
 test("the silhouette paints every fill and stroke in one tone at full opacity", () => {
-  const s = { name: "x", text: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" fill="currentColor" fill-opacity=".2" stroke="none" /><path d="M4 8H12" stroke-opacity="0.6" /></svg>` };
+  const s = { name: "x", text: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="12" height="12" fill="currentColor" fill-opacity=".2" stroke="none" /><path d="M4 8H12" stroke-opacity="0.6" /></svg>` };
   const g = silhouette(s, 16, 16, "#25262a");
   assert.ok(!/opacity/.test(g), "no opacity left");
   assert.match(g, /<rect [^>]*fill="#25262a"/);

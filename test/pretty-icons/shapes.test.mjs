@@ -77,7 +77,7 @@ test("bad flags are refused with the reason", () => {
   refused(() => shape("star"), 'no primitive "star"');
   refused(() => shape("bean", { lean: 1 }), "bean: overshoots its box by 0.79: lower --bulge");
   refused(() => shape("crescent", { bulge: 1.2 }), "2 inflections over a chord of 24.36");
-  refused(() => shape("bean", { grid: 16, w: 11 }), "make the box larger, so every segment's chord is at least 4 (the shortest is 3.26)");
+  refused(() => shape("bean", { grid: 16, w: 11 }), "make the box larger, so every segment's chord is at least 4 (the shortest is 3.61)");
   refused(() => shape("blob", { anchors: "8,8 40,8" }), "at least three");
 });
 
@@ -86,7 +86,7 @@ test("one inflection over a short chord asks for a larger box, not --bulge; a wo
   for (const bulge of [0.3, 0.55, 0.8]) refused(() => shape("leaf", { grid: 16, w: 8, h: 5, bulge }), "make the box larger");
   const msg = (fn) => { try { fn(); } catch (e) { return e.message; } return ""; };
   const small = msg(() => shape("leaf", { grid: 16, w: 8, h: 5 }));
-  assert.match(small, /1 inflection over a chord of 3\.47.*: make the box larger, so every segment's chord is at least 4 \(the shortest is 3\.47\)$/);
+  assert.match(small, /1 inflection over a chord of 3\.82.*: make the box larger, so every segment's chord is at least 4 \(the shortest is 3\.82\)$/);
   assert.ok(!small.includes("--bulge"), small);
   assert.match(msg(() => shape("blob", { grid: 16, anchors: "4,8,c 6,6.5 8,8,c 6,9.5" })), /: spread the anchors, so every segment's chord is at least 4/);
   const wobble = msg(() => shape("crescent", { bulge: 1.2 }));

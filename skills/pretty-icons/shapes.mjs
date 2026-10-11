@@ -24,7 +24,7 @@
  */
 import { readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { preset, PALETTE, FILL } from "./presets.mjs";
+import { preset, inset as insetOf, PALETTE, FILL } from "./presets.mjs";
 import { pathParts, bounds } from "./geometry.mjs";
 import { segments, joins, curveFailures, SMOOTH, CORNER, MIN_CHORD } from "./curve.mjs";
 import { pathCommands, parse } from "./svg.mjs";
@@ -180,7 +180,7 @@ export function parseAnchors(text = "") {
 
 /** One primitive's outline as `{ d, P, segs }`: P and segs for the shade, null for wedge and scoop. */
 export function shape(name, o = {}) {
-  const G = o.grid ?? 48, p = preset(G), inset = (p.contour ?? p.stroke) / 2;
+  const G = o.grid ?? 48, p = preset(G), inset = insetOf(G);
   // the box on the grid: its sides in halves and its centre in quarters, so its edges fall on quarters
   const half = (n) => Math.floor(n * 2) / 2;
   const box = { w: half(o.w ?? p.live), h: half(o.h ?? p.live), at: (o.at ?? p.centre).map(snap), inset, rot: o.rot ?? 0, lean: (o.lean ?? 0) * LEAN };

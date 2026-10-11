@@ -2,27 +2,27 @@
  * The grids pretty-icons draws on, and what each one fixes: finish, stroke,
  * padding, fill, radii, and the four keylines an icon's ink lands on. A body
  * for a keyline is derived here, so the agent copies geometry instead of
- * inventing it: a rect's edge sits half a stroke inside the keyline, a
- * circle's radius is half the keyline less half a stroke.
+ * inventing it: a rect's edge sits an inset inside the keyline (half the stroke, on the
+ * quarter grid), a circle's radius is half the keyline less the inset.
  *
  * The grid names the finish. 16, 20 and 24 are duotone: a currentColor stroke
  * over a 20% fill, for a sidebar. 48 is filled: a thin line over a light fill,
  * shaded inside on the side away from the light, in five neutral tones, shown at 16–64 px by CSS.
  */
 export const PRESETS = {
-  16: { stroke: 1.5, radius: [1.5, 1], keylines: { circle: [14, 14], square: [12.5, 12.5], portrait: [11, 14], landscape: [14, 11] } },
-  20: { stroke: 1.5, radius: [2, 1], keylines: { circle: [18, 18], square: [16, 16], portrait: [14, 18], landscape: [18, 14] } },
-  24: { stroke: 2, radius: [2, 1], keylines: { circle: [22, 22], square: [20, 20], portrait: [18, 22], landscape: [22, 18] } },
+  16: { stroke: 1, radius: [1.5, 1], keylines: { circle: [14, 14], square: [12.5, 12.5], portrait: [11, 14], landscape: [14, 11] } },
+  20: { stroke: 1.25, radius: [2, 1], keylines: { circle: [18, 18], square: [16, 16], portrait: [14, 18], landscape: [18, 14] } },
+  24: { stroke: 1.5, radius: [2, 1], keylines: { circle: [22, 22], square: [20, 20], portrait: [18, 22], landscape: [22, 18] } },
 };
 /**
- * The line tone's share of an icon's painted pixels, at the filled finish. The filled reference's forty run 17% to 48%,
+ * The line tone's share of an icon's painted pixels, at the filled finish. A reference set of forty icons runs 17% to 48%,
  * median near 30: the dark tone is the line and the odd dot, every body light with a contour. Below 20 an icon
  * has too little line; above 45 something large is filled in the line tone, or the lines crowd a small body.
  */
 export const CONTRAST_BAND = [0.2, 0.45];
 export const FILLED_PRESETS = {
   48: {
-    // No shadow: the keylines sit in the live area as the duotone's do, centred at 24.
+    // The keylines sit in the live area as the duotone's do, centred at 24.
     // Two weights: the root's line and a contour at 2. A bar at 3.5 is refused (rules-filled.md 03).
     // A rect's radius is chosen by what the object is: RADII.
     // The hierarchy: a body's contour at 2, everything else at 1.5 (the root's).
@@ -91,16 +91,18 @@ export function radiiFor(G, size) {
   return [RADII.cut[step], RADII.cased[step], RADII.moulded[step], size / 2];
 }
 
-/** The element whose ink lands exactly on a keyline, drawn at the contour's width (the filled finish's 2) or the stroke's. */
+/** How far a body's edge sits inside its keyline: half the drawn stroke (the contour at 48), rounded up to the quarter grid. */
+export const inset = (G) => { const p = preset(G); return Math.ceil((p.contour ?? p.stroke) / 2 / GRID_STEP - 1e-9) * GRID_STEP; };
+
+/** The element whose ink lands on a keyline, its edge an inset inside it. */
 export function body(G, format) {
-  const { stroke: line, contour, keylines, centre: [cx, cy] } = preset(G);
-  const stroke = contour ?? line;
+  const { keylines, centre: [cx, cy] } = preset(G), i = inset(G);
   const kl = keylines[format];
   if (!kl) throw new Error(`no keyline "${format}"; one of ${FORMATS.join(", ")}`);
   const [kw, kh] = kl;
-  if (format === "circle") return { tag: "circle", cx, cy, r: kw / 2 - stroke / 2 };
-  const w = kw - stroke, h = kh - stroke;
-  return { tag: "rect", x: cx - kw / 2 + stroke / 2, y: cy - kh / 2 + stroke / 2, w, h, rx: radiusFor(G, Math.min(w, h)) };
+  if (format === "circle") return { tag: "circle", cx, cy, r: kw / 2 - i };
+  const w = kw - 2 * i, h = kh - 2 * i;
+  return { tag: "rect", x: cx - kw / 2 + i, y: cy - kh / 2 + i, w, h, rx: radiusFor(G, Math.min(w, h)) };
 }
 
 /** A body as SVG text, with the duotone fill under its stroke (the duotone finish's). */
@@ -115,10 +117,10 @@ export function bodySvg(G, format) {
 /**
  * Median ink of examples/hairline per grid, for a set too small to have a median of its own.
  * On 20 and 24 it is measured from the set scaled from the 16 live area to the grid's, drawn
- * at the grid's own stroke: 20 keeps 16's 1.5, so ink does not grow with the area.
+ * at the grid's own stroke.
  * On 48 it is the median line ink of examples/garage: the contours and marks, not the paint.
  */
-export const REFERENCE_INK = { 16: 83.5, 20: 115.4, 24: 183, 48: 340.4 };
+export const REFERENCE_INK = { 16: 63.1, 20: 102.4, 24: 151, 48: 340.4 };
 export const referenceInk = (G) => REFERENCE_INK[G];
 
 /**

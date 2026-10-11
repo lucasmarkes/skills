@@ -87,7 +87,7 @@ test("formatFailure", () => {
 });
 
 test("count: an icon with no elements fails count, not construction", () => {
-  const r = textChecks("x", `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></svg>`, 16);
+  const r = textChecks("x", `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></svg>`, 16);
   assert.ok(rules(r).includes("count"), `${rules(r)}`);
   assert.ok(!rules(r).includes("construction"), `${rules(r)}`);
 });
@@ -95,7 +95,7 @@ test("count: an icon with no elements fails count, not construction", () => {
 // ---- fix round 1 -------------------------------------------------------
 
 const CHECK = fileURLToPath(new URL("../../skills/pretty-icons/check.mjs", import.meta.url));
-const ROOT = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">`;
+const ROOT = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">`;
 const icon = (...els) => `${ROOT}\n${els.map((e) => `  ${e}`).join("\n")}\n</svg>\n`;
 const BODY = `<circle cx="8" cy="8" r="4.25" fill="currentColor" fill-opacity=".2" />`;
 const machines = cleanMachines;
@@ -126,7 +126,7 @@ test("stroke: root fill-opacity is forbidden", () => {
 });
 
 test("stroke: a root dash shorter than the stroke", () => {
-  const r = textChecks("machines", machines().replace('stroke-width="1.5"', 'stroke-width="1.5" stroke-dasharray="0.5 0.5"'), 16);
+  const r = textChecks("machines", machines().replace('stroke-width="1"', 'stroke-width="1" stroke-dasharray="0.5 0.5"'), 16);
   assert.ok(r.failures.some((f) => f.rule === "stroke" && f.got === "root stroke-dasharray 0.5 0.5"), JSON.stringify(r.failures));
 });
 

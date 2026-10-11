@@ -10,8 +10,8 @@ import { MODIFIER, preset, bodySvg } from "../../skills/pretty-icons/presets.mjs
 
 const ex = (set, name) => readFileSync(new URL(`../../skills/pretty-icons/examples/${set}/${name}.svg`, import.meta.url), "utf8");
 const cli = new URL("../../skills/pretty-icons/modifiers.mjs", import.meta.url).pathname;
-const svg16 = (body) => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
-const BODY16 = '<rect x="1.75" y="1.75" width="12.5" height="12.5" rx="1.5" fill="currentColor" fill-opacity=".2" />';
+const svg16 = (body) => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+const BODY16 = '<rect x="2.25" y="2.25" width="11.5" height="11.5" rx="1.5" fill="currentColor" fill-opacity=".2" />';
 
 test("a modifier's box sits in a corner of the live area; its halo is half the box plus one and a half strokes", () => {
   assert.deepEqual(MODIFIER, { 16: { size: 5, dot: 1.5 }, 20: { size: 6.5, dot: 1.75 }, 24: { size: 8, dot: 2.25 }, 48: { size: 14.5, dot: 4 } });
@@ -19,7 +19,7 @@ test("a modifier's box sits in a corner of the live area; its halo is half the b
   assert.deepEqual(placement(16, "badge:plus", "tl").c, [3.5, 3.5]);
   assert.deepEqual(placement(48, "badge:plus").c, [36.75, 36.75]);
   assert.deepEqual(placement(24, "dot").c, [20.75, 20.75]);
-  assert.deepEqual([16, 20, 24, 48].map((G) => halo(G, "badge:plus").r), [4.75, 5.5, 7, 10.25]);
+  assert.deepEqual([16, 20, 24, 48].map((G) => halo(G, "badge:plus").r), [4, 5.125, 6.25, 10.25]);
   assert.throws(() => placement(16, "badge:star"), /--add badge:star/);
   assert.throws(() => placement(16, "dot", "mid"), /--corner mid/);
 });
@@ -27,10 +27,10 @@ test("a modifier's box sits in a corner of the live area; its halo is half the b
 test("cut: a stroke the halo crosses is cut where it enters, the ends snapped outward to the quarter grid", () => {
   const H = halo(24, "badge:plus");
   // a closed rect becomes one open run, from where it leaves the halo round to where it enters
-  assert.equal(cut("M3 5H21V19H3Z", H), "M12 19L3 19L3 5L21 5L21 12.25");
+  assert.equal(cut("M3 5H21V19H3Z", H), "M12.75 19L3 19L3 5L21 5L21 13");
   assert.equal(cut("M3 5H10", H), null);
   // an arc keeps its radii; the part at the cut end goes as a cubic, the kept parts as arcs
-  assert.equal(cut("M1.75 8A6.25 6.25 0 1 1 14.25 8A6.25 6.25 0 1 1 1.75 8Z", halo(16, "badge:plus")), "M8 14.25A6.25 6.25 0 0 1 1.75 8A6.25 6.25 0 0 1 14.25 8");
+  assert.equal(cut("M1.5 8A6.5 6.5 0 1 1 14.5 8A6.5 6.5 0 1 1 1.5 8Z", halo(16, "badge:plus")), "M9 14.5C8.75 14.5 8.25 14.5 8 14.5A6.5 6.5 0 0 1 1.5 8A6.5 6.5 0 0 1 14.5 8");
   // every end is clear of the halo
   for (const d of [cut("M3 5H21V19H3Z", H), cut("M3 12C3 20 10 21 21 21", H)]) {
     const n = d.match(/-?\d*\.?\d+/g).map(Number), ends = [n.slice(0, 2), n.slice(-2)];
@@ -45,9 +45,9 @@ test("cut: a crumb (a run shorter than 1) goes, and a dot is kept or dropped who
 });
 
 test("glyphs: duotone at stroke-opacity 0.6 (--solid leaves it out), a badge at 48 on paper with a contour at 2", () => {
-  assert.deepEqual(glyph(24, "badge:plus"), [{ tag: "path", attrs: { d: "M16 19H22M19 16V22", "data-modifier": "badge:plus", "stroke-opacity": "0.6" } }]);
-  assert.deepEqual(glyph(24, "badge:plus", { solid: true })[0].attrs, { d: "M16 19H22M19 16V22", "data-modifier": "badge:plus" });
-  assert.equal(glyph(24, "slash")[0].attrs.d, "M3 3L21 21");
+  assert.deepEqual(glyph(24, "badge:plus"), [{ tag: "path", attrs: { d: "M15.75 19H22.25M19 15.75V22.25", "data-modifier": "badge:plus", "stroke-opacity": "0.6" } }]);
+  assert.deepEqual(glyph(24, "badge:plus", { solid: true })[0].attrs, { d: "M15.75 19H22.25M19 15.75V22.25", "data-modifier": "badge:plus" });
+  assert.equal(glyph(24, "slash")[0].attrs.d, "M2.5 2.5L21.5 21.5");
   assert.deepEqual(glyph(24, "dot")[0].attrs, { cx: "20.75", cy: "20.75", r: "2.25", fill: "currentColor", stroke: "none", "data-modifier": "dot" });
   const x48 = glyph(48, "badge:x");
   assert.deepEqual(x48[0].attrs, { cx: "36.75", cy: "36.75", r: "6.25", fill: "#ffffff", "stroke-width": "2", "data-modifier": "badge:x" });
@@ -64,7 +64,7 @@ test("addModifier: a duotone body is split into its paint, whole, and its contou
     ["path", undefined, undefined, "badge:plus"],
   ]);
   // the paint keeps its geometry and fill: the modifier never cuts a fill
-  assert.equal(els[0].attrs.width, "12.5");
+  assert.equal(els[0].attrs.width, "11.5");
   assert.equal(els[0].attrs["fill-opacity"], ".2");
   assert.deepEqual(textChecks("x", out, 16).failures, []);
   assert.doesNotMatch(out, /\n\s*\n/, "one element per line, no blank line");
@@ -88,9 +88,9 @@ test("addModifier: every garage icon takes a badge:check, and the cut passes che
 test("addModifier refuses a body wholly under the halo, a slash in a corner, an icon that fails check already, and a cut that fails gap", async () => {
   await assert.rejects(addModifier(svg16(BODY16), "slash", { corner: "tl" }), /a slash crosses the whole icon/);
   await assert.rejects(addModifier(svg16('<path d="M1.8 6.25h12.5" />'), "dot"), /fails check before the modifier/);
-  // a slash cuts connectivity's link to a stub inside its node, 0.97 from the node's cut contour (the example as drawn before Task 11)
+  // a slash cuts connectivity's link to a stub inside its node, 0.41 from the node's cut contour (the example as drawn before Task 11)
   const NODES = '<circle cx="4.75" cy="11.25" r="3" fill="currentColor" fill-opacity=".2" /><circle cx="11.25" cy="4.75" r="3" fill="currentColor" fill-opacity=".2" /><path d="M4.75 11.25 11.25 4.75" />';
-  await assert.rejects(addModifier(svg16(NODES), "slash", { name: "connectivity" }), /would fail check:\ngap  connectivity  path@\d to path@\d 0\.97 apart[^]*try another --corner or another kind/);
+  await assert.rejects(addModifier(svg16(NODES), "slash", { name: "connectivity" }), /would fail check:\ngap  connectivity  path@\d to path@\d 0\.41 apart[^]*try another --corner or another kind/);
 });
 
 test("the modifier rule: opacity, size and corner, the halo, and data-cut without a modifier", async () => {
@@ -98,9 +98,9 @@ test("the modifier rule: opacity, size and corner, the halo, and data-cut withou
   const good = await addModifier(svg16(BODY16), "badge:plus");
   assert.deepEqual(rule(good), []);
   assert.deepEqual(rule(good.replace('stroke-opacity="0.6"', 'stroke-opacity="0.5"')), ["path@4 stroke-opacity 0.5"]);
-  assert.match(rule(good.replace("M10.75 12.5H14.25M12.5 10.75V14.25", "M9.75 11.5H13.25M11.5 9.75V13.25"))[0], /^badge:plus 5 wide, centred at 11.5 11.5/);
+  assert.match(rule(good.replace("M10.5 12.5H14.5M12.5 10.5V14.5", "M9.5 11.5H13.5M11.5 9.5V13.5"))[0], /^badge:plus 5 wide, centred at 11.5 11.5/);
   // a stroke left inside the halo: drawn by hand, not by the command
-  assert.match(rule(svg16(`${BODY16}<path d="M10.75 12.5H14.25M12.5 10.75V14.25" stroke-opacity="0.6" data-modifier="badge:plus" />`))[0], /^rect#1@1 [\d.]+ inside badge:plus's halo/);
+  assert.match(rule(svg16(`${BODY16}<path d="M10.5 12.5H14.5M12.5 10.5V14.5" stroke-opacity="0.6" data-modifier="badge:plus" />`))[0], /^rect#1@1 [\d.]+ inside badge:plus's halo/);
   assert.deepEqual(rule(svg16('<path d="M2 2H8" data-cut="" />')), ["path@1 data-cut"]);
   const two = good.replace("</svg>", '<circle cx="3.5" cy="3.5" r="1.5" fill="currentColor" stroke="none" data-modifier="dot" /></svg>');
   assert.deepEqual(rule(two), ["2 modifiers: badge:plus, dot"]);

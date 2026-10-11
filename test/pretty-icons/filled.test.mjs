@@ -59,7 +59,7 @@ test("bodies at 48, and radii by character: cut, cased, moulded, pill", () => {
   assert.deepEqual(body(48, "square"), { tag: "rect", x: 7, y: 7, w: 34, h: 34, rx: 6 });
   assert.deepEqual(body(48, "portrait"), { tag: "rect", x: 9, y: 5, w: 30, h: 38, rx: 6 });
   assert.deepEqual(body(48, "landscape"), { tag: "rect", x: 5, y: 9, w: 38, h: 30, rx: 6 });
-  assert.deepEqual(body(16, "circle"), { tag: "circle", cx: 8, cy: 8, r: 6.25 }, "the duotone bodies are unchanged");
+  assert.deepEqual(body(16, "circle"), { tag: "circle", cx: 8, cy: 8, r: 6.5 }, "the duotone bodies sit an inset in");
   assert.deepEqual(radiiFor(48, 20.5), [2, 6, 8, 10.25]);
   assert.deepEqual(radiiFor(48, 9), [1.5, 2.5, 4, 4.5]);
   assert.deepEqual(radiiFor(48, 6.5), [1, 1.5, 2.5, 3.25]);

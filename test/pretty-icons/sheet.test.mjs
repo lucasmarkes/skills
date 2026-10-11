@@ -62,7 +62,7 @@ test("the root's stroke-dasharray reaches the sheet", async (t) => {
   const dir = tmp(t);
   cpSync(fix, dir, { recursive: true });
   const p = join(dir, "disc.svg");
-  writeFileSync(p, readFileSync(p, "utf8").replace('stroke-width="1.5"', 'stroke-width="1.5" stroke-dasharray="2 2"'));
+  writeFileSync(p, readFileSync(p, "utf8").replace('stroke-width="1"', 'stroke-width="1" stroke-dasharray="2 2"'));
   const set = readSet(dir);
   assert.ok(composeBlind(set, 16, 7).svg.includes('stroke-dasharray="2 2"'));
 });

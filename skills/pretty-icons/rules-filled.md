@@ -175,7 +175,7 @@ One grid, five tones, measured together.
 
 ## 11 · contrast
 
-The line tone is 20% to 45% of the icon's paint, `CONTRAST_BAND` in `presets.mjs`. The paint is every pixel of the icon as written at half alpha or more; a pixel is in the line tone when it is darker than the midpoint of the line and the mark tones. A modified icon is measured without its modifier. `check.mjs --print` gives the share as `line%`. The filled reference's forty run 17% to 48%, median near 30; `examples/garage` runs 27 to 44.
+The line tone is 20% to 45% of the icon's paint, `CONTRAST_BAND` in `presets.mjs`. The paint is every pixel of the icon as written at half alpha or more; a pixel is in the line tone when it is darker than the midpoint of the line and the mark tones. A modified icon is measured without its modifier. `check.mjs --print` gives the share as `line%`. A reference set of forty icons runs 17% to 48%, median near 30; `examples/garage` runs 27 to 44.
 
 - **Keep it, for a dark icon:** a part filled in the line tone becomes a body (tone, shade, contour) or paper; a part that must stay dark shrinks to a dot. A small body crowded with line takes fewer lines or grows to its keyline.
 - **Keep it, for a pale icon:** give it a line: the contour it lacks, a printed detail, a part.

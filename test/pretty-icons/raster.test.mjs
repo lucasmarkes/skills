@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { cacheDir, measure, render, shares } from "../../skills/pretty-icons/raster.mjs";
 
 const near = (a, b, eps = 0.05) => assert.ok(Math.abs(a - b) < eps, `${a} ≈ ${b}`);
-const ROOT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">`;
+const ROOT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">`;
 const ROOT48 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">`;
 
 test("shares: a body in the fill tone is dark only on its contour; a square in the line tone is dark all over", async () => {
@@ -36,8 +36,8 @@ test("cacheDir by platform, architecture and env", () => {
 });
 
 test("a centred stroked square measures its ink box", async () => {
-  // rect 2.5..13.5 with stroke 1.5: ink 1.75..14.25, 12.5 wide, centred
-  const m = await measure(`${ROOT}<rect x="2.5" y="2.5" width="11" height="11" rx="1.5" fill="currentColor" fill-opacity=".2" /></svg>`, 16);
+  // rect 2.25..13.75 with stroke 1: ink 1.75..14.25, 12.5 wide, centred
+  const m = await measure(`${ROOT}<rect x="2.25" y="2.25" width="11.5" height="11.5" rx="1.5" fill="currentColor" fill-opacity=".2" /></svg>`, 16);
   near(m.box.x0, 1.75); near(m.box.x1, 14.25); near(m.box.y0, 1.75); near(m.box.y1, 14.25); near(m.box.w, 12.5); near(m.box.h, 12.5);
   near(m.mass.dx, 0); near(m.mass.dy, 0);
   assert.ok(m.ink > 50 && m.ink < 100, `ink ${m.ink}`);
@@ -71,7 +71,7 @@ test("currentcolor in any case is ink", async () => {
 test("a non-square viewBox measures finite numbers", async () => {
   const m = await measure(`${ROOT.replace('viewBox="0 0 16 16"', 'viewBox="0 0 16 12"')}<path d="M2 6h12" /></svg>`, 16);
   for (const v of [...Object.values(m.box), m.mass.dx, m.mass.dy, m.ink]) assert.ok(Number.isFinite(v), JSON.stringify(m));
-  near(m.box.x0, 1.25); near(m.box.x1, 14.75); near(m.box.h, 1.5);
+  near(m.box.x0, 1.5); near(m.box.x1, 14.5); near(m.box.h, 1);
   near(m.mass.dx, 0); near(m.mass.dy, 0);
 });
 

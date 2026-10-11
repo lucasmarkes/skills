@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { readFileSync, mkdtempSync, writeFileSync, rmSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { checkSet, textChecks } from "../../skills/pretty-icons/check.mjs";
@@ -10,8 +10,8 @@ import { addModifier } from "../../skills/pretty-icons/modifiers.mjs";
 const doc = (f) => readFileSync(new URL(`../../skills/pretty-icons/${f}`, import.meta.url), "utf8");
 const svgBlocks = (text) => text.split("```svg\n").slice(1).map((s) => s.split("\n```")[0]);
 const line = (f) => `${f.rule}  ${f.icon}  ${f.got} → ${f.want}`;
-const svg16 = (b) => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
-const BODY16 = '<rect x="1.75" y="1.75" width="12.5" height="12.5" rx="1.5" fill="currentColor" fill-opacity=".2" />';
+const svg16 = (b) => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
+const BODY16 = '<rect x="2.25" y="2.25" width="11.5" height="11.5" rx="1.5" fill="currentColor" fill-opacity=".2" />';
 
 test("rules-filled.md: the croissant is the kit's blob pasted, and passes check on its own", async (t) => {
   const { d } = shape("blob", { anchors: "12,39,c 5,25.5 24,8.5 43,25.5 36,39,c 24,30" });
@@ -31,7 +31,7 @@ test("rules.md quotes the messages check.mjs prints for the new rules", async ()
   const stray = textChecks("data", svg16(`${BODY16}<path d="M4.75 5.5H11.25" stroke-opacity="0.6" />`), 16).failures.map(line);
   const good = await addModifier(svg16(BODY16), "badge:plus");
   const wrong = textChecks("data", good.replace('stroke-opacity="0.6"', 'stroke-opacity="0.5"'), 16).failures.map(line);
-  const halo = textChecks("data", svg16(`${BODY16}<path d="M10.75 12.5H14.25M12.5 10.75V14.25" stroke-opacity="0.6" data-modifier="badge:plus" />`), 16).failures.map(line);
+  const halo = textChecks("data", svg16(`${BODY16}<path d="M10.5 12.5H14.5M12.5 10.5V14.5" stroke-opacity="0.6" data-modifier="badge:plus" />`), 16).failures.map(line);
   for (const l of [...stray, ...wrong, ...halo]) assert.ok(rules.includes(`\`${l}\``), `rules.md quotes ${l}`);
   assert.ok(rules.includes("→ under 4° or over 30°: smooth, or a corner on purpose`"));
   assert.ok(rules.includes("→ at most 1, none under a chord of 4`"));
@@ -83,4 +83,15 @@ test("read.md: the set read, its prompt word for word, and the words for no read
   assert.ok(read.includes("## The set read"));
   assert.ok(read.includes("> These N icons are from one app. Name every icon that looks like it comes from a different set than the others, and in five words or fewer say why. Say 'one set' if none does."));
   assert.ok(read.includes("**not read as a set**"));
+});
+
+import { createHash } from "node:crypto";
+
+// The reference set's name, as the SHA-256 of its lowercased form: the test never writes it.
+const NAME = "6a6a1aefb5dce285444475fd85d5450171e0986e7c6df0f117a7678503d87294";
+test("the reference set's name is in no file of the skill", () => {
+  const root = new URL("../../skills/pretty-icons/", import.meta.url).pathname;
+  const walk = (d) => readdirSync(d).flatMap((f) => { const p = join(d, f); return statSync(p).isDirectory() ? walk(p) : [p]; });
+  const named = (p) => (readFileSync(p, "utf8").toLowerCase().match(/[a-z]+/g) ?? []).some((w) => createHash("sha256").update(w).digest("hex") === NAME);
+  assert.deepEqual(walk(root).filter((p) => /\.(md|mjs|svg)$/.test(p) && named(p)), []);
 });

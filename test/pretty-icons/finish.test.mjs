@@ -13,7 +13,7 @@ const read = (dir, n) => readFileSync(join(fix(dir), `${n}.svg`), "utf8");
 const lines = (r) => r.failures.map(formatFailure);
 const of = (r, rule) => [...new Set(r.failures.filter((f) => f.rule === rule).map((f) => f.icon))].sort();
 const tmp = (t) => { const dir = mkdtempSync(join(tmpdir(), "pi-finish-")); t.after(() => rmSync(dir, { recursive: true, force: true })); return dir; };
-const ROOT = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+const ROOT = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
 const icon = (...els) => `${ROOT}\n${els.map((e) => `  ${e}`).join("\n")}\n</svg>\n`;
 const FILLED = 'fill="currentColor" fill-opacity=".2"';
 const BOX = `<rect x="2.5" y="2.5" width="11" height="11" rx="1.5" ${FILLED} />`;
@@ -90,7 +90,7 @@ test("count: the examples' details fit the cap (coding: two braces, eight comman
 test("weight: the tolerances", () => {
   assert.equal(WEIGHT_TOL, 0.15);
   assert.equal(REFERENCE_TOL, 0.2);
-  assert.deepEqual(Object.fromEntries(Object.entries(REFERENCE_INK).filter(([g]) => g !== "48")), { 16: 83.5, 20: 115.4, 24: 183 });
+  assert.deepEqual(Object.fromEntries(Object.entries(REFERENCE_INK).filter(([g]) => g !== "48")), { 16: 63.1, 20: 102.4, 24: 151 });
 });
 
 test("weight: a set uniformly over the reference fails it, though even with itself", async (t) => {
@@ -99,7 +99,7 @@ test("weight: a set uniformly over the reference fails it, though even with itse
   for (const n of ["javascript", "badge", "box"]) writeFileSync(join(dir, `${n}.svg`), badge);
   const r = await checkSet(dir);
   assert.equal(r.measured, true);
-  assert.deepEqual(lines(r).filter((l) => l.startsWith("weight  javascript")), ["weight  javascript  ink 226.95 (+24.0%) → within ±20% of the reference 183"]);
+  assert.deepEqual(lines(r).filter((l) => l.startsWith("weight  javascript")), ["weight  javascript  ink 185.19 (+22.6%) → within ±20% of the reference 151"]);
   assert.deepEqual(of(r, "weight"), ["badge", "box", "javascript"]);
   assert.ok(!r.failures.some((f) => /median/.test(f.want)), "each is the median");
 });
@@ -110,7 +110,7 @@ test("languages fails weight on the badges and contour on the faceted bodies", a
   const r = await checkSet(fix("languages"));
   assert.equal(r.measured, true);
   const l = lines(r);
-  assert.ok(l.includes("weight  javascript  ink 226.95 (+24.0%) → within ±20% of the reference 183"), l.join("\n"));
+  assert.ok(l.includes("weight  javascript  ink 185.19 (+22.6%) → within ±20% of the reference 151"), l.join("\n"));
   assert.ok(l.includes("contour  node  path@2 6 straight sides → at most 5, or curves"), l.join("\n"));
   for (const n of ["go", "javascript", "php", "typescript"]) assert.ok(of(r, "weight").includes(n), `${n} in ${of(r, "weight")}`);
   // ruby's gem has five straight sides and now passes contour; it is left to the reader (rule 04).
@@ -132,12 +132,12 @@ test("the worked examples in rules.md (house, sliders) pass in a set", async () 
   assert.equal(r.measured, true);
   assert.deepEqual(lines(r), []);
   const rules = readFileSync(new URL("../../skills/pretty-icons/rules.md", import.meta.url), "utf8");
-  for (const [name, d] of [["home", 'M2.5 6.5 8 1.75l5.5 4.75v4.75a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1z'], ["home", "M6.5 12.25v-3.5h3v3.5"], ["settings", "M7.25 4.5h7M1.75 11.5h7"]]) {
+  for (const [name, d] of [["home", 'M2.25 6.5 8 1.5l5.75 5v5a1 1 0 0 1-1 1h-9.5a1 1 0 0 1-1-1z'], ["home", "M6.5 12.5v-3.5h3v3.5"], ["settings", "M7.5 4.5h7M1.5 11.5h7"]]) {
     assert.ok(read("worked-16", name).includes(`d="${d}"`), `${name} holds ${d}`);
     assert.ok(rules.includes(d), `rules.md gives ${d}`);
   }
   const knobs = [...read("worked-16", "settings").matchAll(/<circle cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"/g)].map((m) => `cx ${m[1]} cy ${m[2]} r ${m[3]}`);
-  assert.deepEqual(knobs, ["cx 4.5 cy 4.5 r 2.75", "cx 11.5 cy 11.5 r 2.75"]);
+  assert.deepEqual(knobs, ["cx 4.5 cy 4.5 r 3", "cx 11.5 cy 11.5 r 3"]);
   for (const k of knobs) assert.ok(rules.includes(k), `rules.md gives ${k}`);
 });
 

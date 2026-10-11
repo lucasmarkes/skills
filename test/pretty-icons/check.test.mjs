@@ -14,7 +14,7 @@ const rules = (r) => [...new Set(r.failures.map((f) => f.rule))].sort();
 const of = (r, rule) => r.failures.filter((f) => f.rule === rule).map((f) => f.icon).sort();
 /** A fresh temp dir, removed when the test ends. */
 const tmp = (t) => { const dir = mkdtempSync(join(tmpdir(), "pi-")); t.after(() => rmSync(dir, { recursive: true, force: true })); return dir; };
-const ROOT = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+const ROOT = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
 
 test("nearestKeyline", () => {
   assert.equal(nearestKeyline(16, 14, 10.9).format, "landscape");
@@ -58,14 +58,14 @@ test("gap: crossing counts as touching, almost does not", async (t) => {
   writeFileSync(join(dir, "almost.svg"), disc.replace('<circle cx="8" cy="8" r="1.25" />', '<circle cx="8" cy="8" r="4.5" />'));
   const r = await checkSet(dir);
   assert.ok(!of(r, "gap").includes("cross"), "a line across the body's edges touches it");
-  assert.ok(of(r, "gap").includes("almost"), "two rings 1.75 apart centre to centre are 0.25 apart outer edge to outer edge");
+  assert.ok(of(r, "gap").includes("almost"), "two rings 1.75 apart centre to centre are 0.75 apart outer edge to outer edge");
 });
 
 test("gap: strokes that overlap without their centrelines meeting say so", async (t) => {
   const dir = tmp(t);
   cpSync(fix("good-16"), dir, { recursive: true });
-  // the line's ends sit 1 from the tile's sides: the strokes overlap, the centrelines do not meet
-  writeFileSync(join(dir, "overlap.svg"), readFileSync(join(fix("good-16"), "tile.svg"), "utf8").replace('d="M5.5 8h5"', 'd="M3.5 8h9"'));
+  // the line's ends sit 0.75 from the tile's sides: the strokes overlap, the centrelines do not meet
+  writeFileSync(join(dir, "overlap.svg"), readFileSync(join(fix("good-16"), "tile.svg"), "utf8").replace('d="M5.5 8h5"', 'd="M3 8h10"'));
   const r = await checkSet(dir);
   const g = r.failures.filter((f) => f.rule === "gap" && f.icon === "overlap");
   assert.ok(g.length > 0, "gap fires");
@@ -151,10 +151,10 @@ test("an icon that cannot be measured stays out of the median", async (t) => {
   assert.deepEqual(rules(r), ["elements"]);
 });
 
-test("gap compares the subpaths of one path: merged dots 1.5 apart fail", async (t) => {
+test("gap compares the subpaths of one path: merged dots 1 apart fail", async (t) => {
   const dir = tmp(t);
   cpSync(fix("good-16"), dir, { recursive: true });
-  writeFileSync(join(dir, "dots.svg"), `${ROOT}\n  ${BODY} />\n  <path d="M5.75 8h0M7.25 8h0M8.75 8h0M10.25 8h0" />\n</svg>\n`);
+  writeFileSync(join(dir, "dots.svg"), `${ROOT}\n  ${BODY} />\n  <path d="M6 8h0M7 8h0M8 8h0M9 8h0" />\n</svg>\n`);
   // the same dots 3 apart are clear of each other
   writeFileSync(join(dir, "spaced.svg"), `${ROOT}\n  ${BODY} />\n  <path d="M6.5 8h0M9.5 8h0" />\n</svg>\n`);
   const r = await checkSet(dir);
@@ -166,7 +166,7 @@ test("gap compares the subpaths of one path: merged dots 1.5 apart fail", async 
 test("two elements on one line are told apart in a failure", async (t) => {
   const dir = tmp(t);
   cpSync(fix("good-16"), dir, { recursive: true });
-  writeFileSync(join(dir, "pair.svg"), `${ROOT}\n  ${BODY} />\n  <path d="M5.75 8h0" /><path d="M7.25 8h0" />\n</svg>\n`);
+  writeFileSync(join(dir, "pair.svg"), `${ROOT}\n  ${BODY} />\n  <path d="M6.5 8h0" /><path d="M7.5 8h0" />\n</svg>\n`);
   const r = await checkSet(dir);
   assert.deepEqual(r.failures.filter((f) => f.rule === "gap" && f.icon === "pair").map((f) => f.got), ["path#2@3 to path#3@3 0 apart"]);
 });
@@ -178,7 +178,7 @@ test("check prints notes after the failures, and notes never change the exit cod
   const lines = r.stdout.trim().split("\n");
   assert.equal(lines.at(-1), "ok");
   assert.equal(lines[0], "notes");
-  assert.match(lines[1], /^pixel  tile  5 of 5 straight strokes off the pixel at 16 px, 5 at 32 px → their edges on whole pixels$/);
+  assert.match(lines[1], /^pixel  card  5 of 5 straight strokes off the pixel at 16 px, 5 at 32 px → their edges on whole pixels$/);
 });
 
 test("check judges a kinked curve once, even when a contour repeats its tone's path", async () => {
