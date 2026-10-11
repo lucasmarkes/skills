@@ -138,20 +138,20 @@ function outward(q, inside) {
   for (let i = -1; i <= 2; i++) for (let j = -1; j <= 2; j++) cands.push([base[0] + i * STEP, base[1] + j * STEP]);
   return cands.filter((c) => inside(c) >= -1e-9).sort((a, b) => len(sub(a, q)) - len(sub(b, q)))[0];
 }
-/** The tightest radius a cut cubic may keep, in grid units: one stroke's (BEND), set by `cut` for the pass it runs. */
-let minRadius = 0;
-const calm = (P0, c1, c2, P1) => {
+/** Whether a cubic wobbles (two inflections, or one under a chord of 4) or bends tighter than minR, a radius in grid units: one stroke's (BEND). */
+const calm = (P0, c1, c2, P1, minR) => {
   const seg = segments(`M${pt(P0)}C${pt(c1)} ${pt(c2)} ${pt(P1)}`)[0].segs[0] ?? { kind: "line" }, n = inflections(seg), b = tightest(seg);
-  return !(n > 1 || (n && len(sub(P1, P0)) < 4)) && !(b && b.r < minRadius - 1e-9);
+  return !(n > 1 || (n && len(sub(P1, P0)) < 4)) && !(b && b.r < minR - 1e-9);
 };
 /**
  * A cubic's text; one whose snapped handles make it wobble (two inflections, or one under a chord of 4) or bend
  * tighter than a stroke's radius is mended at its cut ends: the nearest quarter-grid handles within a unit that
- * are calm, else no handle at that end. A last piece no handles can calm, a crumb of arc between a kept axis point and
- * its snapped cut end, is dropped: the run ends at the axis point, a little short of the halo.
+ * are calm, else no handle at that end. A piece with one cut end that no handles can calm, a crumb of arc between a
+ * kept axis point and its snapped cut end, is dropped (null): the run starts or ends at the axis point, a little
+ * short of the halo.
  */
-function cubicText(P0, c1, c2, P1, cutStart, cutEnd) {
-  if (!calm(P0, c1, c2, P1)) {
+function cubicText(P0, c1, c2, P1, cutStart, cutEnd, minR) {
+  if (!calm(P0, c1, c2, P1, minR)) {
     // a cut end's handle goes anywhere near; a kept anchor's keeps its direction within TURN, so the join stays smooth
     const near = (c, anchor, cut) => {
       const out = [], u = sub(c, anchor);
@@ -165,15 +165,15 @@ function cubicText(P0, c1, c2, P1, cutStart, cutEnd) {
     let best = null, score = Infinity;
     for (const a of near(c1, P0, cutStart)) for (const b of near(c2, P1, cutEnd)) {
       const sc = len(sub(a, c1)) + len(sub(b, c2));
-      if (sc < score && calm(P0, a, b, P1)) { best = [a, b]; score = sc; }
+      if (sc < score && calm(P0, a, b, P1, minR)) { best = [a, b]; score = sc; }
     }
     if (best) [c1, c2] = best;
-    else if (cutEnd && !cutStart) return "";
+    else if (cutStart !== cutEnd) return null;
     else { if (cutStart) c1 = P0; if (cutEnd) c2 = P1; }
   }
   return `C${pt(c1)} ${pt(c2)} ${pt(P1)}`;
 }
-function piece(s, t0, t1, ends) {
+function piece(s, t0, t1, ends, minR) {
   // ends: [start, end], snapped; a kept original anchor stays where it was
   const [P0, P1] = ends;
   if (s.kind === "line") return `L${pt(P1)}`;
@@ -186,7 +186,8 @@ function piece(s, t0, t1, ends) {
     if (t0 === 0 && t1 === 1 && onGrid(s.p[1]) && onGrid(s.p[2])) return `C${pt(s.p[1])} ${pt(s.p[2])} ${pt(P1)}`;
     const c1 = t0 === 0 ? alongHandle(s.p[0], s.p[1], len(sub(q[1], q[0])) / (len(sub(s.p[1], s.p[0])) || 1)) : q[1].map(snap);
     const c2 = t1 === 1 ? alongHandle(s.p[3], s.p[2], len(sub(q[2], q[3])) / (len(sub(s.p[2], s.p[3])) || 1)) : q[2].map(snap);
-    return cubicText(P0, c1, c2, P1, t0 > 0, t1 < 1);
+    // a dropped leading piece moves the pen to its end; a dropped trailing one leaves nothing
+    return cubicText(P0, c1, c2, P1, t0 > 0, t1 < 1, minR) ?? (t0 > 0 ? `M${pt(P1)}` : "");
   }
   const { rx, ry, deg, sweep, dth } = s.arc;
   if (t0 === 0 && t1 === 1) return `A${fmt(rx)} ${fmt(ry)} ${fmt(deg)} ${Math.abs(dth) > Math.PI ? 1 : 0} ${sweep} ${pt(P1)}`;
@@ -211,7 +212,8 @@ function piece(s, t0, t1, ends) {
     if (!cutA && !cutB) { d += `A${fmt(rx)} ${fmt(ry)} ${fmt(deg)} 0 ${sweep} ${pt(B)}`; continue; }
     const k = (4 / 3) * Math.tan((dth * (b - a)) / 4);
     const c1 = add(at(s, a), mul(tangent(a), k)), c2 = sub(at(s, b), mul(tangent(b), k));
-    d += cubicText(A, cutA ? c1.map(snap) : alongHandle(A, c1, 1), cutB ? c2.map(snap) : alongHandle(B, c2, 1), B, cutA, cutB);
+    const text = cubicText(A, cutA ? c1.map(snap) : alongHandle(A, c1, 1), cutB ? c2.map(snap) : alongHandle(B, c2, 1), B, cutA, cutB, minR);
+    d += text ?? (cutA ? `M${pt(B)}` : "");
   }
   return d;
 }
@@ -223,7 +225,6 @@ const arcLength = (s, t0, t1) => { let L = 0, prev = at(s, t0); for (let i = 1; 
  * round to where it enters. Runs shorter than CRUMB are dropped.
  */
 export function cut(d, { inside, minR = 0 }) {
-  minRadius = minR;
   const subs = segments(d);
   let touched = false;
   const runs = [];
@@ -273,7 +274,10 @@ export function cut(d, { inside, minR = 0 }) {
     if (list.reduce((L, p) => L + arcLength(p.s, p.t0, p.t1), 0) < CRUMB) continue;
     const endOf = (p, t) => (t === 0 ? p.s.p[0] : t === 1 ? p.s.p.at(-1) : outward(at(p.s, t), inside));
     let d0 = `M${pt(endOf(list[0], list[0].t0))}`;
-    for (const p of list) d0 += piece(p.s, p.t0, p.t1, [endOf(p, p.t0), endOf(p, p.t1)]);
+    for (const p of list) {
+      const text = piece(p.s, p.t0, p.t1, [endOf(p, p.t0), endOf(p, p.t1)], minR);
+      d0 = text.startsWith("M") ? text : d0 + text; // a dropped leading piece restarts the run
+    }
     out.push(d0);
   }
   return out.join("");

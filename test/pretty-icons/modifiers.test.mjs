@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { placement, halo, cut, glyph, addModifier, modifierFailures, parseArgs, ModifierError, KINDS } from "../../skills/pretty-icons/modifiers.mjs";
+import { curveFailures } from "../../skills/pretty-icons/curve.mjs";
 import { textChecks } from "../../skills/pretty-icons/check.mjs";
 import { toReact } from "../../skills/pretty-icons/emit.mjs";
 import { parse } from "../../skills/pretty-icons/svg.mjs";
@@ -177,4 +178,26 @@ test("a cut stroke still passes the palette check", async () => {
   const out = await addModifier(svg16(BODY16), "dot");
   const bad = out.replace('data-cut="split"', 'data-cut="split" stroke="red"');
   assert.ok(textChecks("x", bad, 16).failures.some((f) => /stroke red/.test(f.got)));
+});
+
+// ---- bend: a cut calms both of its ends alike ----------------------------
+
+const bendsOf = (d, stroke) => curveFailures("x", { tag: "path", attrs: { d }, at: "path@1" }, stroke).filter((f) => f.rule === "bend");
+
+test("cut: a cubic whose snapped handles would bend under a stroke is given calm ones", () => {
+  // the data example's ellipse is 0.88 across at its ends, and the badge halo cuts it into cubics
+  const ellipse = "M2.25 4.5V11.5A5.75 2.25 0 0 0 13.75 11.5V4.5A5.75 2.25 0 0 0 2.25 4.5Z", h = halo(16, "badge:check", "br");
+  assert.equal(bendsOf(cut(ellipse, { ...h, minR: 0 }), 1).length, 1, "left to snap, it bends");
+  const calm = cut(ellipse, { ...h, minR: 1 });
+  assert.match(calm, /C/, "still a curve");
+  assert.deepEqual(bendsOf(calm, 1), []);
+});
+
+test("cut: a leading crumb no handles can calm is dropped like a trailing one, the run starting at the axis point", () => {
+  // a circle in the slash's path, whose cut leaves a bent crumb of arc after the cut start
+  const circle = "M3 6.5A2 2 0 1 1 3 10.5A2 2 0 1 1 3 6.5Z", h = halo(16, "slash", "br");
+  assert.equal(bendsOf(cut(circle, { ...h, minR: 0 }), 1).length, 1, "left alone, it bends");
+  const out = cut(circle, { ...h, minR: 1 });
+  assert.deepEqual(bendsOf(out, 1), []);
+  assert.match(out, /^M[\d. ]+A/, "one run, starting on the arc");
 });
