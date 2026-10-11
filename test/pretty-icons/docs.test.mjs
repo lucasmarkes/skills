@@ -181,7 +181,7 @@ test("rules.md: the live, gap and weight lines and the numbers it works from, as
     ...await tool("gap", 16, ["overlap", rows16(['<rect x="2" y="2" width="8" height="8" rx="1.5" />', '<path d="M2.75 5V8" />'])]),
     ...await tool("gap", 16, ["dots", rows16(['<rect x="1.75" y="1.75" width="12.5" height="12.5" rx="1.5" />', '<path d="M5 8h0M6 8h0" />'])]),
     ...await tool("weight", 16, ["machines", rows16(['<circle cx="8" cy="8" r="5" />'])]),
-    ...(await tool("weight", 24, ...["rack", "shelf", "cabinet"].map((n) => [n, rows24([BODY24, ...[8, 12, 16].map((y) => `<path d="M6 ${y}h4" />`)])]))).filter((l) => l.includes("rack")),
+    ...(await tool("weight", 24, ...["rack", "shelf", "cabinet"].map((n) => [n, rows24([BODY24, ...[8, 12, 16].map((y) => `<path d="M6 ${y}h5" />`)])]))).filter((l) => l.includes("rack")),
     ...(await tool("weight", 24, ...["cup", "pot"].map((n) => [n, rows24([BODY24, '<path d="M6 8h8" />'])]), ["java", rows24(['<rect x="4" y="4" width="16" height="16" rx="2" ' + TINT + ' />', '<path d="M7 12h8" />'])])).filter((l) => l.includes("java")),
   ];
   assert.equal(quoted.length, 7, quoted.join("\n"));
@@ -201,7 +201,7 @@ test("rules.md: the live, gap and weight lines and the numbers it works from, as
   const three = await rowOf("settings", rows16(SLIDERS(3, "M7.5 4.5h7M1.5 11.5h7")));
   const small = await rowOf("settings", rows16(SLIDERS(2.5, "M7 4.5h7M1.5 11.5h7.5")));
   assert.deepEqual([three.row.keyline, three.lines], ["circle", []]);
-  assert.ok(rules.includes(`Knobs of r 2.5 come out light (${small.row.ink.toFixed(1)}, against 63.1)`), `${small.row.ink}`);
+  assert.ok(rules.includes(`Knobs of r 2.5 come out light (${small.row.ink.toFixed(1)}, against 64.1)`), `${small.row.ink}`);
   assert.ok(small.lines.some((l) => l.startsWith("weight")), "knobs of r 2.5 fail weight");
 });
 
@@ -216,13 +216,17 @@ test("rules-filled.md: the weights it works from are the garage's own", async (t
     return { ink: r.rows.find((x) => x.icon === name).ink, lines: r.failures.map(line) };
   };
   const whole = await edited("tyre", (s) => s);
-  const oneRow = await edited("tyre", (s) => s.replace(/\n  <path d="M9\.75 20\.25[^\n]*\/>/, ""));
-  assert.ok(filled.includes(`\`examples/garage/tyre.svg\` weighs ${Math.round(whole.ink)} with its two rows of treads, and ${Math.round(oneRow.ink)} with one row dropped`), `${whole.ink} ${oneRow.ink}`);
+  const oneRow = await edited("tyre", (s) => s.replace(/\n  <path d="M35\.25 33\.75[^\n]*\/>/, ""));
+  assert.ok(filled.includes(`\`examples/garage/tyre.svg\` weighs ${Math.round(whole.ink)} with its ten treads, and ${Math.round(oneRow.ink)} with every other tread dropped`), `${whole.ink} ${oneRow.ink}`);
   const gear = await edited("gearshift", (s) => s), noMiddle = await edited("gearshift", (s) => s.replace("M24 11.5V22.5", ""));
   assert.ok(filled.includes(`\`gearshift.svg\` weighs ${Math.round(gear.ink)} with its gate at the root's line, and ${Math.round(noMiddle.ink)} with its middle stroke dropped`), `${gear.ink} ${noMiddle.ink}`);
-  const thin = await edited("wrench", (s) => s.replace(/\n  <circle[^\n]*\/>/, "").replaceAll("C29.25 23.75 24.25 18.75 27.5 15.5L35.25 7.75", "L35.25 7.75"));
+  const thin = await edited("wrench", (s) => s.replaceAll("C29.25 23.75 24.25 18.75 27.5 15.5L35.25 7.75", "L35.25 7.75"));
   const weights = thin.lines.filter((l) => l.startsWith("weight"));
   assert.equal(weights.length, 2, thin.lines.join("\n"));
   for (const l of weights) assert.ok(filled.includes(`\`${l}\``), `rules-filled.md quotes ${l}`);
-  assert.ok(filled.includes("examples/garage` with the wrench's hole taken out and its jaw's notch filled in (a straight edge from 32.5 20.5 to 35.25 7.75)"));
+  assert.ok(filled.includes("examples/garage` with the wrench's jaw's notch filled in (a straight edge from 32.5 20.5 to 35.25 7.75)"));
+  const holed = await edited("wrench", (s) => s.replace("</svg>", '  <circle cx="13.5" cy="34.5" r="3.75" fill="#ffffff" />\n</svg>'));
+  const gap = holed.lines.filter((l) => l.startsWith("gap  wrench"));
+  assert.equal(gap.length, 1, holed.lines.join("\n"));
+  assert.ok(filled.includes(`\`${gap[0]}\`, a hole of r 3.75 in the wrench's handle`), gap[0]);
 });

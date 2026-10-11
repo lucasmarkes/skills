@@ -33,7 +33,7 @@ test("construction colours each join by its measure: a kink shows red", () => {
 test("construction draws a modifier's halo: a dashed circle for a badge, a band for a slash", async () => {
   const text = await addModifier(readSet(examples("hairline")).find((s) => s.name === "data").text, "badge:plus");
   assert.match(construction({ name: "d", text }, 16), /<circle [^>]*stroke="#9333ea"[^>]*stroke-dasharray/);
-  const slashed = await addModifier(readSet(examples("hairline")).find((s) => s.name === "devices").text, "slash");
+  const slashed = await addModifier(readSet(examples("hairline")).find((s) => s.name === "security").text, "slash");
   assert.match(construction({ name: "s", text: slashed }, 16), /<path d="M[\d.]+,[\d.]+L[\d.]+,[\d.]+" stroke="#9333ea" stroke-opacity=".15"/);
 });
 

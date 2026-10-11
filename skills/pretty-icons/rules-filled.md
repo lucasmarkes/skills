@@ -127,15 +127,15 @@ Its horns are the two cusps (`c`), and they turn in: a crescent whose horns poin
 
 ## 05 · weight
 
-Ink is the line alone: tones, shades, dots and the shadow dropped, every other stroke read in the line tone. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a shape its outline at 1.5. Where lines cross, they count once. A tyre is a `ring` (`shapes.mjs`), its tone and its contour; paint adds nothing. Within 25% of the set's median and of the reference, 337.5, the median of `examples/garage`.
+Ink is the line alone: tones, shades, dots and the shadow dropped, every other stroke read in the line tone. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a shape its outline at 1.5. Where lines cross, they count once. A tyre is a `ring` (`shapes.mjs`), its tone and its contour; paint adds nothing. Within 25% of the set's median and of the reference, 347, the median of `examples/garage`.
 
 A body at its keyline weighs about 240 to 250: the circle 239, a rect with `rx 6` 251. The details carry the other 90 or so: a line 60 long. A thin object (a bone, a brush, a key) has less outline than a body at its keyline, and comes in light. A bulky one with a second body (a cage, a jar, a bowl of food) comes in heavy.
 
-- **Keep it, after a run:** the percentage is the move. Read it against the number the line names, not against the icon: `-30%` of 340 leaves the icon about 100 short, so add about 100, a third of the reference, which is about 43% of the icon's own ink; `+30%` is about 100 over, so take about 100 away. A minus adds line, a plus takes it away. Aim at the reference, not the edge: the set's median moves as the others change.
-- **Keep it, for a light icon:** give it what the object has: a hole, a slot, a tick. The wrench gained a hole and passed.
+- **Keep it, after a run:** the percentage is the move. Read it against the number the line names, not against the icon: `-30%` of 347 leaves the icon about 100 short, so add about 100, a third of the reference, which is about 43% of the icon's own ink; `+30%` is about 100 over, so take about 100 away. A minus adds line, a plus takes it away. Aim at the reference, not the edge: the set's median moves as the others change.
+- **Keep it, for a light icon:** give it what the object has: a hole, a slot, a tick. The wrench has its jaw's notch: filled in, it comes out light (below).
 - **Keep it, for a thin object:** fill its keyline first, its ends out to the box's sides or corners. Then draw a handle or a shaft as a body, two contours, not one line: a pill 20 × 4 weighs 89, its line 32. Give it larger ends (a bone's knobs, a brush's head), or a band across it, as a second body: a ferrule.
-- **Keep it, for a heavy icon:** a double ring, a third spoke, a fourth tread: drop one, or shrink the hole. For a bulky object: a smaller second body or detail. `examples/garage/tyre.svg` weighs 408 with its two rows of treads, and 366 with one row dropped; `gearshift.svg` weighs 356 with its gate at the root's line, and 340 with its middle stroke dropped.
-- **Rejected when:** `weight  wrench  ink 246.01 (-27.1%) → within ±25% of the set's median 337.54` and `weight  wrench  ink 246.01 (-27.1%) → within ±25% of the reference 337.5`, `examples/garage` with the wrench's hole taken out and its jaw's notch filled in (a straight edge from 32.5 20.5 to 35.25 7.75); `weight  brush  ink 229.19 (-33.1%) → within ±25% of the set's median 342.51`, a brush at 255 the run before, moved the wrong way.
+- **Keep it, for a heavy icon:** a double ring, a third spoke, a fourth tread: drop one, or shrink the hole. For a bulky object: a smaller second body or detail. `examples/garage/tyre.svg` weighs 386 with its ten treads, and 355 with every other tread dropped; `gearshift.svg` weighs 356 with its gate at the root's line, and 340 with its middle stroke dropped.
+- **Rejected when:** `weight  wrench  ink 246.01 (-29.1%) → within ±25% of the set's median 347.04` and `weight  wrench  ink 246.01 (-29.1%) → within ±25% of the reference 347`, `examples/garage` with the wrench's jaw's notch filled in (a straight edge from 32.5 20.5 to 35.25 7.75); `weight  brush  ink 229.19 (-33.1%) → within ±25% of the set's median 342.51`, a brush at 255 the run before, moved the wrong way.
 
 ## 06 · gravity
 
@@ -158,7 +158,7 @@ Line to line: touch, or one and a half strokes apart, 2.25, outer edge to outer 
 
 - **Keep it, for a part that meets a body:** end it on the contour's centreline at an anchor or on a straight side, where the point is on the grid: the fuel pump's nozzle ends on the pump's straight side, at 30.75, 13. Or cross it: run the part on into the body and draw it before the body's tone, so the tone covers its end, as the gearshift's stem. Ending near a curve between anchors is a guess: a stem that stops 0.25 short of a leaf's edge is already almost.
 - **Keep it, for two bodies that meet** (two leaves on a stem, a lid on a pot): give both contours the same anchor, or let one cross the other.
-- **Rejected when:** `gap  wrench  path@4 to circle@5 0.07 apart → ≥ 2.25 apart, or crossing`; `gap  seedling  path@2 to path@6 overlapping, centrelines 0.5 apart → ≥ 2.25 apart, or crossing`: a part stopped near a leaf's edge, neither on it nor through it.
+- **Rejected when:** `gap  wrench  path@4 to circle@5 0.16 apart → ≥ 2.25 apart, or crossing`, a hole of r 3.75 in the wrench's handle; `gap  seedling  path@2 to path@6 overlapping, centrelines 0.5 apart → ≥ 2.25 apart, or crossing`: a part stopped near a leaf's edge, neither on it nor through it.
 
 ## 09 · metaphor
 

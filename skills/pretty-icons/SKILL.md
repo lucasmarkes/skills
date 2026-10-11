@@ -97,7 +97,7 @@ Edit only that icon's `.svg`. Run steps 4 and 5 for the set.
 | filling a wheel, a lamp or a band in the line tone because it is "solid" | `rules-filled.md` 04: a body, or a dot of r 2.5 or less |
 | drawing a rim or a frame as a thick bar | `rules-filled.md` 04: a ring, from the kit (`shapes.mjs ring`) |
 | rounding every rect the same | `rules-filled.md` 07: cut, cased, moulded or a pill, by what the object is |
-| moving an icon's ink the wrong way, or by guess | `rules-filled.md` 05: a minus adds line, a plus takes it away; the percentage of 340 is how much |
+| moving an icon's ink the wrong way, or by guess | `rules-filled.md` 05: a minus adds line, a plus takes it away; the percentage of 347 is how much |
 | drawing an object at its true proportions, a can 29 tall | `rules-filled.md` 02: write the keyline's box first, and name the element that reaches each side |
 | lifting a body whose box already fills the live area | `rules-filled.md` 06: the mass is the area; give the light end area, shorten the heavy end |
 | ending a stem near a leaf's curve | `rules-filled.md` 08: on an anchor, or on through the body, drawn before its tone |

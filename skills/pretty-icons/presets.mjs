@@ -125,7 +125,7 @@ export function bodySvg(G, format) {
  * at the grid's own stroke.
  * On 48 it is the median line ink of examples/garage: the contours and marks, not the paint.
  */
-export const REFERENCE_INK = { 16: 63.1, 20: 102.4, 24: 151, 48: 337.5 };
+export const REFERENCE_INK = { 16: 64.1, 20: 103.5, 24: 152.6, 48: 347 };
 export const referenceInk = (G) => REFERENCE_INK[G];
 
 /**
