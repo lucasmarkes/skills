@@ -98,8 +98,8 @@ Each icon's ink is within 15% of the set's median, and within 20% of the grid's 
 
 The centre of mass of the ink is within 0.5 of the canvas centre on each axis. The box may sit off centre. The mass may not.
 
-- **Keep it:** centre the mass, not the box. `check.mjs` prints the offset: `mass +0, +1.3` is 1.3 low. Move the drawing the other way, to the nearest 0.25. `examples/hairline/machines.svg`'s box sits 0.25 low, under its antenna, and its mass sits at +0, +0.09.
-- **Keep it, when the move would push ink out of the live area:** the layout is lopsided. Three nodes in a triangle sit 1.3 low; two on a diagonal balance (`connectivity`). A tray's floor sits it 0.6 low: lift it, or draw a shape even top to bottom.
+- **Keep it:** centre the mass, not the box. `check.mjs` prints the offset: `mass +0, +1.3` is 1.3 low. Move the drawing the other way, to the nearest 0.25. `examples/hairline/machines.svg`'s head sits 0.25 low, under its antenna: drawn before its dot, its mass sat at +0, +0.07.
+- **Keep it, when the move would push ink out of the live area:** the layout is lopsided. Three nodes in a triangle sit 1.3 low; two links on a diagonal balance (`connectivity`). A tray's floor sits it 0.6 low: lift it, or draw a shape even top to bottom.
 - **Rejected when:** `check.mjs` prints `gravity`: `gravity  connectivity  mass +0, +1.3 → within ±0.5`.
 
 ## 07 · radius: two radii
@@ -114,7 +114,7 @@ Every rect is rounded by the preset. A smaller side of 8 or more takes the large
 Two elements either touch or sit at least one and a half strokes apart, outer edge to outer edge: two and a half strokes on their centrelines, 2.5 on 16, 3.25 on 20, 3.75 on 24. A mark (rule 09's tick, a dot) needs half that. They touch when their centrelines come within 0.1 of each other: one ends on the other, or crosses it. Anything between is "almost", and is rejected. Two outlines that meet edge to edge, `0 apart`, are almost too. The subpaths of one path are held to the same rule: dots merged into one path are as close as separate ones. A detail inside a body is the one exception: it is held one stroke from the body's contour, not one and a half (`loose`, below).
 
 - **Keep it, to make a detail touch a body:** end the path on the body's centreline, on the grid. In `examples/hairline/machines.svg` the antenna `M8 3.75V1.75` ends on the top of the body, a rect from y 3.75, centreline to centreline. Not the stroke's outer edge, 0.5 further out.
-- **Keep it, to keep a detail clear:** put its centreline two and a half strokes from the body's: 2.5 on 16, 3.25 on 20, 3.75 on 24. In `examples/hairline/devices.svg` the home bar `M7 12h2` sits 2.5 above the phone's edge at 14.5, and clear.
+- **Keep it, to keep a detail clear:** put its centreline two and a half strokes from the body's: 2.5 on 16, 3.25 on 20, 3.75 on 24. In `examples/hairline/devices.svg` the home bar `M6.5 12h3` sits 2.5 above the phone's edge at 14.5, and the speaker `M7 4h2` 2.5 below its top at 1.5, both clear.
 - **Keep it, for a line that meets a body:** a part that meets a body from outside (a handle, a stem, a nozzle) ends on the body's edge, and never runs under the body and out the other side, because the 20% fill shows it through.
 - **Keep it, for a detail inside a body** (a seam, a slit, a score, a stripe, a title bar, a line of text): it stops short of the contour, its nearest ink at least one stroke from the contour's, edge to edge: its centreline 2 strokes inside the contour's, 2 on 16. A detail is inside when its midpoint lies inside a filled body. A stripe or a title bar that ran from edge to edge now floats in its body, a stroke clear at each end.
 - **Keep it, for a near miss:** a check in its shield, a home bar in its phone, cells, rows, dots or braces: move each to touch or to two and a half strokes apart. Cells that cannot sit that far apart become round ones: `examples/hairline/all.svg` is four circles of r 2.25, 2.5 apart.

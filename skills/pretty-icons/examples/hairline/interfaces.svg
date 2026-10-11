@@ -1,5 +1,6 @@
 <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M10.5 13.75L3.75 13.75A1.5 1.5 0 0 1 2.25 12.25L2.25 3.75A1.5 1.5 0 0 1 3.75 2.25L12.25 2.25A1.5 1.5 0 0 1 13.75 3.75L13.75 10.5" data-cut="" />
-  <path d="M4.75 4.75 11.25 7.75 8.25 8.5 7.5 11.25Z" fill="currentColor" fill-opacity=".2" />
+  <rect x="2.25" y="2.25" width="11.5" height="11.5" rx="1.5" fill="currentColor" fill-opacity=".2" stroke="none" />
+  <path d="M10.5 13.75L3.75 13.75A1.5 1.5 0 0 1 2.25 12.25L2.25 3.75A1.5 1.5 0 0 1 3.75 2.25L12.25 2.25A1.5 1.5 0 0 1 13.75 3.75L13.75 10.5" data-cut="split" />
+  <path d="M5.5 5.5 11.25 8.5 9 9 8.5 11.25Z" />
   <circle cx="13.5" cy="13.5" r="1.5" fill="currentColor" stroke="none" data-modifier="dot" />
 </svg>
