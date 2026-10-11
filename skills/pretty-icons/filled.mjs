@@ -10,7 +10,7 @@
  *            tone and that tone's contour, so the line covers its edge.
  *   contour  a tone's geometry pasted, no fill, at 2: the line draws it, over the tone and the shade.
  *   shape    a closed element filled and drawn in one: glass or a hole in paper, a base in the shade.
- *   dot      a circle of r 2.5 or less, filled, stroke none: a hub, a lit lamp. The one place the line tone fills.
+ *   dot      a circle of r 2.5 or less, filled, stroke none: a hub, a rivet. The one place the line tone fills.
  *   line     an open stroke in the line tone, at the root's width: a part (a hose, a needle, a sign).
  *   mark     a stroke in the mark tone: a secondary mark (a minor tick, a seam). A tick or tread that names the object is a line. A detail: half a stroke from anything.
  *   solid    refused: anything else filled in the line tone. It is a body, or a dot.
