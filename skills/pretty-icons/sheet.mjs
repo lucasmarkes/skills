@@ -5,7 +5,10 @@
  *   pretty-icons-sheet.png   for the author: the set in rows at 1× and 2×, light and dark (and on grey at the filled finish),
  *                            then a tile per icon with its ink box (solid) over the keyline it matched (dashed)
  *   pretty-icons-blind.png   for the reader: icons only, 2×, shuffled and numbered
- * The key (number → name) is printed, for the author alone. `--seed=<n>`
+ * With `--showcase`, pretty-icons-showcase.png instead: the set as one grid at twice its grid, no names, for the
+ * eye to read as a whole. With `--shadow-pair` (the filled finish), pretty-icons-shadow-A.png and -B.png instead: the
+ * blind sheet with and without the shadow (shadow.mjs), under shuffled letters, for the shadow read in read.md.
+ * The key (number → name, letter → on or off) is printed, for the author alone. `--seed=<n>`
  * fixes the shuffle; `--out=<dir>` moves the files (default: a folder of the set's own
  * under pretty-icons/ in the system's temp folder, never the app). The paths are printed.
  */
@@ -18,6 +21,7 @@ import { checkSet, readSet, formatFailure } from "./check.mjs";
 import { preset, toDark } from "./presets.mjs";
 import { png } from "./raster.mjs";
 import { parse } from "./svg.mjs";
+import { shadowOn, shadowOff } from "./shadow.mjs";
 
 const FONT = `font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"`;
 const THEMES = { light: { bg: "#fafafa", ink: "#737373", text: "#171717" }, dark: { bg: "#0a0a0a", ink: "#8a8a8a", text: "#ededed" }, grey: { bg: "#edeeee", ink: "#2e3955", text: "#171717" } };
@@ -125,6 +129,36 @@ export function composeBlind(set, G, seed = Date.now()) {
   return { svg: svg + "</svg>", key };
 }
 
+/** The set as one grid on its finish's page, at twice its grid, five to a row: no names, no tiles. */
+export function composeShowcase(set, G) {
+  const t = THEMES[preset(G).finish === "filled" ? "grey" : "light"], icon = G * 2, gap = Math.max(16, G), perRow = 5;
+  const cols = Math.min(perRow, set.length), rows = Math.ceil(set.length / perRow);
+  const W = gap * 2 + cols * icon + (cols - 1) * gap, H = gap * 2 + rows * icon + (rows - 1) * gap;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="${t.bg}" />`;
+  set.forEach((s, i) => { svg += place(s, G, gap + (i % perRow) * (icon + gap), gap + Math.floor(i / perRow) * (icon + gap), icon, t.ink); });
+  return svg + "</svg>";
+}
+
+/**
+ * The set with its shadow and without, as two blind sheets in one order, under letters the seed shuffles:
+ * { A, B } the two sheets' markup, key { A, B } each "on" or "off".
+ */
+export function composeShadowPair(set, G, seed = Date.now()) {
+  const sides = shuffled([["on", shadowOn], ["off", shadowOff]], seed);
+  const [A, B] = sides.map(([, fn]) => composeBlind(set.map((s) => ({ ...s, text: fn(s.text) })), G, seed).svg);
+  return { A, B, key: { A: sides[0][0], B: sides[1][0] } };
+}
+
+const widthOf = (svg) => Number(/width="(\d+)"/.exec(svg)[1]);
+
+/** The set as check.mjs judged it; a set it refuses or cannot measure gets no sheet. */
+async function passed(dir) {
+  const r = await checkSet(dir);
+  if (!r.measured) throw new Error(`check: not measured: ${r.why}`);
+  if (r.failures.length) throw new Error(`check failed:\n${r.failures.map(formatFailure).join("\n")}`);
+  return r;
+}
+
 /**
  * Where the sheets go without --out: <tmp>/pretty-icons/<parent>-<hash>, the parent
  * folder's name and the first 8 hex of the sha1 of the folder's absolute path. Two
@@ -138,36 +172,56 @@ export function defaultOut(folder) {
 
 export async function writeSheets(folder, { out, seed = Date.now() % 2 ** 32 } = {}) {
   const dir = resolve(folder), dest = out ? resolve(out) : defaultOut(dir);
-  const r = await checkSet(dir);
-  if (!r.measured) throw new Error(`check: not measured: ${r.why}`);
-  if (r.failures.length) throw new Error(`check failed:\n${r.failures.map(formatFailure).join("\n")}`);
-  const set = readSet(dir);
+  const r = await passed(dir), set = readSet(dir);
   mkdirSync(dest, { recursive: true });
   const sheet = join(dest, "pretty-icons-sheet.png"), blind = join(dest, "pretty-icons-blind.png");
   const sheetSvg = composeSheet(set, r.G, r.rows);
-  writeFileSync(sheet, png(sheetSvg, Number(/width="(\d+)"/.exec(sheetSvg)[1])));
+  writeFileSync(sheet, png(sheetSvg, widthOf(sheetSvg)));
   const b = composeBlind(set, r.G, seed);
-  writeFileSync(blind, png(b.svg, Number(/width="(\d+)"/.exec(b.svg)[1])));
+  writeFileSync(blind, png(b.svg, widthOf(b.svg)));
   return { sheet, blind, key: b.key, seed };
 }
 
-const USAGE = "usage: node sheet.mjs <folder> [--seed=<n>] [--out=<dir>] | node sheet.mjs <folder> --proof [--only <name>] [--out=<dir>]";
+export async function writeShowcase(folder, { out } = {}) {
+  const dir = resolve(folder), dest = out ? resolve(out) : defaultOut(dir);
+  const r = await passed(dir), svg = composeShowcase(readSet(dir), r.G);
+  mkdirSync(dest, { recursive: true });
+  const showcase = join(dest, "pretty-icons-showcase.png");
+  writeFileSync(showcase, png(svg, widthOf(svg)));
+  return { showcase };
+}
 
-/** The folder, seed and out from argv, and --proof with its --only; null when anything in it is not one of those. */
+export async function writeShadowPair(folder, { out, seed = Date.now() % 2 ** 32 } = {}) {
+  const dir = resolve(folder), dest = out ? resolve(out) : defaultOut(dir);
+  const r = await passed(dir);
+  if (preset(r.G).finish !== "filled") throw new Error("--shadow-pair: a shadow at the filled finish only (48)");
+  const pair = composeShadowPair(readSet(dir), r.G, seed);
+  mkdirSync(dest, { recursive: true });
+  const A = join(dest, "pretty-icons-shadow-A.png"), B = join(dest, "pretty-icons-shadow-B.png");
+  writeFileSync(A, png(pair.A, widthOf(pair.A)));
+  writeFileSync(B, png(pair.B, widthOf(pair.B)));
+  return { A, B, key: pair.key, seed };
+}
+
+const USAGE = "usage: node sheet.mjs <folder> [--seed=<n>] [--out=<dir>] | node sheet.mjs <folder> --showcase [--out=<dir>] | node sheet.mjs <folder> --shadow-pair [--seed=<n>] [--out=<dir>] | node sheet.mjs <folder> --proof [--only <name>] [--out=<dir>]";
+
+/** The folder, seed and out from argv, and one of --showcase, --shadow-pair or --proof (with its --only); null when anything in it is not one of those. */
 export function parseArgs(argv) {
   const r = { folder: undefined, seed: undefined, out: undefined };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (!a.startsWith("--")) { if (r.folder !== undefined) return null; r.folder = a; continue; }
-    if (a === "--proof") { if (r.proof) return null; r.proof = true; continue; }
+    const mode = { "--proof": "proof", "--showcase": "showcase", "--shadow-pair": "shadowPair" }[a];
+    if (mode) { if (r[mode]) return null; r[mode] = true; continue; }
     if (a === "--only") { const v = argv[++i]; if (v === undefined || v.startsWith("--") || r.only !== undefined) return null; r.only = v; continue; }
     const m = /^--(seed|out|only)=(.+)$/.exec(a);
     if (!m || r[m[1]] !== undefined) return null;
     if (m[1] === "seed" && !/^\d+$/.test(m[2])) return null;
     r[m[1]] = m[1] === "seed" ? Number(m[2]) : m[2];
   }
-  // --only is for the proof; --seed shuffles the blind sheet, which the proof does not draw
-  if (r.folder === undefined || (r.only !== undefined && !r.proof) || (r.proof && r.seed !== undefined)) return null;
+  // one mode at most; --only is for the proof; --seed shuffles a blind sheet, which the proof and the showcase do not draw
+  if ([r.proof, r.showcase, r.shadowPair].filter(Boolean).length > 1) return null;
+  if (r.folder === undefined || (r.only !== undefined && !r.proof) || ((r.proof || r.showcase) && r.seed !== undefined)) return null;
   return r;
 }
 
@@ -178,6 +232,14 @@ export async function main(argv) {
     if (args.proof) {
       const { writeProof } = await import("./proof.mjs");
       console.log(writeProof(args.folder, { out: args.out, only: args.only }));
+      return;
+    }
+    if (args.showcase) { console.log((await writeShowcase(args.folder, { out: args.out })).showcase); return; }
+    if (args.shadowPair) {
+      const p = await writeShadowPair(args.folder, { out: args.out, seed: args.seed });
+      console.log(p.A); console.log(p.B);
+      console.log(`key: A ${p.key.A} · B ${p.key.B}`);
+      console.log(`seed: ${p.seed}`);
       return;
     }
     const r = await writeSheets(args.folder, { out: args.out, seed: args.seed });

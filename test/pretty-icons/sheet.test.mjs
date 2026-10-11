@@ -5,7 +5,8 @@ import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeF
 import { tmpdir } from "node:os";
 import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
-import { composeBlind, composeSheet, parseArgs, writeSheets } from "../../skills/pretty-icons/sheet.mjs";
+import { composeBlind, composeSheet, composeShowcase, composeShadowPair, parseArgs, writeSheets, writeShowcase, writeShadowPair } from "../../skills/pretty-icons/sheet.mjs";
+import { shadowOn } from "../../skills/pretty-icons/shadow.mjs";
 import { readSet, checkSet } from "../../skills/pretty-icons/check.mjs";
 
 const fix = new URL("./fixtures/good-16/", import.meta.url).pathname;
@@ -70,6 +71,10 @@ test("the root's stroke-dasharray reaches the sheet", async (t) => {
 test("the command line takes a folder, --seed=<int> and --out=<dir>, nothing else", () => {
   assert.deepEqual(parseArgs(["f", "--seed=12", "--out=o"]), { folder: "f", seed: 12, out: "o" });
   assert.deepEqual(parseArgs(["f"]), { folder: "f", seed: undefined, out: undefined });
+  assert.deepEqual(parseArgs(["f", "--showcase", "--out=o"]), { folder: "f", seed: undefined, out: "o", showcase: true });
+  assert.deepEqual(parseArgs(["f", "--shadow-pair", "--seed=3"]), { folder: "f", seed: 3, out: undefined, shadowPair: true });
+  for (const bad of [["f", "--showcase", "--seed=1"], ["f", "--showcase", "--proof"], ["f", "--shadow-pair", "--showcase"], ["f", "--shadow-pair", "--proof"], ["f", "--showcase", "--showcase"], ["f", "--shadow-pair", "--only", "x"]])
+    assert.equal(parseArgs(bad), null, bad.join(" "));
   for (const bad of [["f", "--seed=1.5"], ["f", "--seed=-1"], ["f", "--seed=x"], ["f", "--seed"], ["f", "--out"], ["f", "--out="], ["f", "--grid=16"], ["f", "--print"], []])
     assert.equal(parseArgs(bad), null, bad.join(" "));
   const r = spawnSync(process.execPath, [sheetJs, fix, "--seed=abc"], { encoding: "utf8" });
@@ -126,4 +131,50 @@ test("the sheets go to a folder of their own in the temp folder by default, neve
   const cli = spawnSync(process.execPath, [sheetJs, two], { encoding: "utf8" });
   assert.equal(cli.status, 0, cli.stderr);
   assert.deepEqual(cli.stdout.split("\n").slice(0, 2), [r2.sheet, r2.blind], "the paths are printed");
+});
+
+const garage = new URL("../../skills/pretty-icons/examples/garage/", import.meta.url).pathname;
+
+test("the showcase is the set alone, five to a row at twice its grid, on its finish's page", async (t) => {
+  const set = readSet(fix), svg = composeShowcase(set, 16);
+  for (const s of set) assert.ok(!svg.includes(s.name), `${s.name} on the showcase`);
+  assert.equal(svg.match(/<g transform="translate/g).length, set.length);
+  assert.ok(svg.includes('scale(2)') && svg.includes('fill="#fafafa"'));
+  // 4 icons at 32 px, 16 apart and 16 from the edge
+  assert.match(svg, /^<svg [^>]*width="208" height="64"/);
+  const ten = composeShowcase(readSet(garage), 48);
+  assert.ok(ten.includes('fill="#edeeee"'), "the filled finish on grey");
+  assert.match(ten, /^<svg [^>]*width="768" height="336"/);
+  const out = tmp(t), r = await writeShowcase(fix, { out });
+  assert.equal(r.showcase, join(out, "pretty-icons-showcase.png"));
+  assert.ok(statSync(r.showcase).size > 1000);
+  await assert.rejects(writeShowcase(new URL("./fixtures/hairline-before/", import.meta.url).pathname, { out }), /check/);
+});
+
+test("the shadow pair: one sheet shadowed, one not, in one order, the letters shuffled by the seed", async (t) => {
+  const set = readSet(garage), keys = new Set();
+  for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+    const p = composeShadowPair(set, 48, seed), on = p.key.A === "on" ? "A" : "B", off = on === "A" ? "B" : "A";
+    assert.deepEqual([p.key.A, p.key.B].sort(), ["off", "on"]);
+    assert.match(p[on], /transform="translate\(1\.5 1\.5\)"/);
+    assert.doesNotMatch(p[off], /translate\(1\.5 1\.5\)/);
+    assert.equal(p[off], composeBlind(set, 48, seed).svg, "the unshadowed sheet is the blind sheet");
+    assert.deepEqual(composeShadowPair(set, 48, seed), p, "one seed, one pair");
+    keys.add(p.key.A);
+  }
+  assert.deepEqual([...keys].sort(), ["off", "on"], "the seed decides which letter is shadowed");
+  // a set already shadowed gives the same pair
+  const shadowed = set.map((s) => ({ ...s, text: shadowOn(s.text) }));
+  assert.deepEqual(composeShadowPair(shadowed, 48, 1), composeShadowPair(set, 48, 1));
+  const out = tmp(t), r = await writeShadowPair(garage, { out, seed: 1 });
+  assert.deepEqual([r.A, r.B], [join(out, "pretty-icons-shadow-A.png"), join(out, "pretty-icons-shadow-B.png")]);
+  assert.ok(statSync(r.A).size > 1000 && statSync(r.B).size > 1000);
+  assert.deepEqual(r.key, composeShadowPair(set, 48, 1).key);
+  await assert.rejects(writeShadowPair(fix, { out }), /--shadow-pair: a shadow at the filled finish only \(48\)/);
+  const cli = spawnSync(process.execPath, [sheetJs, garage, "--shadow-pair", "--seed=1", `--out=${out}`], { encoding: "utf8" });
+  assert.equal(cli.status, 0, cli.stderr);
+  assert.deepEqual(cli.stdout.trim().split("\n"), [r.A, r.B, `key: A ${r.key.A} · B ${r.key.B}`, "seed: 1"]);
+  const show = spawnSync(process.execPath, [sheetJs, garage, "--showcase", `--out=${out}`], { encoding: "utf8" });
+  assert.equal(show.status, 0, show.stderr);
+  assert.equal(show.stdout.trim(), join(out, "pretty-icons-showcase.png"));
 });
