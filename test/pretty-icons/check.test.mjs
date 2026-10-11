@@ -271,3 +271,18 @@ test("loose: at 48 the tone is the body, and its contour is not held apart by ga
   assert.deepEqual(await looses(s48(`${body}\n<path d="M9 24H39" />`), 48), []);
   assert.deepEqual(await gaps(s48(`${body}\n<path d="M9 24H39" />`), 48), []);
 });
+
+test("loose: a door inside the body and a chimney meeting it from outside, in one path, is not refused", async () => {
+  const house = '<path d="M8 1.5 13.75 6.5v6.25h-11.5V6.5Z" fill="currentColor" fill-opacity=".2" />';
+  assert.deepEqual(await looses(s16(`${house}\n<path d="M6.75 10.75V8.75h2.5v2M11 2.5V5" />`), 16), []);
+});
+
+test("loose: each subpath is judged on its own and named by index", async () => {
+  assert.deepEqual(await looses(s16(`${CARD}\n<path d="M2 8H5M14 8H20" />`), 16), ["path@2[0] touches rect@1 → end it ≥ 1 stroke inside the contour"]);
+  assert.deepEqual(await looses(s16(`${CARD}\n<path d="M5 8H8M14 8H20" />`), 16), []);
+});
+
+test("gap: two lines outside any body, almost and overlapping", async () => {
+  assert.deepEqual(await gaps(s16('<path d="M2 6H14" />\n<path d="M2 7.75H14" />'), 16), ["path@1 to path@2 0.75 apart → ≥ 1.5 apart, or crossing"]);
+  assert.deepEqual(await gaps(s16('<path d="M2 6H14" />\n<path d="M2 6.5H14" />'), 16), ["path@1 to path@2 overlapping, centrelines 0.5 apart → ≥ 1.5 apart, or crossing"]);
+});

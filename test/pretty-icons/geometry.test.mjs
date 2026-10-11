@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { sample, sampleParts, bounds, minDistance, pathPoints, pathParts, midpoint, inside, interior, clearance } from "../../skills/pretty-icons/geometry.mjs";
+import { sample, sampleParts, bounds, minDistance, pathPoints, pathParts, midpoint, inside, interior, interiorParts, clearance } from "../../skills/pretty-icons/geometry.mjs";
 
 const near = (a, b, eps = 0.02) => assert.ok(Math.abs(a - b) < eps, `${a} ≈ ${b}`);
 const el = (tag, attrs) => ({ tag, attrs: Object.fromEntries(Object.entries(attrs).map(([k, v]) => [k, String(v)])) });
@@ -101,4 +101,18 @@ test("interior: a line whose midpoint lies inside a filled body", () => {
 
 test("clearance: edge to edge, each at its width", () => {
   assert.ok(Math.abs(clearance(E("path", { d: "M4 8H12" }), CARD, 1, 1) - 1) < 0.01);
+});
+
+test("midpoint: a tie goes to the later subpath, an unequal split is not a tie", () => {
+  assert.deepEqual(midpoint(E("path", { d: "M2 8H5.7M9 8H12.7" })), [9, 8]);
+  const s = midpoint(E("path", { d: "M8.25 5.25v6M5.25 8.25h6" }));
+  assert.ok(Math.abs(s[0] - 5.25) < 0.01 && Math.abs(s[1] - 8.25) < 0.01);
+  const m = midpoint(E("path", { d: "M2 8H4M8 8H14" }));
+  assert.ok(Math.abs(m[0] - 10) < 0.01 && m[1] === 8);
+});
+
+test("interiorParts: each subpath judged on its own midpoint", () => {
+  const parts = interiorParts(E("path", { d: "M5 8H8M14 8H20" }), [CARD]);
+  assert.deepEqual(parts.map((x) => x.i), [0]);
+  assert.equal(parts[0].body, CARD);
 });

@@ -162,18 +162,21 @@ export function sample(el, step = 0.1) {
 /** An element's centreline in parts: a path's subpaths, or the whole of any other element. */
 export const sampleParts = (el, step = 0.1) => (el.tag === "path" ? pathParts(el.attrs.d ?? "", step) : [sample(el, step)]);
 
-/** The point halfway along an element's length, its parts in order (the jump between subpaths is not length). */
-export function midpoint(el) {
+/** The point halfway along a list of parts' length (the jump between subpaths is not length); a tie goes to the later part. */
+function halfway(parts) {
   const segs = [];
-  for (const part of sampleParts(el, 0.05)) for (let i = 1; i < part.length; i++) segs.push([part[i - 1], part[i], Math.hypot(part[i][0] - part[i - 1][0], part[i][1] - part[i - 1][1])]);
-  if (!segs.length) return sampleParts(el, 0.05).flat()[0];
+  for (const part of parts) for (let i = 1; i < part.length; i++) segs.push([part[i - 1], part[i], Math.hypot(part[i][0] - part[i - 1][0], part[i][1] - part[i - 1][1])]);
+  if (!segs.length) return parts.flat()[0];
   let rest = segs.reduce((n, s) => n + s[2], 0) / 2;
   for (const [a, b, l] of segs) {
-    if (rest < l) { const t = l ? rest / l : 0; return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; }
+    if (rest < l - 1e-9) { const t = l ? rest / l : 0; return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; }
     rest -= l;
   }
   return segs.at(-1)[1];
 }
+
+/** The point halfway along an element's length, its parts in order; a tie goes to the later subpath. */
+export const midpoint = (el) => halfway(sampleParts(el, 0.05));
 
 /** Whether a point lies inside a closed polygon, even-odd. */
 export function inside([x, y], poly) {
@@ -185,10 +188,22 @@ export function inside([x, y], poly) {
   return n;
 }
 
+const within = (m, body) => sampleParts(body, 0.05).reduce((n, part) => n !== inside(m, part), false);
+
 /** The filled body an element's midpoint lies inside (each subpath of the body even-odd), or null. */
 export function interior(el, bodies) {
   const m = midpoint(el);
-  return bodies.find((b) => sampleParts(b, 0.05).reduce((n, part) => n !== inside(m, part), false)) ?? null;
+  return bodies.find((b) => within(m, b)) ?? null;
+}
+
+/** Each subpath of an element judged on its own: [{ i, part, body }] for those whose own midpoint lies inside a body. */
+export function interiorParts(el, bodies) {
+  const out = [];
+  sampleParts(el, 0.05).forEach((part, i) => {
+    const m = halfway([part]), body = bodies.find((b) => within(m, b));
+    if (body) out.push({ i, part, body });
+  });
+  return out;
 }
 
 /** The least edge-to-edge distance from an element to a body's outline, each at its stroke width. */

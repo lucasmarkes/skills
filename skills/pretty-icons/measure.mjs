@@ -9,14 +9,14 @@
  * so a modified icon is judged for live (the whole) and gap (without the modifier, whose halo is the modifier
  * rule's) only: not keyline, gravity or weight, and it stays out of the median. Its base is judged for those. In duotone the
  * paint is a split body's fill (stroke none): its edge is its contour's, so it is left out of gap too.
- * loose: an unfilled stroke whose midpoint lies inside a filled body is an interior detail; it stops one stroke
+ * loose: an unfilled stroke (each subpath on its own) whose midpoint lies inside a filled body is an interior detail; it stops one stroke
  * inside the body's contour, edge to edge, and gap leaves that pair to it.
  */
 import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE } from "./presets.mjs";
 import { measure, shares, resvg, NO_RASTER } from "./raster.mjs";
 import { parse, compose, num, geometryKey } from "./svg.mjs";
 import { isModifier } from "./modifiers.mjs";
-import { sampleParts, minDistance, interior } from "./geometry.mjs";
+import { sampleParts, minDistance, interiorParts } from "./geometry.mjs";
 import { objectOf, linesOf, classify } from "./filled.mjs";
 
 // `+ 0` turns -0 into 0, so a centred icon prints 0, not -0.
@@ -50,8 +50,8 @@ function interiorDetails(parsed, els, p, c, rootW) {
     .filter((el) => !("data-cut" in el.attrs) && !keys.has(geometryKey(el)));
   const out = [];
   for (const el of candidates) {
-    const body = interior(el, bodies);
-    if (body) out.push({ el, body, w: own(el), wb: widthOf(body) });
+    const all = sampleParts(el, 0.05).length > 1;
+    for (const { i, part, body } of interiorParts(el, bodies)) out.push({ el, body, part, label: all ? `${el.at}[${i}]` : el.at, w: own(el), wb: widthOf(body) });
   }
   return out;
 }
@@ -105,10 +105,10 @@ export async function measuredChecks(set, G) {
     const dx = mass.dx + G / 2 - p.centre[0], dy = mass.dy + G / 2 - p.centre[1];
     if (inked && !modified && (Math.abs(dx) > p.gravityTol || Math.abs(dy) > p.gravityTol)) fail(failures, "gravity", name, `mass ${r2(dx) >= 0 ? "+" : ""}${r2(dx)}, ${r2(dy) >= 0 ? "+" : ""}${r2(dy)}`, `within ±${p.gravityTol}`);
     // loose: a detail inside a body stops a stroke inside its contour
-    for (const { el, body, w, wb } of inner) {
-      const centre = minDistance(sampleParts(el, 0.05).flat(), sampleParts(body, 0.05).flat()), edge = centre - (w + wb) / 2;
-      if (centre <= TOUCH || edge < 0) fail(failures, "loose", name, `${el.at} touches ${body.at}`, `end it ≥ ${LOOSE} stroke inside the contour`);
-      else if (edge < LOOSE * p.stroke - 1e-9) fail(failures, "loose", name, `${el.at} ${(edge / p.stroke).toFixed(1)} strokes from ${body.at}`, `≥ ${LOOSE} stroke inside the contour`);
+    for (const { el, body, part, label, w, wb } of inner) {
+      const centre = minDistance(part, sampleParts(body, 0.05).flat()), edge = centre - (w + wb) / 2;
+      if (centre <= TOUCH || edge < 0) fail(failures, "loose", name, `${label} touches ${body.at}`, `end it ≥ ${LOOSE} stroke inside the contour`);
+      else if (edge < LOOSE * p.stroke - 1e-9) fail(failures, "loose", name, `${label} ${(edge / p.stroke).toFixed(1)} strokes from ${body.at}`, `≥ ${LOOSE} stroke inside the contour`);
     }
     // gap, between every pair of elements, and between the subpaths of one path: merged dots
     // are as "almost" as separate ones. Touching (a shared end, a crossing) passes.
