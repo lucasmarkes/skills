@@ -9,6 +9,11 @@
  *   bean      round, with a dent below            --waist 0..1
  *   crescent  two cusps, a bite out of the bottom  --thick 0..1
  *   taper     round at one end, narrow at the other  --narrow 0..1, --sharp (the narrow end cut flat)
+ *   dome      a flat base, a round top: a loaf, a cloche   --shoulder 0..1 (where the sides turn in)
+ *   sack      a bag gathered at a neck: a sack of flour   --neck 0..1
+ *   bubble    a speech balloon, its tail low on the left  --tail 0..1 (how far left the tail reaches)
+ *   bell      narrow on top, flaring to a flat base: a bell, a lampshade
+ *   bust      a head on shoulders: a person, a profile    --neck 0..1
  *   wedge     a slice: apex, two sides, a crust    --angle 15..120
  *   scoop     a box with one side dished in       --depth 0..1, --side top|right|bottom|left, --rx
  *   blob      your own anchors                     --anchors "x,y[,t][,c] …" (c a cusp, t the handle length)
@@ -86,7 +91,8 @@ export function outline(anchors, { bulge = 0.55, turn = 22 } = {}) {
       return { hin: within(a.p, mul(u, -lin), ax), hout: within(a.p, mul(u, lout), ax) };
     }
     const d = unit(sub(next, a.p)), e = unit(sub(prev, a.p));
-    const ext = 180 - angle(d, e), tt = Math.max(0, Math.min(a.turn ?? turn, (ext - 34) / 2));
+    // a turn below 0 flares both handles outward, unclamped: a neck pinched in (sack, bust)
+    const ext = 180 - angle(d, e), tw = a.turn ?? turn, tt = tw < 0 ? tw : Math.max(0, Math.min(tw, (ext - 34) / 2));
     return { hin: mul(rot(e, -sgn * tt), lin), hout: mul(rot(d, sgn * tt), lout) };
   });
   return { anchors, hs };
@@ -118,6 +124,11 @@ const UNIT = {
       ? [{ p: [-1, 0] }, { p: [-0.4, -1] }, { p: [1, -n], cusp: true, turn: 0, line: true }, { p: [1, n], cusp: true, turn: 0 }, { p: [-0.4, 1] }]
       : [{ p: [-1, 0] }, { p: [-0.4, -1] }, { p: [1, 0], t: n }, { p: [-0.4, 1] }];
   },
+  dome: (o) => { const s = o.shoulder ?? 0.3; return [{ p: [-1, 1], cusp: true, turn: 0, line: true }, { p: [1, 1], cusp: true, turn: 0 }, { p: [1, s] }, { p: [0, -1] }, { p: [-1, s] }]; },
+  sack: (o) => { const n = o.neck ?? 0.22; return [{ p: [0, 1], t: 0.55 }, { p: [1, 0.3] }, { p: [n, -0.35], cusp: true, turn: -60, t: 0.6 }, { p: [0, -1], t: 1 }, { p: [-n, -0.35], cusp: true, turn: -60, t: 0.6 }, { p: [-1, 0.3] }]; },
+  bubble: (o) => [{ p: [-1, -0.15] }, { p: [0, -1] }, { p: [1, -0.15] }, { p: [0.3, 0.72], t: 0.6 }, { p: [-0.4, 0.66], cusp: true, turn: 0, line: true }, { p: [-(o.tail ?? 0.8), 1], cusp: true, turn: 30 }],
+  bell: () => [{ p: [0, -1] }, { p: [0.6, -0.2] }, { p: [1, 1], cusp: true, turn: 0, line: true }, { p: [-1, 1], cusp: true, turn: 0 }, { p: [-0.6, -0.2] }],
+  bust: (o) => { const n = o.neck ?? 0.2; return [{ p: [0.48, -0.7], t: 0.65 }, { p: [n, 0.1], cusp: true, turn: -30 }, { p: [1, 1], line: true, t: 0.9 }, { p: [-1, 1], t: 0.9 }, { p: [-n, 0.1], cusp: true, turn: -30 }, { p: [-0.48, -0.7], t: 0.65 }]; },
 };
 
 /** Unit anchors placed in a w × h box at `at`, an inset in from its edge, leaned and turned. */
@@ -220,6 +231,8 @@ export function shape(name, o = {}) {
 export const drop = (o) => shape("drop", o), leaf = (o) => shape("leaf", o), lens = (o) => shape("lens", o);
 export const bean = (o) => shape("bean", o), crescent = (o) => shape("crescent", o), taper = (o) => shape("taper", o);
 export const wedge = (o) => shape("wedge", o), scoop = (o) => shape("scoop", o), blob = (o) => shape("blob", o);
+export const dome = (o) => shape("dome", o), sack = (o) => shape("sack", o), bubble = (o) => shape("bubble", o);
+export const bell = (o) => shape("bell", o), bust = (o) => shape("bust", o);
 
 /**
  * The shade of an anchor outline: the run of segments on the side away from the light, closed by a seam.
@@ -388,7 +401,7 @@ export function repairFile(text) {
 }
 
 // every flag parseArgs takes, by the value it takes: a number, an x,y pair, a word or text, none
-const NUMERIC = ["w", "h", "rot", "bulge", "lean", "grid", "tip", "skew", "waist", "thick", "narrow", "angle", "depth", "rx", "r", "hole"];
+const NUMERIC = ["w", "h", "rot", "bulge", "lean", "grid", "tip", "skew", "waist", "thick", "narrow", "angle", "depth", "rx", "r", "hole", "shoulder", "neck", "tail"];
 const TEXT = ["shade", "seam", "side", "anchors", "from"];
 export const FLAGS = [...NUMERIC, "at", ...TEXT, "sharp"];
 export const USAGE = [
@@ -401,6 +414,11 @@ export const USAGE = [
   "  bean      --waist 0..1",
   "  crescent  --thick 0..1",
   "  taper     --narrow 0..1 --sharp",
+  "  dome      --shoulder 0..1",
+  "  sack      --neck 0..1",
+  "  bubble    --tail 0..1",
+  "  bell",
+  "  bust      --neck 0..1",
   "  wedge     --angle 15..120",
   "  scoop     --depth 0..1 --side top|right|bottom|left --rx N",
   "  blob      --anchors \"x,y[,t][,c] …\" (absolute anchors; c a cusp, t the handle length)",

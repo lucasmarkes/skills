@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { shape, finishOf, collinear, reconcile, repair, repairFile, shadeOf, parseArgs, ShapeError, drop, wedge, ring, USAGE, FLAGS } from "../../skills/pretty-icons/shapes.mjs";
+import { shape, finishOf, collinear, reconcile, repair, repairFile, shadeOf, parseArgs, ShapeError, drop, wedge, ring, dome, sack, bubble, bell, bust, USAGE, FLAGS } from "../../skills/pretty-icons/shapes.mjs";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -104,7 +104,7 @@ test("the usage names every flag the parser takes, each per-primitive flag on it
     assert.notEqual(parseArgs(argv), null, `parseArgs takes --${f}`);
   }
   assert.equal(parseArgs(["drop", "--colour", "red"]), null);
-  const own = { drop: ["tip"], leaf: ["skew"], bean: ["waist"], crescent: ["thick"], taper: ["narrow", "sharp"], wedge: ["angle"], scoop: ["depth", "side", "rx"], blob: ["anchors"], ring: ["r", "hole"] };
+  const own = { drop: ["tip"], leaf: ["skew"], bean: ["waist"], crescent: ["thick"], taper: ["narrow", "sharp"], wedge: ["angle"], scoop: ["depth", "side", "rx"], dome: ["shoulder"], sack: ["neck"], bubble: ["tail"], bust: ["neck"], blob: ["anchors"], ring: ["r", "hole"] };
   const lines = USAGE.split("\n");
   for (const [name, flags] of Object.entries(own)) {
     const l = lines.find((x) => x.trim().startsWith(`${name} `));
@@ -246,5 +246,34 @@ test("bend: every primitive is clean at every grid, at the grid's stroke", () =>
   for (const grid of [16, 20, 24, 48]) for (const name of [...ANCHORED, "wedge", "scoop"]) {
     const { d } = shape(name, { grid });
     assert.deepEqual(curveFailures(name, { tag: "path", attrs: { d }, at: "path@1" }, preset(grid).stroke), [], `${name} at ${grid}: ${d}`);
+  }
+});
+
+const SOFT = ["dome", "sack", "bubble", "bell", "bust"];
+const bent = (d, grid) => curveFailures("x", { tag: "path", attrs: { d }, at: "path@1" }, preset(grid).stroke);
+
+test("the soft bodies, at every grid, are on the quarter grid with no kink, wobble or tight bend", () => {
+  for (const grid of [16, 20, 24, 48]) for (const name of SOFT) {
+    const { d } = shape(name, { grid });
+    assert.ok(onGrid(d), `${name} at ${grid}: ${d}`);
+    assert.deepEqual(bent(d, grid), [], `${name} at ${grid}`);
+  }
+  for (const [name, o] of [["dome", { shoulder: 0.6 }], ["sack", { neck: 0.35 }], ["bubble", { tail: 0.5 }], ["bust", { neck: 0.3 }]]) assert.deepEqual(bent(shape(name, o).d, 48), [], `${name} ${JSON.stringify(o)}`);
+});
+
+test("the soft bodies at 16, as drawn", () => {
+  assert.equal(dome({ grid: 16 }).d, "M1.5 14.5L14.5 14.5C14.5 12.75 14.5 11.75 14.5 10C14.5 5.75 12.25 1.5 8 1.5C3.75 1.5 1.5 5.75 1.5 10C1.5 11.75 1.5 12.75 1.5 14.5Z");
+  assert.equal(sack({ grid: 16 }).d, "M8 14.5C11.5 14.5 14.5 13 14.5 10C14.5 7.5 12.5 4.75 9.5 5.75C10.75 4.25 11.5 1.5 8 1.5C4.5 1.5 5.25 4.25 6.5 5.75C3.5 4.75 1.5 7.5 1.5 10C1.5 13 4.5 14.5 8 14.5Z");
+  assert.equal(bubble({ grid: 16 }).d, "M1.5 7C1.5 3.75 4.75 1.5 8 1.5C11.25 1.5 14.5 3.75 14.5 7C14.5 9.75 13.5 10.75 10 12.75C8.25 13.75 7.25 12.5 5.5 12.25L2.75 14.5C3.75 11.75 1.5 10 1.5 7Z");
+  assert.equal(bell({ grid: 16 }).d, "M8 1.5C10.5 1.5 10.75 4.25 12 6.75C13.5 9.75 13.5 11.5 14.5 14.5L1.5 14.5C2.5 11.5 2.5 9.75 4 6.75C5.25 4.25 5.5 1.5 8 1.5Z");
+  assert.equal(bust({ grid: 16 }).d, "M11 3.5C12.75 5.5 10.75 7.25 9.25 8.75C12.25 9.75 14.5 9 14.5 14.5L1.5 14.5C1.5 9 3.75 9.75 6.75 8.75C5.25 7.25 3.25 5.5 5 3.5C6.75 1.5 9.25 1.5 11 3.5Z");
+});
+
+test("the soft bodies at the filled finish: tone, shade and contour, passing its rules", () => {
+  for (const name of SOFT) {
+    const els = finishOf(name, { grid: 48 });
+    assert.equal(els.length, 3, name);
+    const svg = `<svg viewBox="0 0 48 48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${els.join("")}</svg>`;
+    assert.deepEqual(filledChecks(name, parse(svg), 48), [], name);
   }
 });
