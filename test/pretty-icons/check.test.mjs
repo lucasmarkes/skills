@@ -297,3 +297,21 @@ test("air: check names the narrow paper and its move", async () => {
 test("air: an interior detail is loose's, so air reads the body without it", async () => {
   assert.deepEqual(await airs(s16(`${CARD}<path d="M4 8H12" />`), 16), []);
 });
+
+const LONG = s16('<path d="M3 13L13 3" />'), ROUND = s16('<circle cx="8" cy="8" r="6.5" />');
+const diagonals = async (texts) => (await measuredChecks(texts.map((text, i) => ({ name: `i${i}`, text })), 16)).failures.filter((f) => f.rule === "diagonal").map((f) => `${f.icon}  ${f.got} → ${f.want}`);
+
+test("diagonal: at most three in ten", async () => {
+  assert.deepEqual(await diagonals([...Array(4).fill(LONG), ...Array(6).fill(ROUND)]), ["set  4 of 10 on the diagonal (i0, i1, i2, i3) → at most 3"]);
+  assert.deepEqual(await diagonals([...Array(3).fill(LONG), ...Array(7).fill(ROUND)]), []);
+});
+
+test("diagonal: a set of one or two may hold one", async () => {
+  assert.deepEqual(await diagonals([LONG]), []);
+  assert.deepEqual(await diagonals([LONG, ROUND]), []);
+  assert.deepEqual(await diagonals([LONG, LONG]), ["set  2 of 2 on the diagonal (i0, i1) → at most 1"]);
+});
+
+test("diagonal: never upper-left to lower-right", async () => {
+  assert.deepEqual(await diagonals([s16('<path d="M3 3L13 13" />')]), ["i0  upper-left to lower-right → lower-left to upper-right"]);
+});

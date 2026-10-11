@@ -13,9 +13,10 @@
  * inside the body's contour, edge to edge, and gap leaves that pair to it.
  * air: the paper rendered at 8 px a stroke, opened at radius 0.75 stroke; what stays narrow, or a hole under 2 strokes, is named with its place.
  * Gap and air may both name one pair of parallel lines.
+ * diagonal: the base's ink axes; an elongated icon at 45° rising to the right counts, a set holds at most max(1, round(0.3 × N)), and one falling to the right is refused.
  */
-import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE, COUNTER } from "./presets.mjs";
-import { measure, shares, resvg, air, NO_RASTER } from "./raster.mjs";
+import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE, COUNTER, DIAGONAL } from "./presets.mjs";
+import { measure, shares, resvg, air, elongation, NO_RASTER } from "./raster.mjs";
 import { parse, compose, num, geometryKey } from "./svg.mjs";
 import { isModifier } from "./modifiers.mjs";
 import { sampleParts, minDistance, interiorParts } from "./geometry.mjs";
@@ -80,6 +81,7 @@ export async function measuredChecks(set, G) {
       const m = filled
         ? { ...(await measure(objectOf(base), G)), live: whole.box, ink: (await measure(linesOf(base), G)).ink }
         : { ...(await measure(base, G)), live: whole.box };
+      const e = await elongation(filled ? objectOf(base) : base, G);
       const share = filled ? await shares(base, G) : null;
       const inner = interiorDetails(parsed, els, p, c, rootW), innerAt = new Set(inner.map((x) => x.el.at));
       // air reads the base without its interior details: those are loose's, a stroke from the contour
@@ -87,7 +89,7 @@ export async function measuredChecks(set, G) {
       // a detail and its body (and the body's contour, the same geometry) are loose's, not gap's
       const skip = new Set();
       for (const { el, body } of inner) for (const x of els) if (geometryKey(x) === geometryKey(body)) skip.add(`${el.at}|${x.at}`).add(`${x.at}|${el.at}`);
-      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW, inner, innerAt, skip, narrow });
+      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW, inner, innerAt, skip, narrow, e });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
@@ -139,6 +141,12 @@ export async function measuredChecks(set, G) {
     }
     rows.push({ icon: name, x0: r2(box.x0), y0: r2(box.y0), w: r2(box.w), h: r2(box.h), keyline: fits ? k.format : "—", ink: r2(ink), dx: r2(dx), dy: r2(dy), ...(share ? { "line%": share.paint ? Math.round((1000 * share.dark) / share.paint) / 10 : 0 } : {}) });
   }
+
+  // diagonal: an elongated icon may lie at 45°, lower-left to upper-right, in a share of the set; never the other way
+  const long = measures.filter((x) => x.e.ratio >= DIAGONAL.ratio);
+  for (const x of long) if (Math.abs(x.e.angle + 45) <= DIAGONAL.tol) fail(failures, "diagonal", x.name, "upper-left to lower-right", "lower-left to upper-right");
+  const diag = long.filter((x) => Math.abs(x.e.angle - 45) <= DIAGONAL.tol), cap = Math.max(1, Math.round(DIAGONAL.share * measures.length));
+  if (diag.length > cap) fail(failures, "diagonal", "set", `${diag.length} of ${measures.length} on the diagonal (${diag.map((x) => x.name).join(", ")})`, `at most ${cap}`);
 
   // weight: a set of three or more against its own median and, looser, the reference, so a set
   // uniformly heavier than the finish fails; a set of one or two against the reference alone

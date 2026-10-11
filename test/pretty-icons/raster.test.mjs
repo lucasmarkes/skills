@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { air, cacheDir, measure, render, shares } from "../../skills/pretty-icons/raster.mjs";
+import { air, cacheDir, elongation, measure, render, shares } from "../../skills/pretty-icons/raster.mjs";
 
 const near = (a, b, eps = 0.05) => assert.ok(Math.abs(a - b) < eps, `${a} ≈ ${b}`);
 const ROOT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">`;
@@ -124,4 +124,13 @@ test("air: a speck of paper pinched where three strokes meet (a small triangle's
   const pocket = await air(one('<path d="M6 6H9.5L7.75 9Z" />'), 16, 1);
   assert.deepEqual(pocket.map((x) => x.kind), ["counter"]);
   assert.ok(pocket[0].area >= 1);
+});
+
+test("elongation: a 45° line is long and at 45°; the other way is −45; a disc is round", async () => {
+  const up = await elongation(one('<path d="M3 13L13 3" />'), 16);
+  assert.ok(up.ratio > 2 && Math.abs(up.angle - 45) <= 1, JSON.stringify(up));
+  const down = await elongation(one('<path d="M3 3L13 13" />'), 16);
+  assert.ok(Math.abs(down.angle + 45) <= 1, JSON.stringify(down));
+  assert.ok((await elongation(one('<circle cx="8" cy="8" r="6" />'), 16)).ratio < 1.1);
+  assert.deepEqual(await elongation(one(""), 16), { ratio: 1, angle: 0 });
 });

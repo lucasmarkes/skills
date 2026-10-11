@@ -142,3 +142,5 @@ export const AIR_AREA = 1;
 export const AIR_TOL = 0.25;
 /** A smooth curve's tightest radius, in strokes: tighter reads as a kink at display size. */
 export const BEND = 1;
+/** An elongated icon (principal axes at `ratio` or more) within `tol`° of 45 lies on the diagonal; a set holds at most `share` of them, and at least one is allowed. */
+export const DIAGONAL = { share: 0.3, ratio: 2, tol: 10 };

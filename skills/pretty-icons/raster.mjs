@@ -183,3 +183,27 @@ export async function air(svgText, G, stroke) {
   }
   return out;
 }
+
+/**
+ * The ink's principal axes, from its second moments at 8 px a unit: the ratio of the long axis to
+ * the short, and the long axis's angle in degrees, 45 rising to the right, −45 falling. No ink is round.
+ */
+export async function elongation(svgText, G) {
+  const S = 8, { width, height, pixels } = render(svgText, G * S);
+  let m = 0, sx = 0, sy = 0;
+  for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) { const a = pixels[(y * width + x) * 4 + 3] / 255; m += a; sx += a * x; sy += a * y; }
+  if (!m) return { ratio: 1, angle: 0 };
+  const cx = sx / m, cy = sy / m;
+  let xx = 0, yy = 0, xy = 0;
+  for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+    const a = pixels[(y * width + x) * 4 + 3] / 255;
+    xx += a * (x - cx) ** 2; yy += a * (y - cy) ** 2; xy += a * (x - cx) * (y - cy);
+  }
+  xx /= m; yy /= m; xy /= m;
+  const tr = (xx + yy) / 2, det = Math.sqrt(((xx - yy) / 2) ** 2 + xy * xy), l1 = tr + det, l2 = Math.max(tr - det, 1e-9);
+  // y grows down the image, so the angle is negated to read as on paper
+  let angle = (-0.5 * Math.atan2(2 * xy, xx - yy) * 180) / Math.PI;
+  if (angle <= -90) angle += 180;
+  if (angle > 90) angle -= 180;
+  return { ratio: +Math.sqrt(l1 / l2).toFixed(2), angle: +angle.toFixed(1) };
+}
