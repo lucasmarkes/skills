@@ -104,3 +104,21 @@ test("the filled grid has no pixel note: CSS scales it", () => {
   const icon = parse(`<svg viewBox="0 0 48 48" stroke="#25262a" stroke-width="1.5"><path d="M24 6V42" /></svg>`);
   assert.deepEqual(pixelNotes("x", icon, 48), []);
 });
+
+const bends = (d, stroke) => curveFailures("pao", el(d), stroke).filter((f) => f.rule === "bend");
+
+test("bend: a curve tighter than a stroke's radius is refused, with its radius and place", () => {
+  const f = bends("M8 7.5C8.276 7.5 8.5 7.724 8.5 8", 1);
+  assert.equal(f.length, 1);
+  assert.match(f[0].got, /^path@\d+ radius 0\.5 at [\d.]+, [\d.]+$/);
+  assert.equal(f[0].want, "≥ 1, or a cusp");
+});
+
+test("bend: read only when the stroke is given", () => {
+  assert.deepEqual(bends("M8 7.5C8.276 7.5 8.5 7.724 8.5 8"), []);
+});
+
+test("bend: a zero-length handle and a cusp inside a cubic are not refused", () => {
+  assert.deepEqual(bends("M0 0C0 0 4 0 4 4", 1.5), []);
+  assert.deepEqual(bends("M0 0C4 4 0 4 4 0", 1.5), []);
+});

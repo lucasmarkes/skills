@@ -80,7 +80,7 @@ test("count: moves are not drawing commands; implicit repeats are", () => {
   assert.deepEqual(of(ok, "count"), [], "eight drawing commands is the cap");
 });
 
-test("count: the examples' details fit the cap (coding: two braces, eight commands)", () => {
+test("count: the examples' details fit the cap (coding: two angle brackets)", () => {
   const r = textChecks("coding", readFileSync(new URL("../../skills/pretty-icons/examples/hairline/coding.svg", import.meta.url), "utf8"), 16);
   assert.deepEqual(r.failures, []);
 });

@@ -88,9 +88,9 @@ test("addModifier: every garage icon takes a badge:check, and the cut passes che
 test("addModifier refuses a body wholly under the halo, a slash in a corner, an icon that fails check already, and a cut that fails gap", async () => {
   await assert.rejects(addModifier(svg16(BODY16), "slash", { corner: "tl" }), /a slash crosses the whole icon/);
   await assert.rejects(addModifier(svg16('<path d="M1.8 6.25h12.5" />'), "dot"), /fails check before the modifier/);
-  // a slash cuts connectivity's link to a stub inside its node, 0.41 from the node's cut contour (the example as drawn before Task 11)
+  // a slash cuts connectivity's link to a stub inside its node, 1.12 from the node's cut contour, whose last crumb of arc bend drops (the example as drawn before Task 11)
   const NODES = '<circle cx="4.75" cy="11.25" r="3" fill="currentColor" fill-opacity=".2" /><circle cx="11.25" cy="4.75" r="3" fill="currentColor" fill-opacity=".2" /><path d="M4.75 11.25 11.25 4.75" />';
-  await assert.rejects(addModifier(svg16(NODES), "slash", { name: "connectivity" }), /would fail check:\ngap  connectivity  path@\d to path@\d 0\.41 apart[^]*try another --corner or another kind/);
+  await assert.rejects(addModifier(svg16(NODES), "slash", { name: "connectivity" }), /would fail check:\ngap  connectivity  path@\d to path@\d 1\.12 apart[^]*try another --corner or another kind/);
 });
 
 test("the modifier rule: opacity, size and corner, the halo, and data-cut without a modifier", async () => {

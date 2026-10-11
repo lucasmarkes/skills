@@ -1,5 +1,5 @@
 <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
   <rect x="1.75" y="3.25" width="12.5" height="9.5" rx="1.5" fill="currentColor" fill-opacity=".2" />
   <path d="M6.5 6h-1l-1 2 1 2h1" />
-  <path d="M9 6.25q0-.75.75-.75h.5q.75 0 .75.75v.25q0 .5-.5.75l-.5.25v.5" />
+  <path d="M9 6.5l.5-.5h1l.5.5v.25l-.5.5-.5.25v.5" />
 </svg>

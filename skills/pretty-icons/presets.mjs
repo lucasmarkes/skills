@@ -140,3 +140,5 @@ export const COUNTER = 2;
 export const AIR_AREA = 1;
 /** A counter within this many strokes of COUNTER passes: the raster reads a hole a little small. */
 export const AIR_TOL = 0.25;
+/** A smooth curve's tightest radius, in strokes: tighter reads as a kink at display size. */
+export const BEND = 1;

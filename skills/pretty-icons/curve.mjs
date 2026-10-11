@@ -6,13 +6,16 @@
  *               long; a shorter one is a terminal, not a join.
  *   inflection  where a cubic changes the side it bends to: at most one per segment, none in a
  *               segment whose chord is under 4. Two is a wobble.
+ *   bend        a cubic's tightest radius of curvature, sampled where the curve moves at speed: under one
+ *               stroke it reads as a kink. A cusp is a corner on purpose, and a slow stretch (a short or
+ *               zero handle) is not read.
  *   pixel       a note, never a failure: straight H and V strokes whose edges land between pixels at
  *               the display size, so they show a grey row the same stroke placed elsewhere would not.
  * Rects and circles have no joins to judge: a rect's corners are corners, its arcs meet smoothly.
  */
 import { commands } from "./geometry.mjs";
 import { num } from "./svg.mjs";
-import { preset } from "./presets.mjs";
+import { preset, BEND } from "./presets.mjs";
 
 export const SMOOTH = 4, CORNER = 30, MIN_SEGMENT = 1, MIN_CHORD = 4;
 /**
@@ -125,8 +128,28 @@ export function inflections(seg) {
   return roots.filter((t) => t > 1e-3 && t < 1 - 1e-3).length;
 }
 
-/** The join and inflection failures of one element; a path the reader cannot read is the elements rule's, not these. */
-export function curveFailures(icon, el) {
+const SAMPLES = 64;
+/** A cubic's tightest radius of curvature, read at 65 samples where it moves at half its mean speed or more; null for any other segment. */
+export function tightest(seg) {
+  if (seg.kind !== "cubic") return null;
+  const [p0, p1, p2, p3] = seg.p;
+  const d1 = (t) => { const u = 1 - t; return [0, 1].map((k) => 3 * u * u * (p1[k] - p0[k]) + 6 * u * t * (p2[k] - p1[k]) + 3 * t * t * (p3[k] - p2[k])); };
+  const d2 = (t) => [0, 1].map((k) => 6 * (1 - t) * (p2[k] - 2 * p1[k] + p0[k]) + 6 * t * (p3[k] - 2 * p2[k] + p1[k]));
+  const ts = Array.from({ length: SAMPLES + 1 }, (_, i) => i / SAMPLES), speeds = ts.map((t) => len(d1(t)));
+  const mean = speeds.reduce((a, b) => a + b, 0) / speeds.length;
+  let best = null;
+  ts.forEach((t, i) => {
+    if (speeds[i] < mean / 2) return;
+    const c = Math.abs(cross(d1(t), d2(t)));
+    if (c < 1e-12) return;
+    const r = speeds[i] ** 3 / c;
+    if (!best || r < best.r) { const u = 1 - t; best = { r, t, at: [0, 1].map((k) => u * u * u * p0[k] + 3 * u * u * t * p1[k] + 3 * u * t * t * p2[k] + t * t * t * p3[k]) }; }
+  });
+  return best;
+}
+
+/** The join, inflection and (with the grid's stroke) bend failures of one element; a path the reader cannot read is the elements rule's, not these. */
+export function curveFailures(icon, el, stroke) {
   if (el.tag !== "path") return [];
   let subs;
   try { subs = segments(el.attrs.d ?? ""); } catch { return []; }
@@ -138,6 +161,10 @@ export function curveFailures(icon, el) {
     if (n >= 2 || (n >= 1 && s.chord < MIN_CHORD))
       out.push({ rule: "inflection", icon, got: `${el.at} segment ${i + 1} ${n} inflection${n > 1 ? "s" : ""} over a chord of ${fmt(s.chord)}`, want: `at most 1, none under a chord of ${MIN_CHORD}` });
   });
+  if (stroke) for (const s of subs.flatMap((x) => x.segs)) {
+    const b = tightest(s);
+    if (b && b.r < BEND * stroke - 1e-9) out.push({ rule: "bend", icon, got: `${el.at} radius ${fmt(b.r)} at ${fmt(b.at[0])}, ${fmt(b.at[1])}`, want: `≥ ${fmt(BEND * stroke)}, or a cusp` });
+  }
   return out;
 }
 

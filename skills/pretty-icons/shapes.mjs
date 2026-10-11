@@ -198,12 +198,13 @@ export function shape(name, o = {}) {
     ({ P, segs } = snapOutline(outline(anchors, { bulge: o.bulge ?? 0.55 })));
     d = pathOf({ P, segs });
   }
-  const failures = curveFailures(name, { tag: "path", attrs: { d }, at: "path@1" });
+  const failures = curveFailures(name, { tag: "path", attrs: { d }, at: "path@1" }, p.stroke);
   if (failures.length) {
     const said = failures.map((f) => `${f.rule} ${f.got.replace("path@1 ", "")}`).join("; ");
     // one inflection over a short chord: a box too small for its curves, which no --bulge cures
-    const chords = failures.map((f) => (f.rule === "inflection" ? f.got.match(/ 1 inflection over a chord of ([\d.]+)$/) : null));
-    if (chords.every(Boolean)) refuse(`${name}: ${said}: ${name === "blob" ? "spread the anchors" : "make the box larger"}, so every segment's chord is at least ${MIN_CHORD} (the shortest is ${Math.min(...chords.map((m) => Number(m[1])))})`);
+    // (a bend beside it is the same box's: tight curves over short chords)
+    const chords = failures.filter((f) => f.rule !== "bend").map((f) => (f.rule === "inflection" ? f.got.match(/ 1 inflection over a chord of ([\d.]+)$/) : null));
+    if (chords.length && chords.every(Boolean)) refuse(`${name}: ${said}: ${name === "blob" ? "spread the anchors" : "make the box larger"}, so every segment's chord is at least ${MIN_CHORD} (the shortest is ${Math.min(...chords.map((m) => Number(m[1])))})`);
     refuse(`${name}: ${said}: change --bulge or the box`);
   }
   if (name !== "blob") {
@@ -303,7 +304,7 @@ export function finishOf(name, o = {}, given = null) {
   const side = o.shade ?? (s.P ? "right" : "none");
   if (side !== "none") {
     if (!s.P) refuse(`${name}: no --shade for wedge and scoop yet; draw the shade by hand, or --shade none`);
-    const seam = o.seam ?? "straight", kinks = (d) => curveFailures(name, { tag: "path", attrs: { d }, at: "path@1" });
+    const seam = o.seam ?? "straight", kinks = (d) => curveFailures(name, { tag: "path", attrs: { d }, at: "path@1" }, p.stroke);
     let sh = shadeOf(s, { side, seam });
     if (lit(s.d, sh, G)) {
       const f = kinks(sh);

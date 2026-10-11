@@ -6,6 +6,7 @@ import { shape, finishOf, collinear, reconcile, repair, repairFile, shadeOf, par
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { preset } from "../../skills/pretty-icons/presets.mjs";
 import { curveFailures, joins } from "../../skills/pretty-icons/curve.mjs";
 import { pathCommands, parse } from "../../skills/pretty-icons/svg.mjs";
 import { filledChecks } from "../../skills/pretty-icons/filled.mjs";
@@ -75,7 +76,8 @@ test("bad flags are refused with the reason", () => {
   refused(() => shape("drop", { lean: 1.5 }), "--lean 1.5: from -1 to 1");
   refused(() => shape("wedge", { angle: 150 }), "--angle 150: from 15 to 120");
   refused(() => shape("star"), 'no primitive "star"');
-  refused(() => shape("bean", { lean: 1 }), "bean: overshoots its box by 0.79: lower --bulge");
+  refused(() => shape("bean", { lean: 1, w: 40, h: 30 }), "bean: overshoots its box by 0.56: lower --bulge");
+  refused(() => shape("bean", { lean: 1 }), "bean: bend radius 1.19 at 27.35, 43.39");
   refused(() => shape("crescent", { bulge: 1.2 }), "2 inflections over a chord of 24.36");
   refused(() => shape("bean", { grid: 16, w: 11 }), "make the box larger, so every segment's chord is at least 4 (the shortest is 3.61)");
   refused(() => shape("blob", { anchors: "8,8 40,8" }), "at least three");
@@ -238,4 +240,11 @@ test("ring: off-centre with --at, refused when the hole leaves less than a conto
   refused(() => ring({ r: 10, hole: 7.25 }), "ring: hole 7.25 + 3 > r 10");
   refused(() => ring({ r: 10, hole: 0 }), "ring: hole 0: a ring needs a hole; for a disc, draw a circle body");
   refused(() => finishOf("ring", { grid: 16 }), "ring: the filled finish only (--grid 48)");
+});
+
+test("bend: every primitive is clean at every grid, at the grid's stroke", () => {
+  for (const grid of [16, 20, 24, 48]) for (const name of [...ANCHORED, "wedge", "scoop"]) {
+    const { d } = shape(name, { grid });
+    assert.deepEqual(curveFailures(name, { tag: "path", attrs: { d }, at: "path@1" }, preset(grid).stroke), [], `${name} at ${grid}: ${d}`);
+  }
 });

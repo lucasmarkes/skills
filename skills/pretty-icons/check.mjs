@@ -128,7 +128,7 @@ export function textChecks(icon, text, expectG) {
   for (const el of parsed.elements) {
     if (el.tag !== "path" || seen.has(el.attrs.d)) continue;
     seen.add(el.attrs.d);
-    failures.push(...curveFailures(icon, el));
+    failures.push(...curveFailures(icon, el, p?.stroke));
   }
   failures.push(...modifierFailures(icon, parsed, expectG));
 

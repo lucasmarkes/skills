@@ -21,10 +21,10 @@
  */
 import { readFileSync, writeFileSync, realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { preset, inset, MODIFIER, PALETTE } from "./presets.mjs";
+import { preset, inset, BEND, MODIFIER, PALETTE } from "./presets.mjs";
 import { parse, compose, num, G as gridOf, isClosed } from "./svg.mjs";
 import { sampleParts } from "./geometry.mjs";
-import { segments, inflections } from "./curve.mjs";
+import { segments, inflections, tightest, angle } from "./curve.mjs";
 
 export const KINDS = ["badge:plus", "badge:minus", "badge:check", "badge:x", "arrow:up", "arrow:right", "arrow:down", "arrow:left", "lock", "dot", "slash"];
 export const CORNERS = ["br", "tr", "bl", "tl"];
@@ -138,10 +138,39 @@ function outward(q, inside) {
   for (let i = -1; i <= 2; i++) for (let j = -1; j <= 2; j++) cands.push([base[0] + i * STEP, base[1] + j * STEP]);
   return cands.filter((c) => inside(c) >= -1e-9).sort((a, b) => len(sub(a, q)) - len(sub(b, q)))[0];
 }
-/** A cubic's text; one whose snapped handles make it wobble (two inflections, or one under a chord of 4) loses its handle at a cut end. */
+/** The tightest radius a cut cubic may keep, in grid units: one stroke's (BEND), set by `cut` for the pass it runs. */
+let minRadius = 0;
+const calm = (P0, c1, c2, P1) => {
+  const seg = segments(`M${pt(P0)}C${pt(c1)} ${pt(c2)} ${pt(P1)}`)[0].segs[0] ?? { kind: "line" }, n = inflections(seg), b = tightest(seg);
+  return !(n > 1 || (n && len(sub(P1, P0)) < 4)) && !(b && b.r < minRadius - 1e-9);
+};
+/**
+ * A cubic's text; one whose snapped handles make it wobble (two inflections, or one under a chord of 4) or bend
+ * tighter than a stroke's radius is mended at its cut ends: the nearest quarter-grid handles within a unit that
+ * are calm, else no handle at that end. A last piece no handles can calm, a crumb of arc between a kept axis point and
+ * its snapped cut end, is dropped: the run ends at the axis point, a little short of the halo.
+ */
 function cubicText(P0, c1, c2, P1, cutStart, cutEnd) {
-  const n = inflections(segments(`M${pt(P0)}C${pt(c1)} ${pt(c2)} ${pt(P1)}`)[0].segs[0] ?? { kind: "line" });
-  if (n > 1 || (n && len(sub(P1, P0)) < 4)) { if (cutStart) c1 = P0; if (cutEnd) c2 = P1; }
+  if (!calm(P0, c1, c2, P1)) {
+    // a cut end's handle goes anywhere near; a kept anchor's keeps its direction within TURN, so the join stays smooth
+    const near = (c, anchor, cut) => {
+      const out = [], u = sub(c, anchor);
+      for (let i = -4; i <= 4; i++) for (let j = -4; j <= 4; j++) {
+        const q = [c[0] + i * STEP, c[1] + j * STEP], w = sub(q, anchor);
+        if (!cut && (!len(w) || !len(u) || angle(u, w) > TURN)) continue;
+        out.push(q);
+      }
+      return out.sort((a, b) => len(sub(a, c)) - len(sub(b, c)));
+    };
+    let best = null, score = Infinity;
+    for (const a of near(c1, P0, cutStart)) for (const b of near(c2, P1, cutEnd)) {
+      const sc = len(sub(a, c1)) + len(sub(b, c2));
+      if (sc < score && calm(P0, a, b, P1)) { best = [a, b]; score = sc; }
+    }
+    if (best) [c1, c2] = best;
+    else if (cutEnd && !cutStart) return "";
+    else { if (cutStart) c1 = P0; if (cutEnd) c2 = P1; }
+  }
   return `C${pt(c1)} ${pt(c2)} ${pt(P1)}`;
 }
 function piece(s, t0, t1, ends) {
@@ -193,7 +222,8 @@ const arcLength = (s, t0, t1) => { let L = 0, prev = at(s, t0); for (let i = 1; 
  * when the halo does not touch it. A closed subpath cut once becomes one run, from where it leaves the halo
  * round to where it enters. Runs shorter than CRUMB are dropped.
  */
-export function cut(d, { inside }) {
+export function cut(d, { inside, minR = 0 }) {
+  minRadius = minR;
   const subs = segments(d);
   let touched = false;
   const runs = [];
@@ -299,7 +329,7 @@ export async function addModifier(text, kind, { corner = "br", solid = false, na
   if (before.length) refuse(`it fails check before the modifier; fix it first:\n${before.map((f) => `${f.rule}  ${f.icon}  ${f.got} → ${f.want}`).join("\n")}`);
   if (parsed.elements.some(isModifier)) refuse("it has a modifier already: one per icon");
   if (kind === "slash" && corner !== "br") refuse("--corner: a slash crosses the whole icon");
-  const H = halo(G, kind, corner), rootStroke = parsed.attrs.stroke;
+  const H = { ...halo(G, kind, corner), minR: BEND * preset(G).stroke }, rootStroke = parsed.attrs.stroke;
   const strokes = (el) => !isNone(el.attrs.stroke ?? rootStroke);
   const paints = (el) => el.attrs.fill !== undefined && !isNone(el.attrs.fill);
   const out = [];
