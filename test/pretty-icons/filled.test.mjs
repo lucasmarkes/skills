@@ -109,9 +109,9 @@ test("palette: every fill and stroke is one of the five tones", () => {
   assert.deepEqual(rules(check(add('<path d="M24 44V40" stroke="#d26352" />'))), ["palette"]);
 });
 
-test("construction: no offset shadow, no highlight", () => {
+test("construction: no hand-drawn shadow, no highlight", () => {
   const shadow = check(LIGHT.replace(TONE, `${TONE.replace("#ececea", "#cfcfcb").replace(" />", ' transform="translate(3 3)" />')}\n  ${TONE}`));
-  assert.ok(lines(shadow).includes("construction  traffic-light  rect@3 transform → no offset shadow: the shade sits inside the body"), lines(shadow).join("\n"));
+  assert.ok(lines(shadow).includes("construction  traffic-light  rect@3 transform → not set: shadow.mjs --on writes the shadow"), lines(shadow).join("\n"));
   assert.deepEqual(lines(check(add('<path d="M17 10V16" stroke="#ffffff" />'))), ["construction  traffic-light  path@9 stroke #ffffff → no highlight: paper only as a fill (glass, a lamp that is on)"]);
 });
 

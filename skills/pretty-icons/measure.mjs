@@ -15,10 +15,11 @@
  * Gap and air may both name one pair of parallel lines.
  * diagonal: the base's ink axes; an elongated icon at 45° rising to the right counts, a set holds at most max(1, round(0.3 × N)), and one falling to the right is refused.
  */
-import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE, COUNTER, DIAGONAL } from "./presets.mjs";
+import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE, COUNTER, DIAGONAL, SHADOW } from "./presets.mjs";
 import { measure, shares, resvg, air, elongation, NO_RASTER } from "./raster.mjs";
 import { parse, compose, num, geometryKey } from "./svg.mjs";
 import { isModifier } from "./modifiers.mjs";
+import { isShadow } from "./shadow.mjs";
 import { sampleParts, minDistance, interiorParts } from "./geometry.mjs";
 import { objectOf, linesOf, classify } from "./filled.mjs";
 
@@ -70,8 +71,9 @@ export async function measuredChecks(set, G) {
     try {
       const filled = p.finish === "filled";
       const parsed = parse(s.text);
-      const els = parsed.elements.filter((el) => !(filled && "transform" in el.attrs) && !isModifier(el));
-      const modified = parsed.elements.some(isModifier), base = !modified ? s.text : compose(parsed.attrs, parsed.elements.filter((el) => !isModifier(el)));
+      const els = parsed.elements.filter((el) => !(filled && "transform" in el.attrs) && !isModifier(el) && !isShadow(el));
+      const modified = parsed.elements.some(isModifier), shadowed = parsed.elements.some(isShadow);
+      const base = !modified && !shadowed ? s.text : compose(parsed.attrs, parsed.elements.filter((el) => !isModifier(el) && !isShadow(el)));
       const c = filled ? classify(els) : null;
       const details = new Set(filled ? c.details.map((el) => el.at) : []);
       const paint = new Set(filled ? [...c.paint].map((el) => el.at) : els.filter((el) => String(el.attrs.stroke).trim().toLowerCase() === "none").map((el) => el.at));
@@ -89,20 +91,20 @@ export async function measuredChecks(set, G) {
       // a detail and its body (and the body's contour, the same geometry) are loose's, not gap's
       const skip = new Set();
       for (const { el, body } of inner) for (const x of els) if (geometryKey(x) === geometryKey(body)) skip.add(`${el.at}|${x.at}`).add(`${x.at}|${el.at}`);
-      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW, inner, innerAt, skip, narrow, e });
+      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW, inner, innerAt, skip, narrow, e, shadowed });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
     }
   }
 
-  for (const { name, els, parts, details, paint, m, modified, share, rootW, inner, skip, narrow } of measures) {
+  for (const { name, els, parts, details, paint, m, modified, share, rootW, inner, skip, narrow, shadowed } of measures) {
     const { box, mass, ink, live } = m;
     // an empty icon has no box or mass to judge; count already reports it
     const inked = live.w > 0;
-    // live: every pixel of the file
-    const lo = p.pad - 0.05, hi = G - p.pad + 0.05;
-    if (inked && (live.x0 < lo || live.y0 < lo || live.x1 > hi || live.y1 > hi)) fail(failures, "live", name, `ink ${r2(live.x0)},${r2(live.y0)}–${r2(live.x1)},${r2(live.y1)}`, `inside ${p.pad}–${G - p.pad}`);
+    // live: every pixel of the file; a shadowed icon's shadow may run SHADOW past it, down and right
+    const edge = G - p.pad + (shadowed ? SHADOW : 0), lo = p.pad - 0.05, hi = edge + 0.05;
+    if (inked && (live.x0 < lo || live.y0 < lo || live.x1 > hi || live.y1 > hi)) fail(failures, "live", name, `ink ${r2(live.x0)},${r2(live.y0)}–${r2(live.x1)},${r2(live.y1)}`, `inside ${p.pad}–${edge}`);
     // keyline
     const k = nearestKeyline(G, box.w, box.h);
     const fits = inked && modified ? true : inked && Math.abs(k.dw) <= p.keylineTol + 1e-9 && Math.abs(k.dh) <= p.keylineTol + 1e-9;

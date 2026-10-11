@@ -17,6 +17,9 @@
  *   radius        rx by the shape's size (at 48, by what the object is: cut, cased, moulded or a pill)
  *   modifier      one per icon, of a known kind, its size and corner from the preset, at stroke-opacity 0.6
  *                 or none in duotone, none at 48; no other stroke inside its halo (modifiers.mjs)
+ *   shadow        the filled finish only, the whole set or none: a copy of every element, first, in the
+ *                 shade tone, translate(1.5 1.5), marked data-shadow (shadow.mjs writes it); every
+ *                 other rule reads the icon without it
  *   count         at most three elements (a modifier and, in duotone, a cut contour left out), at most eight commands in a path (implicit repeats count);
  *                 the details (every element without a fill) at most two subpaths and eight
  *                 drawing commands between them (moves left out)
@@ -33,6 +36,7 @@ import { straightSides } from "./geometry.mjs";
 import { filledChecks } from "./filled.mjs";
 import { curveFailures, curveColumns, pixelNotes } from "./curve.mjs";
 import { modifierFailures, isModifier, isCut, isSplit } from "./modifiers.mjs";
+import { isShadow, shadowFailures } from "./shadow.mjs";
 
 export { pathCommands, isClosed };
 
@@ -91,7 +95,9 @@ export function textChecks(icon, text, expectG) {
   for (const a of ROOT_FORBIDDEN) if (a in root) fail(failures, "stroke", icon, `root ${a}`, "not set");
   if ("fill" in root && !isNone(root.fill)) fail(failures, "stroke", icon, `fill ${root.fill}`, "none");
   if ("stroke-dasharray" in root) checkDash(failures, icon, "root", root["stroke-dasharray"], p.stroke);
-  for (const el of parsed.elements) {
+  // the icon's own elements: a shadow copy is shadow.mjs's, judged by shadowFailures alone
+  const own = parsed.elements.filter((el) => !isShadow(el));
+  for (const el of own) {
     const a = el.attrs, where = el.at;
     for (const k of FORBIDDEN_ATTRS) if (k in a && !(k === "stroke-opacity" && isModifier(el))) fail(failures, "stroke", icon, `${where} ${k}`, "not set");
     if ("stroke-width" in a && !p.weights.includes(num(a, "stroke-width"))) fail(failures, "stroke", icon, `${where} stroke-width ${a["stroke-width"]}`, p.finish === "filled" ? `not set: the root's ${p.stroke}, or ${p.contour} on a contour` : p.weights.length ? `the root's, or ${p.weights.join(" or ")}` : "the root's");
@@ -100,7 +106,7 @@ export function textChecks(icon, text, expectG) {
   }
 
   // grid, radius and the per-path count, on every finish
-  for (const el of parsed.elements) {
+  for (const el of own) {
     const a = el.attrs, where = el.at;
     const nums = el.tag === "path" ? pathNumbers(a.d ?? "").map((n, i) => [`d[${i}]`, n]) : Object.entries(a).filter(([k]) => GEOMETRY.includes(k)).map(([k, v]) => [k, Number(v)]);
     for (const [k, n] of nums) if (!onGrid(n, p.step)) fail(failures, "grid", icon, `${where} ${k} ${n}`, `a multiple of ${p.step}`);
@@ -115,22 +121,23 @@ export function textChecks(icon, text, expectG) {
     }
   }
   // the base, without its modifier: what the finish's rules and the count judge
-  const base = { ...parsed, elements: parsed.elements.filter((el) => !isModifier(el)) };
+  const base = { ...parsed, elements: own.filter((el) => !isModifier(el)) };
   if (p.finish === "filled") failures.push(...filledChecks(icon, base, expectG));
   else duotoneChecks(failures, icon, base, p);
 
   // a split body's contour is one element with its paint; any other cut stroke counts as the one it was
   const counted = base.elements.filter((el) => !isSplit(el)).length;
   if (counted > p.elements) fail(failures, "count", icon, `${counted} elements`, `at most ${p.elements}`);
-  if (parsed.elements.length === 0) fail(failures, "count", icon, "0 elements", "at least 1");
+  if (own.length === 0) fail(failures, "count", icon, "0 elements", "at least 1");
   // curves, after every other text rule; each path once, since a contour repeats its tone's
   const seen = new Set();
-  for (const el of parsed.elements) {
+  for (const el of own) {
     if (el.tag !== "path" || seen.has(el.attrs.d)) continue;
     seen.add(el.attrs.d);
     failures.push(...curveFailures(icon, el, p?.stroke));
   }
   failures.push(...modifierFailures(icon, parsed, expectG));
+  failures.push(...shadowFailures(icon, parsed, expectG));
 
   return { G, failures, parsed };
 }
@@ -202,9 +209,13 @@ export async function checkSet(folder, { grid, measure = true, loadMeasure = () 
   }
   // A grid with no preset has nothing to measure against; canvas has failed every icon.
   if (!GRIDS[G]) return { G, failures, measured: true, why: "", rows: [], notes: [] };
+  // the shadow is the set's: every icon or none
+  const shadowed = readable.filter(([, parsed]) => parsed.elements.some(isShadow)).length;
+  if (preset(G).finish === "filled" && shadowed && shadowed < readable.length) fail(failures, "shadow", "set", `${shadowed} of ${readable.length} shadowed`, "all or none (shadow.mjs --on|--off)");
+  const ownOf = (parsed) => ({ ...parsed, elements: parsed.elements.filter((el) => !isShadow(el)) });
   // notes never fail the set: they say what a person may want to look at
-  const notes = readable.flatMap(([name, parsed]) => pixelNotes(name, parsed, G));
-  const columns = new Map(readable.map(([name, parsed]) => [name, curveColumns(parsed.elements)]));
+  const notes = readable.flatMap(([name, parsed]) => pixelNotes(name, ownOf(parsed), G));
+  const columns = new Map(readable.map(([name, parsed]) => [name, curveColumns(ownOf(parsed).elements)]));
   let measured = false, rows = [], why = "";
   if (measure) {
     try {

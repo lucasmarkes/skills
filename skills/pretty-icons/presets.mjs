@@ -144,3 +144,5 @@ export const AIR_TOL = 0.25;
 export const BEND = 1;
 /** An elongated icon (principal axes at `ratio` or more) within `tol`° of 45 lies on the diagonal; a set holds at most `share` of them, and at least one is allowed. */
 export const DIAGONAL = { share: 0.3, ratio: 2, tol: 10 };
+/** How far the offset shadow sits from the icon, down and right, in grid units (the filled finish only). */
+export const SHADOW = 1.5;

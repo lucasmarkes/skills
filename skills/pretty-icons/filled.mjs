@@ -1,7 +1,7 @@
 /**
  * The filled finish: what check.mjs reads from an icon on the 48 grid beyond
  * the rules every grid shares. Five tones (presets.mjs PALETTE), no colour, no
- * offset shadow, no highlight: the light comes from the top, and the side away
+ * hand-drawn shadow (shadow.mjs writes one), no highlight: the light comes from the top, and the side away
  * from it is shaded inside the body. One line weight: the root's 1.5, and 2 on a contour.
  * An icon's elements are told apart by paint:
  *   tone     a body's colour: closed, filled with the fill or paper tone, stroke none.
@@ -72,7 +72,7 @@ export function filledChecks(icon, parsed, G) {
   }
 
   const c = classify(els), at = (el) => els.indexOf(el);
-  for (const el of c.shadows) fail(failures, "construction", icon, `${el.at} transform`, "no offset shadow: the shade sits inside the body");
+  for (const el of c.shadows) fail(failures, "construction", icon, `${el.at} transform`, "not set: shadow.mjs --on writes the shadow");
   for (const el of c.highlights) fail(failures, "construction", icon, `${el.at} stroke ${el.attrs.stroke}`, "no highlight: paper only as a fill (glass, a lamp that is on)");
   for (const el of els) if (tone(el.attrs.fill) === "mark") fail(failures, "construction", icon, `${el.at} fill ${el.attrs.fill}`, "the mark tone only as a stroke");
   for (const el of els) {

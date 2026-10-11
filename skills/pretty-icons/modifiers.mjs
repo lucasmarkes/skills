@@ -24,6 +24,7 @@ import { fileURLToPath } from "node:url";
 import { preset, inset, BEND, MODIFIER, PALETTE } from "./presets.mjs";
 import { parse, compose, num, G as gridOf, isClosed } from "./svg.mjs";
 import { sampleParts } from "./geometry.mjs";
+import { isShadow } from "./shadow.mjs";
 import { segments, inflections, tightest, angle } from "./curve.mjs";
 
 export const KINDS = ["badge:plus", "badge:minus", "badge:check", "badge:x", "arrow:up", "arrow:right", "arrow:down", "arrow:left", "lock", "dot", "slash"];
@@ -332,6 +333,7 @@ export async function addModifier(text, kind, { corner = "br", solid = false, na
   const before = textChecks(name, text, G).failures;
   if (before.length) refuse(`it fails check before the modifier; fix it first:\n${before.map((f) => `${f.rule}  ${f.icon}  ${f.got} → ${f.want}`).join("\n")}`);
   if (parsed.elements.some(isModifier)) refuse("it has a modifier already: one per icon");
+  if (parsed.elements.some(isShadow)) refuse("it has a shadow: take it off with shadow.mjs --off, add the modifier, put it back with --on");
   if (kind === "slash" && corner !== "br") refuse("--corner: a slash crosses the whole icon");
   const H = { ...halo(G, kind, corner), minR: BEND * preset(G).stroke }, rootStroke = parsed.attrs.stroke;
   const strokes = (el) => !isNone(el.attrs.stroke ?? rootStroke);
@@ -406,7 +408,7 @@ export function modifierFailures(icon, parsed, G) {
   // the halo: every other stroke's centreline clear of it (a tenth for the snap)
   const H = halo(G, kind, corner), rootStroke = parsed.attrs.stroke;
   for (const el of parsed.elements) {
-    if (isModifier(el) || isNone(el.attrs.stroke ?? rootStroke)) continue;
+    if (isModifier(el) || isShadow(el) || isNone(el.attrs.stroke ?? rootStroke)) continue;
     let q;
     try { q = sampleParts(el, 0.05).flat(); } catch { continue; }
     const worst = Math.min(...q.map(H.inside));

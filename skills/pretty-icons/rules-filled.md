@@ -86,7 +86,7 @@ The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="no
 
 `viewBox="0 0 48 48"`, every number a multiple of 0.25, every pixel inside 4–44. The file is flat: `rect`, `circle`, `line` and `path`, self-closing, in the root. No `transform`, no `<use>`, no `<defs>`.
 
-- **Rejected when:** `grid  tyre  path@3 d[1] 10.4 → a multiple of 0.25`; `construction  traffic-light  rect@3 transform → no offset shadow: the shade sits inside the body`.
+- **Rejected when:** `grid  tyre  path@3 d[1] 10.4 → a multiple of 0.25`; `construction  traffic-light  rect@3 transform → not set: shadow.mjs --on writes the shadow`.
 
 ## 02 · keyline
 
