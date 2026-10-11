@@ -313,3 +313,141 @@ Verdict: pass. The new set was picked 3 of 3.
   - machines: "part robot part screen";
   - coding: "braces small and cramped".
 - **The round 3 seed put the new set on A in all three ranking pairs.** The controller swapped read 2's letters to balance position.
+
+## The trial
+
+Two trials, each by one fresh agent (opus) with no access to this conversation and only the skill as Task 11 left it, working in an empty scratch folder with no app. Both ran at the same time. Each agent opened its own readers; then a fresh reader (sonnet), opened by the controller, read each final blind sheet (`sheet.mjs --seed=12`), so the verdict does not rest on the drawer's own readers. A trial passes when its drawer reported `ok` on check run 1 or 2 and the controller's blind read is 6 of 6, none by elimination.
+
+### notes, duotone 16
+
+The prompt as sent:
+
+> Your working directory for this whole task is `<scratch>/trial16.4QAo`. It is empty, and there is no app in it. Run every command from there (cd into it first in each shell command), and write nothing outside it.
+>
+> Use the skill in `/Users/lucasmarques/estudos/skills/skills/pretty-icons/SKILL.md` to draw six icons for the sidebar of a notes app; the sidebar text is 14px, in the duotone finish: inbox, calendar, chat, profile, search, upload. Nobody is available to answer questions, so where the skill says to ask, take its recommendation and say so. Follow every step, the reads included. Before each `check.mjs` run, say "check run N". Stop at the hand-over and report what `check.mjs` printed each time, each icon's concept line, and each reader's answer.
+
+The agent took the skill's recommendations: duotone on 16 (14px text), plain `.svg` (no app), its own concept lines. It emitted `.svg` into its folder.
+
+Each check run, as the agent reported it (`pixel` notes printed on most runs and never failed it; scratch runs on variants are not numbered):
+
+1. fail: `gravity profile mass +0, +1.21` · `gravity upload mass +0, +1.92` · `weight calendar ink 64.02 (+16.9%) → within ±15% of the set's median 54.77` · `weight inbox ink 74.63 (+36.3%)` · `weight search ink 49.61 (-22.6%) → within ±20% of the reference 64.1` · `weight upload ink 50.81 (-20.7%)` against the reference
+2. fail: `gravity search mass -0.61, -0.61` · `weight inbox ink 73.83 (+28.1%)` (median 57.63) · `weight upload ink 47.52 (-17.5%)` against the median, `(-25.9%)` against the reference
+3. fail: `gravity upload +0.61` · `weight inbox ink 69.04 (+19.8%)` · `weight upload ink 48.98 (-15.0%)` against the median, `(-23.6%)` against the reference
+4. fail: `keyline upload 13.25 × 8.69 → landscape 14 × 11 ±0.5` · `gravity upload +0.12, +1.35` · `loose upload path@3[0]` and `path@3[1] 0.7 strokes from path@2 → ≥ 1 stroke inside the contour` · `weight inbox ink 69.04 (+19.8%)` · `weight upload ink 50.84 (-20.7%)` against the reference
+5. fail: `gravity upload mass +0, +0.93` · `weight inbox ink 69.04 (+15.9%)` (median 59.56)
+6. `ok`; reads round 1
+7. fail: `weight inbox ink 68.76 (+15.1%) → within ±15% of the set's median 59.76`
+8. `ok`; reads round 2
+9. `ok`; reads round 3
+10. `ok`; reads round 4, the final set
+
+`check.mjs --print`, run by the controller on the final folder (exit 0):
+
+```
+┌─────────┬────────────┬──────┬──────┬───────┬───────┬─────────────┬───────┬───────┬───────┬────────────────────────┬──────┐
+│ (index) │ icon       │ x0   │ y0   │ w     │ h     │ keyline     │ ink   │ dx    │ dy    │ joins                  │ infl │
+├─────────┼────────────┼──────┼──────┼───────┼───────┼─────────────┼───────┼───────┼───────┼────────────────────────┼──────┤
+│ 0       │ 'calendar' │ 1.75 │ 1.25 │ 12.5  │ 13    │ 'square'    │ 62.97 │ 0     │ 0.36  │ '0 smooth · 0 corners' │ 0    │
+│ 1       │ 'chat'     │ 1.5  │ 2    │ 13    │ 12    │ 'square'    │ 62.1  │ -0.28 │ -0.36 │ '4 smooth · 2 corners' │ 1    │
+│ 2       │ 'inbox'    │ 1.25 │ 2.75 │ 13.5  │ 10.5  │ 'landscape' │ 69.1  │ 0     │ 0.2   │ '0 smooth · 2 corners' │ 0    │
+│ 3       │ 'profile'  │ 2    │ 1    │ 12    │ 12    │ 'square'    │ 53.42 │ 0     │ 0.08  │ '0 smooth · 4 corners' │ 0    │
+│ 4       │ 'search'   │ 1.25 │ 1.25 │ 13.75 │ 13.75 │ 'circle'    │ 52.43 │ -0.41 │ -0.41 │ '0 smooth · 0 corners' │ 0    │
+│ 5       │ 'upload'   │ 1.16 │ 2.5  │ 13.84 │ 10.5  │ 'landscape' │ 58.25 │ -0.23 │ 0.24  │ '2 smooth · 1 corners' │ 0    │
+└─────────┴────────────┴──────┴──────┴───────┴───────┴─────────────┴───────┴───────┴───────┴────────────────────────┴──────┘
+notes
+pixel  calendar  4 of 6 straight strokes off the pixel at 16 px, 4 at 32 px → their edges on whole pixels
+pixel  inbox  4 of 5 straight strokes off the pixel at 16 px, 4 at 32 px → their edges on whole pixels
+ok
+```
+
+The agent's concept lines (final): inbox — tray, landscape, body + notch line · calendar — page with binding rings, square, body + two rings · chat — speech bubble, square, bubble + two text lines · profile — head and shoulders, square (the kit's `bust` in rounds 1–2, a hand-drawn single contour in 3–4) · search — magnifier, circle, lens + handle · upload — first "an arrow rising off a base", swapped after it kept failing weight and gravity to "a cloud with an up arrow, landscape".
+
+The agent's reads, each by a fresh reader it opened, four rounds:
+- Blind: passed all four rounds, none by elimination; inbox the least sure each time ("basket", "bag", "smile").
+- Set: "one set" in round 1; one icon named in rounds 2 (search) and 3 (upload); round 4 named two: "Icon 2 (chat) and icon 6 (upload) look different from the rest, but it's a close call. Chat has a thicker, heavier stroke, and upload looks thicker and rounder."
+- Craft: failed all four rounds. Round 4: chat "tail bulges, slightly wobbly bubble"; inbox "tray detail too small to read"; profile "confused silhouette, flat-bottom bust"; upload "lumpy cloud, uneven bumps"; calendar and search none.
+- The agent stopped after round 4 by its own judgment ("the readers' notes weren't converging") and reported two limits it met: a bolder inbox notch puts inbox over the ±15% weight band, its box already at the smallest landscape keyline; a profile in two pieces could not meet gravity and weight together on 16.
+
+The controller's blind read (key `1 upload · 2 search · 3 profile · 4 inbox · 5 calendar · 6 chat`), verbatim:
+
+> 1. upload: cloud with up arrow.
+> 2. search: magnifying glass.
+> 3. profile: head and shoulders person.
+> 4. inbox: open tray with a dip.
+> 5. calendar: square with two top tabs.
+> 6. chat: speech bubble with text lines.
+>
+> No two numbers compete for one name. I read no letter or digit inside any icon; the only digits are the labels 1 to 6. No number got its name only because the other names were taken. Icon 5 is the least certain, since it is a blank square with ring tabs and no grid. I still read it as a calendar, not a generic page.
+
+Verdict: **held**. The blind read is 6 of 6, none by elimination, but `check.mjs` first printed `ok` on run 6; run 1 was held first by `gravity` (profile, upload) and `weight` (calendar, inbox, search, upload). The agent's own set read named two icons in its last round.
+
+### kitchen, filled 48
+
+The prompt as sent:
+
+> Your working directory for this whole task is `<scratch>/trial48.CpZI`. It is empty, and there is no app in it. Run every command from there (cd into it first in each shell command), and write nothing outside it.
+>
+> Use the skill in `/Users/lucasmarques/estudos/skills/skills/pretty-icons/SKILL.md` to draw six icons for a kitchen shop's category grid, in the filled finish: kettle, whisk, rolling-pin, pot, cup, toaster. Nobody is available to answer questions, so where the skill says to ask, take its recommendation and say so. Follow every step, the reads included. Before each `check.mjs` run, say "check run N". Stop at the hand-over and report what `check.mjs` printed each time, each icon's concept line, and each reader's answer.
+
+The agent took the skill's recommendations: filled for a category grid, plain `.svg` (no app), the conventional concepts. It did not emit, since the craft read had not passed.
+
+Each check run, as the agent reported it:
+
+1. fail: `contour` pot and rolling-pin (6 straight sides each) · `gravity` kettle · `live` pot · `gap` pot and rolling-pin · `air` toaster · `weight` whisk −30.2% · `contrast` whisk 68.1%
+2. and 3. fail: join, bend, keyline, air, loose and gap
+4. fail: `air kettle counter 1.2 strokes across at 27, 11`
+5. `ok`
+6. `ok` (the toaster's toast redrawn as a bread slice, after its proof read as a handbag)
+7. `ok`
+8. fail: `contour cup path@2 6 straight sides → at most 5, or curves` · `gravity kettle mass +1.68, +5.52 → within ±3` · `gap toaster path@3 to rect@8 1.58 apart → ≥ 2.25 apart, or crossing`
+9. fail: `gravity kettle mass +1.74, +4.01 → within ±3`
+10. `ok`
+11. fail: `construction whisk path@2 stroke-width 2 → the root's line on a filled element; only a contour sets a width`, and the same for path@3 · `air whisk paper 1.6 strokes wide at 19.5, 20.58 and at 27.42, 28.49` · `contrast whisk line tone on 46.4% of the paint`
+12. `ok`
+13. fail: `gap toaster path@3 to path@5 2 apart → ≥ 2.25 apart, or crossing` · `loose whisk path@5[0] 0.8 strokes from path@2 → ≥ 1 stroke inside the contour`, and the same for path@5[1] · `weight whisk ink 254.78 (-26.6%) → within ±25% of the reference 347`
+14. fail: `loose whisk path@5[0] 0.9 strokes from path@2` · `contrast whisk line tone on 46.6% of the paint → 20% to 45%`
+15. fail: `keyline whisk 37.13 × 37.13 → square 36 × 36 ±1`
+16. `ok` (whisk ink 270.68, line% 44.8)
+17. `ok`, after `shadow.mjs --off`
+
+`check.mjs --print`, run by the controller on the final folder (exit 0):
+
+```
+┌─────────┬───────────────┬──────┬──────┬───────┬───────┬─────────────┬────────┬───────┬───────┬───────┬─────────────────────────┬──────┐
+│ (index) │ icon          │ x0   │ y0   │ w     │ h     │ keyline     │ ink    │ dx    │ dy    │ line% │ joins                   │ infl │
+├─────────┼───────────────┼──────┼──────┼───────┼───────┼─────────────┼────────┼───────┼───────┼───────┼─────────────────────────┼──────┤
+│ 0       │ 'cup'         │ 6    │ 6    │ 37    │ 36    │ 'square'    │ 316.98 │ -2.04 │ -0.47 │ 28.9  │ '8 smooth · 12 corners' │ 0    │
+│ 1       │ 'kettle'      │ 5    │ 4.75 │ 36    │ 35.75 │ 'square'    │ 387.1  │ 1.27  │ 1.31  │ 35.1  │ '4 smooth · 12 corners' │ 0    │
+│ 2       │ 'pot'         │ 4    │ 7    │ 40    │ 33    │ 'landscape' │ 329.62 │ 0     │ 0.79  │ 33.6  │ '11 smooth · 6 corners' │ 0    │
+│ 3       │ 'rolling-pin' │ 5.94 │ 5.94 │ 36.13 │ 36.13 │ 'square'    │ 292.96 │ 0     │ 0     │ 37.2  │ '16 smooth · 6 corners' │ 0    │
+│ 4       │ 'toaster'     │ 4    │ 7.5  │ 40    │ 32.5  │ 'landscape' │ 386.21 │ 0     │ 1.19  │ 28.9  │ '14 smooth · 6 corners' │ 8    │
+│ 5       │ 'whisk'       │ 6.75 │ 4.31 │ 36.94 │ 36.94 │ 'square'    │ 270.68 │ 2.1   │ -2.1  │ 44.8  │ '11 smooth · 5 corners' │ 3    │
+└─────────┴───────────────┴──────┴──────┴───────┴───────┴─────────────┴────────┴───────┴───────┴───────┴─────────────────────────┴──────┘
+ok
+```
+
+The agent's concept lines: kettle — stovetop kettle, square; round body, arched handle, spout (the spout a curved body from round 3, the handle a shaded band in round 4) · whisk — diagonal; handle, ferrule, wire loops (round 4: handle and a balloon head with wires, no ferrule) · rolling-pin — diagonal; barrel and two handles · pot — cooking pot, landscape; body, lid with knob, side handles · cup — mug, square; body and handle · toaster — landscape; body, toast slice, lever (round 4: body and two slices, no lever). Two diagonals, the limit.
+
+The agent's reads, each by a fresh reader it opened, four rounds:
+- Blind: passed all four rounds, none by elimination. Round 4 on the whisk: "whisk-like utensil with loop head. Weak read; the head looks like a paddle or fan with a thin handle."
+- Set: "one set" in rounds 1, 3 and 4; round 2 named cup ("flat side-split shading, thinner outline").
+- Craft: failed all four rounds; pot and rolling-pin passed every one. Round 4: cup "handle ring looks detached/heavy"; kettle "confused silhouette, spout/handle arc"; toaster "slots read as ear-like bumps"; whisk "wire detail too small".
+- Shadow: run though the craft read had not passed; the reader picked off ("A. Cleaner, consistent, crisp edges."), and the agent ran `shadow.mjs --off`.
+- The agent stopped after round 4: the same complaints came back each round.
+
+The controller's blind read (key `1 whisk · 2 toaster · 3 rolling-pin · 4 pot · 5 cup · 6 kettle`), verbatim:
+
+> 1 = whisk: whisk with oval wire head. Whole-image check: no letters or digits inside any icon (only the 1-6 labels).
+> 2 = toaster: two-slot toaster with bread slices.
+> 3 = rolling-pin: diagonal pin with handles.
+> 4 = pot: lidded two-handled cooking pot.
+> 5 = cup: tall mug with side handle.
+> 6 = kettle: domed kettle with spout.
+>
+> No two numbers compete for one name. No number got its name only because the other names were taken. All six matched on their own shape.
+
+Verdict: **held**. The blind read is 6 of 6, none by elimination, but `check.mjs` first printed `ok` on run 5; run 1 was held first by `contour` (pot, rolling-pin: six straight sides each), then gravity, live, gap, air, weight and contrast.
+
+### What the trial says
+
+Both sets are named by a fresh reader from the picture alone, 6 of 6, at both finishes, and both reach `ok`. Neither reaches it in two runs: the notes drawer took six, the kitchen drawer five, and each spent most of its runs on weight and gravity (notes) or on the filled finish's construction rules (kitchen). Neither passed its own craft read in four rounds, and both drawers stopped by judgment because the readers' notes moved between rounds. Candidates for a later change, for the person to judge: the duotone weight band on 16, which leaves a small tray no room for a readable notch; a two-piece bust on 16, which the drawer could not balance; the kit's soft bodies, which the notes drawer used for profile and chat and then hand-drew past.
