@@ -298,6 +298,19 @@ test("air: an interior detail is loose's, so air reads the body without it", asy
   assert.deepEqual(await airs(s16(`${CARD}<path d="M4 8H12" />`), 16), []);
 });
 
+test("gap and air: a merged path's outside part is still judged against the body, its inside part left to loose", async () => {
+  const body = '<rect x="2.25" y="4.25" width="11.5" height="9.5" rx="1.5" fill="currentColor" fill-opacity=".2" />';
+  // apart, the outside stroke fails gap and air against the body
+  const apart = s16(`${body}\n<path d="M6 9h4" />\n<path d="M5 3h6" />`);
+  assert.deepEqual(await gaps(apart, 16), ["rect@1 to path@3 0.25 apart → ≥ 1.5 apart, or crossing"]);
+  assert.deepEqual(await airs(apart, 16), ["paper 0.6 strokes wide at 8, 3.61 → ≥ 1.5 apart, or touching"]);
+  // merged with the inside stroke, it fails the same, named by its index
+  const merged = s16(`${body}\n<path d="M6 9h4M5 3h6" />`);
+  assert.deepEqual(await gaps(merged, 16), ["rect@1 to path@2[1] 0.25 apart → ≥ 1.5 apart, or crossing"]);
+  assert.deepEqual(await airs(merged, 16), ["paper 0.6 strokes wide at 8, 3.61 → ≥ 1.5 apart, or touching"]);
+  assert.deepEqual(await looses(merged, 16), []);
+});
+
 const LONG = s16('<path d="M3 13L13 3" />'), ROUND = s16('<circle cx="8" cy="8" r="6.5" />');
 const diagonals = async (texts) => (await measuredChecks(texts.map((text, i) => ({ name: `i${i}`, text })), 16)).failures.filter((f) => f.rule === "diagonal").map((f) => `${f.icon}  ${f.got} → ${f.want}`);
 

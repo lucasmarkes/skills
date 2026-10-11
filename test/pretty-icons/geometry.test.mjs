@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { sample, sampleParts, bounds, minDistance, pathPoints, pathParts, midpoint, inside, interior, interiorParts, clearance } from "../../skills/pretty-icons/geometry.mjs";
+import { sample, sampleParts, bounds, minDistance, pathPoints, pathParts, midpoint, inside, interior, interiorParts, clearance, subpaths } from "../../skills/pretty-icons/geometry.mjs";
 
 const near = (a, b, eps = 0.02) => assert.ok(Math.abs(a - b) < eps, `${a} ≈ ${b}`);
 const el = (tag, attrs) => ({ tag, attrs: Object.fromEntries(Object.entries(attrs).map(([k, v]) => [k, String(v)])) });
@@ -115,4 +115,11 @@ test("interiorParts: each subpath judged on its own midpoint", () => {
   const parts = interiorParts(E("path", { d: "M5 8H8M14 8H20" }), [CARD]);
   assert.deepEqual(parts.map((x) => x.i), [0]);
   assert.equal(parts[0].body, CARD);
+});
+
+test("subpaths: one d per subpath, each opening at its own absolute point", () => {
+  assert.deepEqual(subpaths("M6 9h4M5 3h6"), ["M6 9h4", "M5 3h6"]);
+  assert.deepEqual(subpaths("M1 1h2m1 0v3zm0 2l1 1"), ["M1 1h2", "M4 1v3z", "M4 3l1 1"]);
+  const d = "M2 2C2 4 4 4 4 2s2-2 2 0m1 1a1 1 0 0 0 2 0";
+  assert.deepEqual(subpaths(d).map((x) => pathParts(x, 0.1)[0]), pathParts(d, 0.1));
 });

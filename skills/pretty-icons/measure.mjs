@@ -10,7 +10,7 @@
  * rule's) only: not keyline, gravity or weight, and it stays out of the median. Its base is judged for those. In duotone the
  * paint is a split body's fill (stroke none): its edge is its contour's, so it is left out of gap too.
  * loose: an unfilled stroke (each subpath on its own) whose midpoint lies inside a filled body is an interior detail; it stops one stroke
- * inside the body's contour, edge to edge, and gap leaves that pair to it.
+ * inside the body's contour, edge to edge, and gap and air leave that subpath to it; the path's other subpaths they still judge.
  * air: the paper rendered at 8 px a stroke, opened at radius 0.75 stroke; what stays narrow, or a hole under 2 strokes, is named with its place.
  * Gap and air may both name one pair of parallel lines.
  * diagonal: the base's ink axes; an elongated icon at 45° rising to the right counts, a set holds at most max(1, round(0.3 × N)), and one falling to the right is refused.
@@ -20,7 +20,7 @@ import { measure, shares, resvg, air, elongation, NO_RASTER } from "./raster.mjs
 import { parse, compose, num, geometryKey } from "./svg.mjs";
 import { isModifier } from "./modifiers.mjs";
 import { isShadow } from "./shadow.mjs";
-import { sampleParts, minDistance, interiorParts } from "./geometry.mjs";
+import { sampleParts, minDistance, interiorParts, subpaths } from "./geometry.mjs";
 import { objectOf, linesOf, classify } from "./filled.mjs";
 
 // `+ 0` turns -0 into 0, so a centred icon prints 0, not -0.
@@ -55,7 +55,7 @@ function interiorDetails(parsed, els, p, c, rootW) {
   const out = [];
   for (const el of candidates) {
     const all = sampleParts(el, 0.05).length > 1;
-    for (const { i, part, body } of interiorParts(el, bodies)) out.push({ el, body, part, label: all ? `${el.at}[${i}]` : el.at, w: own(el), wb: widthOf(body) });
+    for (const { i, part, body } of interiorParts(el, bodies)) out.push({ el, body, i, part, label: all ? `${el.at}[${i}]` : el.at, w: own(el), wb: widthOf(body) });
   }
   return out;
 }
@@ -85,13 +85,22 @@ export async function measuredChecks(set, G) {
         : { ...(await measure(base, G)), live: whole.box };
       const e = await elongation(filled ? objectOf(base) : base, G);
       const share = filled ? await shares(base, G) : null;
-      const inner = interiorDetails(parsed, els, p, c, rootW), innerAt = new Set(inner.map((x) => x.el.at));
-      // air reads the base without its interior details: those are loose's, a stroke from the contour
-      const narrow = await air(compose(parsed.attrs, els.filter((el) => !innerAt.has(el.at))), G, p.stroke);
-      // a detail and its body (and the body's contour, the same geometry) are loose's, not gap's
+      const inner = interiorDetails(parsed, els, p, c, rootW);
+      // air reads the base without its interior details, subpath by subpath: those are loose's, a stroke from the contour;
+      // a path with a detail and an outside part keeps the outside part
+      const innerParts = new Map();
+      for (const { el, i } of inner) innerParts.set(el.at, (innerParts.get(el.at) ?? new Set()).add(i));
+      const outside = els.flatMap((el) => {
+        const drop = innerParts.get(el.at);
+        if (!drop) return [el];
+        const keep = el.tag === "path" ? subpaths(el.attrs.d ?? "").filter((_, i) => !drop.has(i)) : [];
+        return keep.length ? [{ ...el, attrs: { ...el.attrs, d: keep.join("") } }] : [];
+      });
+      const narrow = await air(compose(parsed.attrs, outside), G, p.stroke);
+      // a detail and its body (and the body's contour, the same geometry) are loose's, not gap's: keyed by the detail's subpath
       const skip = new Set();
-      for (const { el, body } of inner) for (const x of els) if (geometryKey(x) === geometryKey(body)) skip.add(`${el.at}|${x.at}`).add(`${x.at}|${el.at}`);
-      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW, inner, innerAt, skip, narrow, e, shadowed });
+      for (const { el, i, body } of inner) for (const x of els) if (geometryKey(x) === geometryKey(body)) skip.add(`${el.at}#${i}|${x.at}`);
+      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW, inner, skip, narrow, e, shadowed });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
@@ -124,15 +133,21 @@ export async function measuredChecks(set, G) {
     const width = new Map(els.map((el) => [el.at, num(el.attrs, "stroke-width", rootW)]));
     const gap = (A, B, a, b) => {
       const ka = a.replace(/\[\d+\]$/, ""), kb = b.replace(/\[\d+\]$/, "");
-      if (skip.has(`${ka}|${kb}`)) return;
       const min = (details.has(ka) || details.has(kb) ? AIR / 2 : AIR) * p.stroke;
       const centre = minDistance(A, B), outer = centre - (width.get(ka) + width.get(kb)) / 2;
       if (centre > TOUCH && outer < min - 1e-9) fail(failures, "gap", name, `${a} to ${b} ${outer < 0 ? `overlapping, centrelines ${r2(centre)} apart` : `${r2(outer)} apart`}`, `≥ ${+min.toFixed(3)} apart, or crossing`);
     };
     const whole = parts.map((q) => q.flat());
+    // what of element i gap holds apart from element j: the whole, or, when some subpaths are details
+    // inside j (loose's), each other subpath on its own, named by its index
+    const side = (i, j) => {
+      const keep = parts[i].map((q, k) => [q, k]).filter(([, k]) => !skip.has(`${els[i].at}#${k}|${els[j].at}`));
+      if (keep.length === parts[i].length) return [[whole[i], els[i].at]];
+      return keep.map(([q, k]) => [q, parts[i].length > 1 ? `${els[i].at}[${k}]` : els[i].at]);
+    };
     for (let i = 0; i < els.length; i++) {
       if (paint.has(els[i].at)) continue;
-      for (let j = i + 1; j < els.length; j++) if (!paint.has(els[j].at)) gap(whole[i], whole[j], els[i].at, els[j].at);
+      for (let j = i + 1; j < els.length; j++) if (!paint.has(els[j].at)) for (const [A, a] of side(i, j)) for (const [B, b] of side(j, i)) gap(A, B, a, b);
       const sub = parts[i];
       if (sub.length > 1) for (let a = 0; a < sub.length; a++) for (let b = a + 1; b < sub.length; b++) gap(sub[a], sub[b], `${els[i].at}[${a}]`, `${els[i].at}[${b}]`);
     }

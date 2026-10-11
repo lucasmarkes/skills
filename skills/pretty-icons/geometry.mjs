@@ -140,7 +140,31 @@ export function pathParts(d, step = 0.1) {
   return parts;
 }
 
-export const pathPoints = (d, step = 0.1) => pathParts(d, step).flat();
+/**
+ * A path's d split into one d per subpath, in pathParts' order: each opens with an absolute M at
+ * where it starts, its other commands as written (relative ones stay relative to the same points).
+ */
+export function subpaths(d) {
+  const out = [];
+  let x = 0, y = 0, sx = 0, sy = 0;
+  for (const { C, rel, a } of commands(d)) {
+    let nx = x, ny = y;
+    if (C === "H") nx = rel ? x + a[0] : a[0];
+    else if (C === "V") ny = rel ? y + a[0] : a[0];
+    else if (C === "Z") { nx = sx; ny = sy; }
+    else { const k = END[C]; nx = rel ? x + a[k] : a[k]; ny = rel ? y + a[k + 1] : a[k + 1]; }
+    if (C === "M") { out.push(`M${nx} ${ny}`); sx = nx; sy = ny; }
+    else {
+      // drawing before any M starts at 0 0, as pathParts reads it
+      if (!out.length) out.push("M0 0");
+      out[out.length - 1] += `${rel ? C.toLowerCase() : C}${a.join(" ")}`;
+    }
+    x = nx; y = ny;
+  }
+  return out;
+}
+
+export const pathPoints =(d, step = 0.1) => pathParts(d, step).flat();
 
 export function sample(el, step = 0.1) {
   const a = el.attrs;
