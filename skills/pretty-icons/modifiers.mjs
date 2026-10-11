@@ -293,7 +293,7 @@ export function glyph(G, kind, { corner = "br", solid = false } = {}) {
   if (kind === "dot") return [{ tag: "circle", attrs: { cx: fmt(cx), cy: fmt(cy), r: fmt(half), fill: filled ? PALETTE.line : "currentColor", stroke: "none", "data-modifier": kind } }];
   if (kind === "slash") { const [a, b] = slashEnds(G); return [{ tag: "path", attrs: { d: `M${pt(a)}L${pt(b)}`, ...(filled ? { "stroke-width": String(s) } : {}), ...mark } }]; }
   const out = [];
-  // the glyph's half-extent: the box less half a stroke; at 48 inside a paper circle, half that circle's
+  // the glyph's half-extent: the box less an inset; at 48 inside a paper circle, half that circle's
   let h = half - inset(G);
   if (filled && kind.startsWith("badge")) {
     out.push({ tag: "circle", attrs: { cx: fmt(cx), cy: fmt(cy), r: fmt(h), fill: PALETTE.paper, "stroke-width": String(s), ...mark } });
