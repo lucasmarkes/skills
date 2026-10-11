@@ -23,7 +23,7 @@ test("rules-filled.md: the croissant is the kit's blob pasted, and passes check 
   const r = await checkSet(dir);
   assert.equal(r.measured, true);
   assert.deepEqual(r.failures.map(line), []);
-  assert.equal(r.rows[0].ink.toFixed(1), "279.6");
+  assert.equal(r.rows[0].ink.toFixed(1), "274.9");
 });
 
 test("rules.md quotes the messages check.mjs prints for the new rules", async () => {

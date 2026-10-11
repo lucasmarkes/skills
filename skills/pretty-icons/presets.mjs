@@ -58,6 +58,8 @@ export const WEIGHT_TOL = 0.15;
 // How far a set's ink may sit from the reference, however even it is with itself.
 export const REFERENCE_TOL = 0.2;
 export const GRAVITY_TOL = 0.5;
+/** Air, in strokes: two inks that do not touch sit this far apart, edge to edge (a mark, half). */
+export const AIR = 1.5;
 export const GRID_STEP = 0.25;
 export const TOUCH = 0.1;
 export const SCALE = 32;
@@ -120,7 +122,7 @@ export function bodySvg(G, format) {
  * at the grid's own stroke.
  * On 48 it is the median line ink of examples/garage: the contours and marks, not the paint.
  */
-export const REFERENCE_INK = { 16: 63.1, 20: 102.4, 24: 151, 48: 340.4 };
+export const REFERENCE_INK = { 16: 63.1, 20: 102.4, 24: 151, 48: 337.5 };
 export const referenceInk = (G) => REFERENCE_INK[G];
 
 /**

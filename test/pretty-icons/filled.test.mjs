@@ -135,14 +135,14 @@ test("the hierarchy: a contour at 2, the parts' line at 1.5, a closed line at 2 
 });
 
 test("construction: the mark tone only as a stroke; the fill and shade tones only as a fill", () => {
-  assert.deepEqual(lines(check(LIGHT.replace('cy="35" r="4" fill="#ffffff"', 'cy="35" r="4" fill="#8b8c90"'))), ["construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke"]);
+  assert.deepEqual(lines(check(LIGHT.replace('cy="35" r="3.5" fill="#ffffff"', 'cy="35" r="4" fill="#8b8c90"'))), ["construction  traffic-light  circle@8 fill #8b8c90 → the mark tone only as a stroke"]);
   assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke="#ececea" />'))), ["construction  traffic-light  path@9 stroke #ececea → the fill tone only as a fill"]);
   assert.deepEqual(lines(check(add('<path d="M24 44V40" stroke="#cfcfcb" />'))), ["construction  traffic-light  path@9 stroke #cfcfcb → the shade tone only as a fill"]);
 });
 
 test("solid: the line tone fills only a dot of r ≤ 2.5", () => {
   assert.deepEqual(lines(check(add('<circle cx="24" cy="13" r="3" fill="#25262a" stroke="none" />'))), ["solid  traffic-light  circle@9 r 3 filled in the line tone → a body (tone, shade, contour), or a dot of r ≤ 2.5"]);
-  assert.deepEqual(lines(check(LIGHT.replace('<circle cx="24" cy="13" r="4" fill="#ffffff" />', '<circle cx="24" cy="13" r="4" fill="#25262a" />'))), ["solid  traffic-light  circle@6 r 4 filled in the line tone → a body (tone, shade, contour), or a dot of r ≤ 2.5"]);
+  assert.deepEqual(lines(check(LIGHT.replace('<circle cx="24" cy="13" r="3.5" fill="#ffffff" />', '<circle cx="24" cy="13" r="4" fill="#25262a" />'))), ["solid  traffic-light  circle@6 r 4 filled in the line tone → a body (tone, shade, contour), or a dot of r ≤ 2.5"]);
   assert.deepEqual(lines(check(add('<rect x="22" y="11" width="4" height="4" rx="1" fill="#25262a" />'))), ["solid  traffic-light  rect@9 filled in the line tone → a body (tone, shade, contour), or a dot of r ≤ 2.5"]);
   assert.deepEqual(lines(check(add('<circle cx="24" cy="13" r="2.5" fill="#25262a" stroke="none" />'))), [], "a dot of r 2.5");
   assert.deepEqual(lines(check(add('<circle cx="24" cy="13" r="2.5" fill="#25262a" />'))), [], "a dot drawn with the root's line is a shape, and passes");

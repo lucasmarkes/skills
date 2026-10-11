@@ -74,9 +74,9 @@ Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded
   <rect x="13.75" y="5" width="20.5" height="38" rx="8" fill="#ececea" stroke="none" />
   <path d="M26.25 5A8 8 0 0 1 34.25 13V35A8 8 0 0 1 26.25 43Z" fill="#cfcfcb" stroke="none" />
   <rect x="13.75" y="5" width="20.5" height="38" rx="8" stroke-width="2" />
-  <circle cx="24" cy="13" r="4" fill="#ffffff" />
-  <circle cx="24" cy="24" r="4" fill="#ffffff" />
-  <circle cx="24" cy="35" r="4" fill="#ffffff" />
+  <circle cx="24" cy="13" r="3.5" fill="#ffffff" />
+  <circle cx="24" cy="24" r="3.5" fill="#ffffff" />
+  <circle cx="24" cy="35" r="3.5" fill="#ffffff" />
   <circle cx="24" cy="13" r="2" fill="#25262a" stroke="none" />
 </svg>
 ```
@@ -115,11 +115,11 @@ Tone, shade, contour, in that order, for every body (a small part may leave its 
   <path d="M12 39C11.5 33 5 31.5 5 25.5C5 15.5 14 8.5 24 8.5C34 8.5 43 15.5 43 25.5C43 31.5 36.5 33 36 39C33 34 29.75 30 24 30C18.25 30 15 34 12 39Z" fill="#ececea" stroke="none" />
   <path d="M24 8.5C34 8.5 43 15.5 43 25.5C43 31.5 36.5 33 36 39Z" fill="#cfcfcb" stroke="none" />
   <path d="M12 39C11.5 33 5 31.5 5 25.5C5 15.5 14 8.5 24 8.5C34 8.5 43 15.5 43 25.5C43 31.5 36.5 33 36 39C33 34 29.75 30 24 30C18.25 30 15 34 12 39Z" stroke-width="2" />
-  <path d="M16.5 14.5C18.75 19.5 19.25 23.5 18.5 27.5M31.5 14.5C29.25 19.5 28.75 23.5 29.5 27.5" />
+  <path d="M17 15.25C19 19.75 19.25 23.25 18.5 26.75M31 15.25C29 19.75 28.75 23.25 29.5 26.75" />
 </svg>
 ```
 
-Its horns are the two cusps (`c`), and they turn in: a crescent whose horns point straight down reads as a bell. The seams stop clear of the contour, 3 from its centreline, so they do not touch it by almost (08). Its ink is 40 × 32.5, its mass 1.5 high, its line ink 279.6.
+Its horns are the two cusps (`c`), and they turn in: a crescent whose horns point straight down reads as a bell. The seams stop clear of the contour, 4 from its centreline, so they do not touch it by almost (08). Its ink is 40 × 32.5, its mass 1.5 high, its line ink 274.9.
 - **Keep it, for the light:** `check.mjs` compares the centre of the shade's box with the centre of its tone's box. The shade passes when its centre is lower, or further right. A shade run from end to end of a slanted body (a leaf or a lens at 30° to 60°) has the tone's own box, centre on centre, and fails on either side. Never shade a body with a copy of its whole tone. The kit's shade passes the light check at every `--rot`; when it cannot, it says so. At a slant it shades one segment, from the lower belly to a tip (the tip on the right with `--shade right`), closed by its chord, even with `--seam curved`. For a body you drew yourself, or with `--from`, do the same by hand: copy that segment from the contour and close it with `Z`. For `leaf --w 16 --h 8 --at 16,12 --rot -45` that is `M21 7C19.25 9 20.5 11.75 18.5 13.75Z`, the kit's own shade. A small part beside a larger body (a leaf on a stem, a grain on an ear) may take `--shade none`; the larger body carries the light.
 - **Keep it, for a ring** (a rim, a tyre, a hoop): a body with a hole. `node <skill-dir>/shapes.mjs ring --r 19 --hole 10` prints five elements: the tone, the shade (the ring's lower half), the contour, the hole in paper and its contour, both contours at 2. Refused when the hole leaves less than a contour and its gap: `--hole` at most `--r` less 3.
 - **Keep it, for a small dark part:** a hub, a rivet, a lamp that is on: a dot, a circle of r 2.5 or less in the line tone, `stroke="none"`. A wheel, a lens, a band or a cap larger than that is a body (tone, shade, contour), or paper. Glass and a hole: paper.
@@ -128,7 +128,7 @@ Its horns are the two cusps (`c`), and they turn in: a crescent whose horns poin
 
 ## 05 · weight
 
-Ink is the line alone: tones, shades and dots dropped, every other stroke read in the line tone. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a shape its outline at 1.5. Where lines cross, they count once. A tyre is a `ring` (`shapes.mjs`), its tone and its contour; paint adds nothing. Within 25% of the set's median and of the reference, 340.4, the median of `examples/garage`.
+Ink is the line alone: tones, shades and dots dropped, every other stroke read in the line tone. It is the lines' area, so it goes by length: a contour weighs 2 for each unit, a line 1.5, a shape its outline at 1.5. Where lines cross, they count once. A tyre is a `ring` (`shapes.mjs`), its tone and its contour; paint adds nothing. Within 25% of the set's median and of the reference, 337.5, the median of `examples/garage`.
 
 A body at its keyline weighs about 240 to 250: the circle 239, a rect with `rx 6` 251. The details carry the other 90 or so: a line 60 long. A thin object (a bone, a brush, a key) has less outline than a body at its keyline, and comes in light. A bulky one with a second body (a cage, a jar, a bowl of food) comes in heavy.
 

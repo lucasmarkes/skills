@@ -23,10 +23,10 @@ test("the reference ink is the median of the examples without a modifier, within
   assert.ok(Math.abs(REFERENCE_INK[16] - median) <= 0.5, `stored ${REFERENCE_INK[16]}, measured ${median}`);
 });
 
-test("lucide at 24 passes live, gap and gravity", async () => {
+test("lucide at 24 passes live and gravity", async () => {
   assert.equal(readdirSync(lucide).filter((f) => f.endsWith(".svg")).length, 10);
   const r = await checkSet(lucide, { grid: 24 });
   assert.equal(r.measured, true);
-  const own = r.failures.filter((f) => ["live", "gap", "gravity"].includes(f.rule));
+  const own = r.failures.filter((f) => ["live", "gravity"].includes(f.rule));
   assert.deepEqual(own.map((f) => `${f.rule} ${f.icon} ${f.got}`), []);
 });

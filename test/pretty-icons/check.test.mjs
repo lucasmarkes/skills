@@ -5,7 +5,7 @@ import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { checkSet } from "../../skills/pretty-icons/check.mjs";
-import { nearestKeyline } from "../../skills/pretty-icons/measure.mjs";
+import { nearestKeyline, measuredChecks } from "../../skills/pretty-icons/measure.mjs";
 import { addModifier } from "../../skills/pretty-icons/modifiers.mjs";
 import { shares } from "../../skills/pretty-icons/raster.mjs";
 
@@ -159,7 +159,7 @@ test("gap compares the subpaths of one path: merged dots 1 apart fail", async (t
   writeFileSync(join(dir, "spaced.svg"), `${ROOT}\n  ${BODY} />\n  <path d="M6.5 8h0M9.5 8h0" />\n</svg>\n`);
   const r = await checkSet(dir);
   const g = r.failures.filter((f) => f.rule === "gap");
-  assert.deepEqual(g.filter((f) => f.icon === "dots").map((f) => f.got), ["path@3[0] to path@3[1] 0 apart", "path@3[1] to path@3[2] 0 apart", "path@3[2] to path@3[3] 0 apart"]);
+  assert.deepEqual(g.filter((f) => f.icon === "dots").map((f) => f.got), ["path@3[0] to path@3[1] 0 apart", "path@3[0] to path@3[2] 1 apart", "path@3[1] to path@3[2] 0 apart", "path@3[1] to path@3[3] 1 apart", "path@3[2] to path@3[3] 0 apart"]);
   assert.ok(!g.some((f) => f.icon === "spaced"), JSON.stringify(g));
 });
 
@@ -227,4 +227,20 @@ test("contrast: duotone has no line% and no contrast", async () => {
   assert.ok(r.rows.length > 0);
   assert.ok(r.rows.every((x) => !("line%" in x)));
   assert.ok(!r.failures.some((f) => f.rule === "contrast"));
+});
+
+const s16 = (b) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
+const s48 = (b) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
+const GAPBODY = '<rect x="1.5" y="3" width="13" height="10" rx="1.5" fill="currentColor" fill-opacity=".2" />';
+const gaps = async (text, G) => (await measuredChecks([{ name: "x", text }], G)).failures.filter((f) => f.rule === "gap").map((f) => `${f.got} → ${f.want}`);
+
+test("gap: two lines sit 1.5 strokes apart, edge to edge", async () => {
+  assert.deepEqual(await gaps(s16(`${GAPBODY}\n<path d="M4 6.5H12" />\n<path d="M4 8.75H12" />`), 16), ["path@2 to path@3 1.25 apart → ≥ 1.5 apart, or crossing"]);
+  assert.deepEqual(await gaps(s16(`${GAPBODY}\n<path d="M4 6.5H12" />\n<path d="M4 9H12" />`), 16), []);
+});
+
+test("gap: a contour is taken at its own width, 2", async () => {
+  const body = '<rect x="5" y="9" width="38" height="30" rx="6" fill="#ececea" stroke="none" />\n<rect x="5" y="9" width="38" height="30" rx="6" stroke-width="2" />';
+  assert.deepEqual(await gaps(s48(`${body}\n<path d="M10 43H38" />`), 48), []);
+  assert.deepEqual(await gaps(s48(`${body}\n<path d="M10 42.75H38" />`), 48), ["rect@2 to path@3 2 apart → ≥ 2.25 apart, or crossing"]);
 });

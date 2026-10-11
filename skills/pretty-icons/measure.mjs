@@ -3,16 +3,16 @@
  * raster.mjs; gap is read from geometry.mjs, with the stroke added.
  * At the filled finish weight reads the lines alone (no paint, no fill), and gap holds
  * every element but the paint apart (a tone, a shade, a dot: filled.mjs): line
- * from line by a stroke, a mark from anything by half a stroke.
+ * from line by 1.5 strokes edge to edge, each at its own width, a mark from anything by half that.
  * At the filled finish contrast reads the base as written, every tone kept: the line tone's share of its painted pixels (`shares` in raster.mjs).
  * A modifier (modifiers.mjs) is the base's sign, not its object. Its cut moves the base's box, mass and ink,
  * so a modified icon is judged for live (the whole) and gap (without the modifier, whose halo is the modifier
  * rule's) only: not keyline, gravity or weight, and it stays out of the median. Its base is judged for those. In duotone the
  * paint is a split body's fill (stroke none): its edge is its contour's, so it is left out of gap too.
  */
-import { preset, TOUCH, FORMATS, referenceInk } from "./presets.mjs";
+import { preset, TOUCH, FORMATS, referenceInk, AIR } from "./presets.mjs";
 import { measure, shares, resvg, NO_RASTER } from "./raster.mjs";
-import { parse, compose } from "./svg.mjs";
+import { parse, compose, num } from "./svg.mjs";
 import { isModifier } from "./modifiers.mjs";
 import { sampleParts, minDistance } from "./geometry.mjs";
 import { objectOf, linesOf, classify } from "./filled.mjs";
@@ -48,20 +48,21 @@ export async function measuredChecks(set, G) {
       const c = filled ? classify(els) : null;
       const details = new Set(filled ? c.details.map((el) => el.at) : []);
       const paint = new Set(filled ? [...c.paint].map((el) => el.at) : els.filter((el) => String(el.attrs.stroke).trim().toLowerCase() === "none").map((el) => el.at));
+      const rootW = num(parsed.attrs, "stroke-width", p.stroke);
       const parts = els.map((el) => { try { return sampleParts(el, 0.05); } catch (e) { throw new Error(`${el.at} ${e.message}`); } });
       const whole = await measure(s.text, G);
       const m = filled
         ? { ...(await measure(objectOf(base), G)), live: whole.box, ink: (await measure(linesOf(base), G)).ink }
         : { ...(await measure(base, G)), live: whole.box };
       const share = filled ? await shares(base, G) : null;
-      measures.push({ ...s, els, parts, details, paint, m, modified, share });
+      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
     }
   }
 
-  for (const { name, els, parts, details, paint, m, modified, share } of measures) {
+  for (const { name, els, parts, details, paint, m, modified, share, rootW } of measures) {
     const { box, mass, ink, live } = m;
     // an empty icon has no box or mass to judge; count already reports it
     const inked = live.w > 0;
@@ -77,10 +78,13 @@ export async function measuredChecks(set, G) {
     if (inked && !modified && (Math.abs(dx) > p.gravityTol || Math.abs(dy) > p.gravityTol)) fail(failures, "gravity", name, `mass ${r2(dx) >= 0 ? "+" : ""}${r2(dx)}, ${r2(dy) >= 0 ? "+" : ""}${r2(dy)}`, `within ±${p.gravityTol}`);
     // gap, between every pair of elements, and between the subpaths of one path: merged dots
     // are as "almost" as separate ones. Touching (a shared end, a crossing) passes.
+    // each element at its own width: a contour's edge is at 2, the parts' at the root's
+    const width = new Map(els.map((el) => [el.at, num(el.attrs, "stroke-width", rootW)]));
     const gap = (A, B, a, b) => {
-      const min = details.has(a.replace(/\[\d+\]$/, "")) || details.has(b.replace(/\[\d+\]$/, "")) ? p.stroke / 2 : p.stroke;
-      const centre = minDistance(A, B), outer = centre - p.stroke;
-      if (centre > TOUCH && outer < min - 1e-9) fail(failures, "gap", name, `${a} to ${b} ${outer < 0 ? `overlapping, centrelines ${r2(centre)} apart` : `${r2(outer)} apart`}`, `≥ ${min} apart, or crossing`);
+      const ka = a.replace(/\[\d+\]$/, ""), kb = b.replace(/\[\d+\]$/, "");
+      const min = (details.has(ka) || details.has(kb) ? AIR / 2 : AIR) * p.stroke;
+      const centre = minDistance(A, B), outer = centre - (width.get(ka) + width.get(kb)) / 2;
+      if (centre > TOUCH && outer < min - 1e-9) fail(failures, "gap", name, `${a} to ${b} ${outer < 0 ? `overlapping, centrelines ${r2(centre)} apart` : `${r2(outer)} apart`}`, `≥ ${+min.toFixed(3)} apart, or crossing`);
     };
     const whole = parts.map((q) => q.flat());
     for (let i = 0; i < els.length; i++) {
