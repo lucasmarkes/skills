@@ -133,3 +133,10 @@ export const referenceInk = (G) => REFERENCE_INK[G];
  * the base gives it, is derived: half the box plus one and a half base strokes (`modifiers.mjs`).
  */
 export const MODIFIER = { 16: { size: 5, dot: 1.5 }, 20: { size: 6.5, dot: 1.75 }, 24: { size: 8, dot: 2.25 }, 48: { size: 14.5, dot: 4 } };
+
+/** A closed counter (a hole, an eye, a ring's inside) is at least this many strokes across. */
+export const COUNTER = 2;
+/** Air reports a narrow region of at least this many square strokes; smaller is anti-aliasing. */
+export const AIR_AREA = 1;
+/** A counter within this many strokes of COUNTER passes: the raster reads a hole a little small. */
+export const AIR_TOL = 0.25;

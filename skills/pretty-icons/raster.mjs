@@ -10,7 +10,7 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
-import { SCALE, INK_ALPHA, DARK_LUMA } from "./presets.mjs";
+import { SCALE, INK_ALPHA, DARK_LUMA, AIR, COUNTER, AIR_AREA, AIR_TOL } from "./presets.mjs";
 import { withNs } from "./svg.mjs";
 
 // Pinned: the bar set's margins are thin, and a renderer's anti-aliasing moves ink.
@@ -99,4 +99,87 @@ export async function shares(svgText, G) {
     if (((pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3) * 255 / a < DARK_LUMA) dark++;
   }
   return { paint, dark };
+}
+
+// Air is read at 8 px a stroke; a pixel darker than 0.6 is ink (the line and mark tones; fill, shade and paper are paper).
+const PX = 8, INK_LUMA = 0.6;
+
+// Felzenszwalb and Huttenlocher's exact squared distance transform, one dimension.
+function edt1d(f, n, d, v, z) {
+  let k = 0;
+  v[0] = 0; z[0] = -Infinity; z[1] = Infinity;
+  for (let q = 1; q < n; q++) {
+    let s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+    while (s <= z[k]) { k--; s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]); }
+    k++; v[k] = q; z[k] = s; z[k + 1] = Infinity;
+  }
+  k = 0;
+  for (let q = 0; q < n; q++) { while (z[k + 1] < q) k++; d[q] = (q - v[k]) ** 2 + f[v[k]]; }
+}
+
+/** Each pixel's Euclidean distance, in pixels, to the nearest set pixel of `mask`. */
+export function edt(mask, W, H) {
+  const BIG = 1e12, out = new Float64Array(W * H), n = Math.max(W, H);
+  const f = new Float64Array(n), d = new Float64Array(n), v = new Int32Array(n), z = new Float64Array(n + 1);
+  for (let x = 0; x < W; x++) { for (let y = 0; y < H; y++) f[y] = mask[y * W + x] ? 0 : BIG; edt1d(f, H, d, v, z); for (let y = 0; y < H; y++) out[y * W + x] = d[y]; }
+  for (let y = 0; y < H; y++) { for (let x = 0; x < W; x++) f[x] = out[y * W + x]; edt1d(f, W, d, v, z); for (let x = 0; x < W; x++) out[y * W + x] = Math.sqrt(d[x]); }
+  return out;
+}
+
+// 4-connected regions of a mask, each with whether it reaches the image's border.
+function components(mask, W, H) {
+  const seen = new Uint8Array(W * H), out = [];
+  for (let i = 0; i < W * H; i++) {
+    if (!mask[i] || seen[i]) continue;
+    const stack = [i], px = [];
+    let border = false;
+    seen[i] = 1;
+    while (stack.length) {
+      const j = stack.pop(), x = j % W, y = (j - x) / W;
+      px.push(j);
+      if (x === 0 || y === 0 || x === W - 1 || y === H - 1) border = true;
+      for (const k of [x > 0 ? j - 1 : -1, x < W - 1 ? j + 1 : -1, y > 0 ? j - W : -1, y < H - 1 ? j + W : -1])
+        if (k >= 0 && mask[k] && !seen[k]) { seen[k] = 1; stack.push(k); }
+    }
+    out.push({ px, border });
+  }
+  return out;
+}
+
+/**
+ * The paper an icon squeezes: rendered at 8 px a stroke on white, the paper is opened at radius
+ * AIR/2 strokes, and what the opening cannot reach is narrow. An enclosed paper region under
+ * COUNTER (less AIR_TOL) strokes across is a counter, reported whole; anything under AIR_AREA
+ * square strokes is left out. Sizes in strokes, places in grid units.
+ */
+export async function air(svgText, G, stroke) {
+  const unit = PX / stroke, size = Math.round(G * unit), pad = PX;
+  const { width, height, pixels } = render(svgText, size, { background: "#ffffff" });
+  const W = width + 2 * pad, H = height + 2 * pad, ink = new Uint8Array(W * H);
+  for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+    const i = (y * width + x) * 4;
+    if ((pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3 / 255 < INK_LUMA) ink[(y + pad) * W + x + pad] = 1;
+  }
+  const dt = edt(ink, W, H);
+  const at = (px) => {
+    let sx = 0, sy = 0;
+    for (const j of px) { sx += (j % W) + 0.5; sy += Math.floor(j / W) + 0.5; }
+    return [+((sx / px.length - pad) / unit).toFixed(2), +((sy / px.length - pad) / unit).toFixed(2)];
+  };
+  const widest = (px) => { let m = 0; for (const j of px) if (dt[j] > m) m = dt[j]; return (2 * m + 1) / PX; };
+  const out = [], counter = new Uint8Array(W * H), paper = Uint8Array.from(ink, (v) => 1 - v);
+  for (const c of components(paper, W, H)) {
+    if (c.border) continue;
+    const across = widest(c.px), area = c.px.length / PX / PX;
+    if (across >= COUNTER - AIR_TOL) continue;
+    for (const j of c.px) counter[j] = 1;
+    if (area >= AIR_AREA) out.push({ kind: "counter", across: +across.toFixed(2), area: +area.toFixed(2), at: at(c.px) });
+  }
+  const r = (AIR / 2) * PX, reach = edt(Uint8Array.from(dt, (v) => (v >= r ? 1 : 0)), W, H);
+  const narrow = Uint8Array.from(ink, (v, i) => (!v && !counter[i] && reach[i] > r ? 1 : 0));
+  for (const c of components(narrow, W, H)) {
+    const area = c.px.length / PX / PX;
+    if (area >= AIR_AREA) out.push({ kind: "paper", across: +widest(c.px).toFixed(2), area: +area.toFixed(2), at: at(c.px) });
+  }
+  return out;
 }

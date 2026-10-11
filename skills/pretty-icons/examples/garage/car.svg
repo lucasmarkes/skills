@@ -5,6 +5,4 @@
   <path d="M16.75 21.5C17.75 16.25 20.5 14 24 14C27.5 14 30.25 16.25 31.25 21.5Z" fill="#ffffff" />
   <circle cx="13.5" cy="35.5" r="4" fill="#cfcfcb" />
   <circle cx="34.5" cy="35.5" r="4" fill="#cfcfcb" />
-  <circle cx="13.5" cy="35.5" r="1.5" fill="#25262a" stroke="none" />
-  <circle cx="34.5" cy="35.5" r="1.5" fill="#25262a" stroke="none" />
 </svg>

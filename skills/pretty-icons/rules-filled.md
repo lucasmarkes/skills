@@ -66,7 +66,7 @@ Each body's ink lands on its keyline, centred at 24. A rect's edge sits half a c
 | --- | --- | --- | --- |
 | `cx 24 cy 24 r 19` | `x 7 y 7 w 34 h 34 rx 6` | `x 9 y 5 w 30 h 38 rx 6` | `x 5 y 9 w 38 h 30 rx 6` |
 
-Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded housing on the portrait keyline, is the whole construction in eight elements: the side panels, the tone, the shade, the contour, three lenses and the lit lamp's dot:
+Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded housing on the portrait keyline, is the whole construction in seven elements: the side panels, the tone, the shade, the contour and three lenses:
 
 ```svg
 <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -77,11 +77,10 @@ Every icon starts from this root. `examples/garage/traffic-light.svg`, a moulded
   <circle cx="24" cy="13" r="3.5" fill="#ffffff" />
   <circle cx="24" cy="24" r="3.5" fill="#ffffff" />
   <circle cx="24" cy="35" r="3.5" fill="#ffffff" />
-  <circle cx="24" cy="13" r="2" fill="#25262a" stroke="none" />
 </svg>
 ```
 
-The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="none"`; the shade is the right third of it, its corners the same arcs, so the contour pasted after it covers the seam; the contour is the tone's rect again, at 2. The side panels come first, one shape in the shade tone: each ends on the housing's straight side, between its corner arcs, so the contour covers its seam. A bracket of one line goes thin at 16 to 24 px; a panel 5 wide holds. The three lenses are paper, drawn by the root's line; the lamp that is on is a dot in the line tone inside the top lens.
+The housing is 20.5 wide, moulded: `rx 8`. The tone is the rect with `stroke="none"`; the shade is the right third of it, its corners the same arcs, so the contour pasted after it covers the seam; the contour is the tone's rect again, at 2. The side panels come first, one shape in the shade tone: each ends on the housing's straight side, between its corner arcs, so the contour covers its seam. A bracket of one line goes thin at 16 to 24 px; a panel 5 wide holds. The three lenses are paper, drawn by the root's line; a lamp that is on would be a dot in the line tone inside a lens, but the ring of paper around a dot that small is under 2 strokes across, which `air` refuses: a dot sits on open paper, or a lens stays empty.
 
 ## 01 · grid
 

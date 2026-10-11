@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { cacheDir, measure, render, shares } from "../../skills/pretty-icons/raster.mjs";
+import { air, cacheDir, measure, render, shares } from "../../skills/pretty-icons/raster.mjs";
 
 const near = (a, b, eps = 0.05) => assert.ok(Math.abs(a - b) < eps, `${a} ≈ ${b}`);
 const ROOT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">`;
@@ -90,4 +90,29 @@ test("a cache whose binary is missing is `not measured`, exit 2, with the folder
   const last = r.stdout.trim().split("\n").at(-1);
   assert.match(last, /^not measured: could not load @resvg\/resvg-js from .*: Cannot find module '@resvg\/resvg-js-binary'; delete that folder to reinstall$/);
   assert.doesNotMatch(r.stdout + r.stderr, /\n\s+at /, "no stack");
+});
+
+const one = (b) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
+
+test("air: paper under 1.5 strokes between two lines is one region, at its centre", async () => {
+  const r = await air(one('<path d="M3 7H13" /><path d="M3 9H13" />'), 16, 1);
+  assert.equal(r.length, 1);
+  assert.equal(r[0].kind, "paper");
+  assert.ok(r[0].across < 1.5, `across ${r[0].across}`);
+  assert.deepEqual(r[0].at, [8, 8]);
+  assert.deepEqual(await air(one('<path d="M3 6.5H13" /><path d="M3 9.5H13" />'), 16, 1), []);
+});
+
+test("air: a counter under 2 strokes is reported, a speck is not, 2 and over passes", async () => {
+  const counter = await air(one('<circle cx="8" cy="8" r="1.25" />'), 16, 1);
+  assert.deepEqual(counter.map((x) => x.kind), ["counter"]);
+  assert.ok(counter[0].across < 2 - 0.25);
+  assert.deepEqual(await air(one('<circle cx="8" cy="8" r="1" />'), 16, 1), []);
+  assert.deepEqual(await air(one('<circle cx="8" cy="8" r="1.75" />'), 16, 1), []);
+});
+
+test("air: a filled body, a V and a T leave no narrow paper", async () => {
+  assert.deepEqual(await air(one('<rect x="2" y="2" width="12" height="12" rx="1.5" fill="currentColor" />'), 16, 1), []);
+  assert.deepEqual(await air(one('<path d="M3 3L8 13L13 3" />'), 16, 1), []);
+  assert.deepEqual(await air(one('<path d="M3 3H13M8 3V13" />'), 16, 1), []);
 });

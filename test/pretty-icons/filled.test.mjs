@@ -15,13 +15,12 @@ const rules = (r) => [...new Set(r.failures.map((f) => f.rule))].sort();
 const lines = (r) => r.failures.map(formatFailure);
 const read = (n) => readFileSync(join(garage, `${n}.svg`), "utf8");
 
-// The worked example: side panels, tone, shade, contour, three lenses, the lit lamp's dot.
+// The worked example: side panels, tone, shade, contour, three lenses.
 const LIGHT = read("traffic-light");
 const TONE = '<rect x="13.75" y="5" width="20.5" height="38" rx="8" fill="#ececea" stroke="none" />';
 const SHADE = '<path d="M26.25 5A8 8 0 0 1 34.25 13V35A8 8 0 0 1 26.25 43Z" fill="#cfcfcb" stroke="none" />';
 const CONTOUR = '<rect x="13.75" y="5" width="20.5" height="38" rx="8" stroke-width="2" />';
-const LIT = '<circle cx="24" cy="13" r="2" fill="#25262a" stroke="none" />';
-const add = (el) => LIGHT.replace(LIT, el);
+const add = (el) => LIGHT.replace("</svg>", `  ${el}\n</svg>`);
 const check = (svg) => textChecks("traffic-light", svg, 48);
 
 test("48 is the filled preset; the duotone table is unchanged", () => {
@@ -80,7 +79,7 @@ test("the tones: five, neutral, each with a dark twin", () => {
 
 test("classify: tone, shade, contour, shape, dot, line; mark", () => {
   const at = (els) => els.map((e) => e.at);
-  const t = classify(parse(LIGHT).elements);
+  const t = classify(parse(add('<circle cx="24" cy="13" r="2" fill="#25262a" stroke="none" />')).elements);
   assert.deepEqual(at(t.lines), []);
   assert.deepEqual(at(t.tones), ["rect@3"]);
   assert.deepEqual(at(t.shades), ["path@4"]);
@@ -176,11 +175,11 @@ test("count: eight elements, twelve commands", () => {
 });
 
 test("the variants for measuring: the object as drawn, and its lines alone", () => {
-  assert.equal(parse(objectOf(LIGHT)).elements.length, 8);
+  assert.equal(parse(objectOf(LIGHT)).elements.length, 7);
   const l = linesOf(LIGHT);
   assert.ok(!/#ececea|#cfcfcb|#ffffff/.test(l), l);
   assert.doesNotMatch(l, /<mask/);
-  assert.equal(parse(l).elements.length, 5, "side panels, contour, three lenses: the tone, the shade and the dot are paint");
+  assert.equal(parse(l).elements.length, 5, "side panels, contour, three lenses: the tone and the shade are paint");
 });
 
 test("every set in the old finish is rejected, and so is the first neutral drawing", async () => {

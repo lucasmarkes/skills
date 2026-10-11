@@ -286,3 +286,14 @@ test("gap: two lines outside any body, almost and overlapping", async () => {
   assert.deepEqual(await gaps(s16('<path d="M2 6H14" />\n<path d="M2 7.75H14" />'), 16), ["path@1 to path@2 0.75 apart → ≥ 1.5 apart, or crossing"]);
   assert.deepEqual(await gaps(s16('<path d="M2 6H14" />\n<path d="M2 6.5H14" />'), 16), ["path@1 to path@2 overlapping, centrelines 0.5 apart → ≥ 1.5 apart, or crossing"]);
 });
+
+const airs = async (text, G) => (await measuredChecks([{ name: "oil", text }], G)).failures.filter((f) => f.rule === "air").map((f) => `${f.got} → ${f.want}`);
+
+test("air: check names the narrow paper and its move", async () => {
+  assert.deepEqual(await airs(s16('<path d="M3 7H13" /><path d="M3 9H13" />'), 16), ["paper 1.1 strokes wide at 8, 8 → ≥ 1.5 apart, or touching"]);
+  assert.deepEqual(await airs(s16('<circle cx="8" cy="8" r="1.25" />'), 16), ["counter 1.5 strokes across at 8, 8 → ≥ 2 across"]);
+});
+
+test("air: an interior detail is loose's, so air reads the body without it", async () => {
+  assert.deepEqual(await airs(s16(`${CARD}<path d="M4 8H12" />`), 16), []);
+});

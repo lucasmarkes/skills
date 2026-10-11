@@ -57,8 +57,7 @@ test("SKILL.md: the loop composes with the kit, checks, and looks at the proof",
 });
 
 const LIGHT = readFileSync(new URL("../../skills/pretty-icons/examples/garage/traffic-light.svg", import.meta.url), "utf8");
-const LIT = '<circle cx="24" cy="13" r="2" fill="#25262a" stroke="none" />';
-const light = (el) => textChecks("traffic-light", LIGHT.replace(LIT, el), 48).failures.map(line);
+const light = (el) => textChecks("traffic-light", LIGHT.replace("</svg>", `  ${el}\n</svg>`), 48).failures.map(line);
 
 test("rules-filled.md quotes what check.mjs prints for one weight, the solid, the painted stroke and contrast", async () => {
   const filled = doc("rules-filled.md");

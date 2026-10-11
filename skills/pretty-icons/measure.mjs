@@ -11,9 +11,11 @@
  * paint is a split body's fill (stroke none): its edge is its contour's, so it is left out of gap too.
  * loose: an unfilled stroke (each subpath on its own) whose midpoint lies inside a filled body is an interior detail; it stops one stroke
  * inside the body's contour, edge to edge, and gap leaves that pair to it.
+ * air: the paper rendered at 8 px a stroke, opened at radius 0.75 stroke; what stays narrow, or a hole under 2 strokes, is named with its place.
+ * Gap and air may both name one pair of parallel lines.
  */
-import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE } from "./presets.mjs";
-import { measure, shares, resvg, NO_RASTER } from "./raster.mjs";
+import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE, COUNTER } from "./presets.mjs";
+import { measure, shares, resvg, air, NO_RASTER } from "./raster.mjs";
 import { parse, compose, num, geometryKey } from "./svg.mjs";
 import { isModifier } from "./modifiers.mjs";
 import { sampleParts, minDistance, interiorParts } from "./geometry.mjs";
@@ -80,17 +82,19 @@ export async function measuredChecks(set, G) {
         : { ...(await measure(base, G)), live: whole.box };
       const share = filled ? await shares(base, G) : null;
       const inner = interiorDetails(parsed, els, p, c, rootW), innerAt = new Set(inner.map((x) => x.el.at));
+      // air reads the base without its interior details: those are loose's, a stroke from the contour
+      const narrow = await air(compose(parsed.attrs, els.filter((el) => !innerAt.has(el.at))), G, p.stroke);
       // a detail and its body (and the body's contour, the same geometry) are loose's, not gap's
       const skip = new Set();
       for (const { el, body } of inner) for (const x of els) if (geometryKey(x) === geometryKey(body)) skip.add(`${el.at}|${x.at}`).add(`${x.at}|${el.at}`);
-      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW, inner, innerAt, skip });
+      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW, inner, innerAt, skip, narrow });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
     }
   }
 
-  for (const { name, els, parts, details, paint, m, modified, share, rootW, inner, skip } of measures) {
+  for (const { name, els, parts, details, paint, m, modified, share, rootW, inner, skip, narrow } of measures) {
     const { box, mass, ink, live } = m;
     // an empty icon has no box or mass to judge; count already reports it
     const inked = live.w > 0;
@@ -127,6 +131,11 @@ export async function measuredChecks(set, G) {
       for (let j = i + 1; j < els.length; j++) if (!paint.has(els[j].at)) gap(whole[i], whole[j], els[i].at, els[j].at);
       const sub = parts[i];
       if (sub.length > 1) for (let a = 0; a < sub.length; a++) for (let b = a + 1; b < sub.length; b++) gap(sub[a], sub[b], `${els[i].at}[${a}]`, `${els[i].at}[${b}]`);
+    }
+    // air: paper narrower than AIR strokes between inks that do not touch, or a counter under COUNTER
+    for (const a of narrow) {
+      if (a.kind === "paper") fail(failures, "air", name, `paper ${a.across.toFixed(1)} strokes wide at ${a.at[0]}, ${a.at[1]}`, `≥ ${AIR} apart, or touching`);
+      else fail(failures, "air", name, `counter ${a.across.toFixed(1)} strokes across at ${a.at[0]}, ${a.at[1]}`, `≥ ${COUNTER} across`);
     }
     rows.push({ icon: name, x0: r2(box.x0), y0: r2(box.y0), w: r2(box.w), h: r2(box.h), keyline: fits ? k.format : "—", ink: r2(ink), dx: r2(dx), dy: r2(dy), ...(share ? { "line%": share.paint ? Math.round((1000 * share.dark) / share.paint) / 10 : 0 } : {}) });
   }
