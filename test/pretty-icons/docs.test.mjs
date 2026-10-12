@@ -277,3 +277,24 @@ test("rules-bulk.md quotes what check.mjs prints at bulk: stroke, construction, 
   assert.ok(read.includes("## The studio read"));
   assert.ok(read.includes("> These are two sets of icons, A and B, from two apps. Which set looks drawn by an icon studio: A, B, or both? Answer with the letter or \"both\" and, in five words or fewer, why."));
 });
+
+test("SKILL.md offers three finishes, recommends bulk for a sidebar with presence, runs knockout.mjs in the loop, and sends a bulk set to the studio read", () => {
+  const skill = doc("SKILL.md");
+  for (const s of [
+    "one of three finishes",
+    "**Bulk**, on 24",
+    "fill-opacity=\".4\"",
+    "bulk in a sidebar, a nav or tabs when the app wants presence",
+    "duotone when the app is thin",
+    "`rules-bulk.md`",
+    "examples/bulk",
+    "knockout.mjs pretty-icons/<name>.svg",
+    "never cut a body by hand",
+    "Do the studio read",
+    "**not read by the studio**",
+    "| cutting a knockout by hand, or moving an accent after the cut |",
+    "| a `rect` at bulk |",
+    "| a `share` out of the band |",
+  ]) assert.ok(skill.includes(s), s);
+  assert.ok(/node <skill-dir>\/knockout\.mjs[^\n]*\n[^\n]*check\.mjs/.test(skill) || skill.indexOf("knockout.mjs pretty-icons/<name>.svg") < skill.indexOf("3. `node <skill-dir>/check.mjs pretty-icons/`"), "knockout before check in the loop");
+});
