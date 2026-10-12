@@ -97,14 +97,14 @@ test("one inflection over a short chord asks for a larger box, not --bulge; a wo
 });
 
 test("the usage names every flag the parser takes, each per-primitive flag on its primitive's line", () => {
-  const value = { at: "8,8", shade: "right", seam: "curved", side: "top", anchors: "8,8 12,8 10,12", from: "M0 0Z" };
+  const value = { at: "8,8", shade: "right", seam: "curved", side: "top", anchors: "8,8 12,8 10,12", from: "M0 0Z", finish: "bulk" };
   for (const f of FLAGS) {
     assert.ok(USAGE.includes(`--${f}`), `USAGE names --${f}`);
-    const argv = f === "from" ? ["--from", "M0 0Z"] : ["drop", `--${f}`, ...(f === "sharp" ? [] : [value[f] ?? "1"])];
+    const argv = f === "from" ? ["--from", "M0 0Z"] : ["drop", `--${f}`, ...(f === "sharp" || f === "accent" ? [] : [value[f] ?? "1"])];
     assert.notEqual(parseArgs(argv), null, `parseArgs takes --${f}`);
   }
   assert.equal(parseArgs(["drop", "--colour", "red"]), null);
-  const own = { drop: ["tip"], leaf: ["skew"], bean: ["waist"], crescent: ["thick"], taper: ["narrow", "sharp"], wedge: ["angle"], scoop: ["depth", "side", "rx"], dome: ["shoulder"], sack: ["neck"], bubble: ["tail"], bust: ["neck"], blob: ["anchors"], ring: ["r", "hole"] };
+  const own = { drop: ["tip"], leaf: ["skew"], bean: ["waist"], crescent: ["thick"], taper: ["narrow", "sharp"], wedge: ["angle"], scoop: ["depth", "side", "rx"], dome: ["shoulder"], sack: ["neck"], bubble: ["tail"], bust: ["neck"], blob: ["anchors"], ring: ["r", "hole"], squircle: ["r"] };
   const lines = USAGE.split("\n");
   for (const [name, flags] of Object.entries(own)) {
     const l = lines.find((x) => x.trim().startsWith(`${name} `));
@@ -276,4 +276,29 @@ test("the soft bodies at the filled finish: tone, shade and contour, passing its
     const svg = `<svg viewBox="0 0 48 48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${els.join("")}</svg>`;
     assert.deepEqual(filledChecks(name, parse(svg), 48), [], name);
   }
+});
+
+test("squircle: a primitive on 24 at bulk, 5 or 3 by the short side, a pill at --r half the short side", () => {
+  const s = shape("squircle", { w: 18, h: 18, at: [12, 12], grid: 24, finish: "bulk" });
+  assert.equal(s.d, "M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z");
+  assert.equal(s.P, null);
+  assert.ok(onGrid(s.d));
+  assert.deepEqual(clean(s.d), []);
+  assert.ok(shape("squircle", { w: 8, h: 8, at: [8, 8], grid: 24, finish: "bulk" }).d.includes("C 9.5 4 10 4 11 5"));
+  assert.equal(shape("squircle", { w: 20, h: 8, at: [12, 12], r: 4, grid: 24, finish: "bulk" }).d, "M 6 8 H 18 A 4 4 0 0 1 18 16 H 6 A 4 4 0 0 1 6 8 Z");
+  refused(() => shape("squircle", { w: 18, h: 18, at: [12, 12], r: 10, grid: 24, finish: "bulk" }), "--r 10: at most 9");
+  refused(() => shape("squircle", { w: 18, h: 18, grid: 16 }), "squircle: the bulk finish, --finish bulk");
+});
+
+test("--finish bulk prints one body at .4, --accent prints it full; other grids refuse at bulk", () => {
+  assert.deepEqual(finishOf("squircle", { w: 18, h: 18, at: [12, 12], grid: 24, finish: "bulk" }), [`<path d="${shape("squircle", { w: 18, h: 18, at: [12, 12], grid: 24, finish: "bulk" }).d}" fill-opacity=".4" />`]);
+  assert.deepEqual(finishOf("lens", { grid: 24, finish: "bulk", accent: true }), [`<path d="${shape("lens", { grid: 24, finish: "bulk" }).d}" />`]);
+  assert.deepEqual(finishOf("lens", { grid: 24, finish: "bulk" }), [`<path d="${shape("lens", { grid: 24, finish: "bulk" }).d}" fill-opacity=".4" />`]);
+  refused(() => finishOf("lens", { grid: 16, finish: "bulk" }), "no bulk preset for grid 16: bulk is 24");
+  refused(() => finishOf("ring", { grid: 24, finish: "bulk", r: 8, hole: 3 }), "ring: the filled finish only");
+  const out = execFileSync("node", [SCRIPT, "squircle", "--w", "16", "--h", "20", "--at", "12,12", "--finish", "bulk"], { encoding: "utf8" });
+  assert.equal(out.trim(), `<path d="${shape("squircle", { w: 16, h: 20, at: [12, 12], grid: 24, finish: "bulk" }).d}" fill-opacity=".4" />`);
+  const acc = execFileSync("node", [SCRIPT, "drop", "--w", "8", "--h", "10", "--at", "12,12", "--finish", "bulk", "--accent"], { encoding: "utf8" });
+  assert.ok(acc.trim().startsWith('<path d="') && acc.trim().endsWith('" />') && !acc.includes("fill-opacity"), acc);
+  assert.deepEqual(parseArgs(["lens", "--finish", "bulk", "--accent"]), { name: "lens", o: { finish: "bulk", accent: true } });
 });

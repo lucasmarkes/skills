@@ -29,8 +29,8 @@
  */
 import { readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { preset, inset as insetOf, PALETTE, FILL } from "./presets.mjs";
-import { pathParts, bounds } from "./geometry.mjs";
+import { preset, inset as insetOf, PALETTE, FILL, radiusFor } from "./presets.mjs";
+import { pathParts, bounds, squircle } from "./geometry.mjs";
 import { segments, joins, curveFailures, SMOOTH, CORNER, MIN_CHORD } from "./curve.mjs";
 import { pathCommands, parse } from "./svg.mjs";
 import { filledChecks } from "./filled.mjs";
@@ -191,7 +191,19 @@ export function parseAnchors(text = "") {
 
 /** One primitive's outline as `{ d, P, segs }`: P and segs for the shade, null for wedge and scoop. */
 export function shape(name, o = {}) {
-  const G = o.grid ?? 48, p = preset(G), inset = insetOf(G);
+  const finish = o.finish;
+  if (finish !== undefined && finish !== "bulk") refuse(`--finish ${finish}: bulk, or leave it out`);
+  const G = o.grid ?? (finish === "bulk" ? 24 : 48);
+  let p; try { p = preset(G, finish); } catch (e) { refuse(e.message); }
+  const inset = insetOf(G, finish);
+  if (name === "squircle") {
+    if (finish !== "bulk") refuse("squircle: the bulk finish, --finish bulk");
+    const half = (n) => Math.floor(n * 2) / 2;
+    const w = half(o.w ?? p.live), h = half(o.h ?? p.live), [cx, cy] = (o.at ?? p.centre).map(snap);
+    const short = Math.min(w, h), r = o.r ?? radiusFor(G, short, finish);
+    if (r > short / 2) refuse(`--r ${r}: at most ${short / 2}`);
+    return { d: squircle(cx - w / 2, cy - h / 2, w, h, r), P: null, segs: null };
+  }
   // the box on the grid: its sides in halves and its centre in quarters, so its edges fall on quarters
   const half = (n) => Math.floor(n * 2) / 2;
   const box = { w: half(o.w ?? p.live), h: half(o.h ?? p.live), at: (o.at ?? p.centre).map(snap), inset, rot: o.rot ?? 0, lean: (o.lean ?? 0) * LEAN };
@@ -309,9 +321,13 @@ function fallbacks(s, side, seam) {
 
 /** The elements a body takes at its grid's finish, as lines of SVG; `given` a body already drawn (--from), unshaded unless asked. */
 export function finishOf(name, o = {}, given = null) {
-  const G = o.grid ?? 48, p = preset(G);
+  const finish = o.finish;
+  if (finish !== undefined && finish !== "bulk") refuse(`--finish ${finish}: bulk, or leave it out`);
+  const G = o.grid ?? (finish === "bulk" ? 24 : 48);
+  let p; try { p = preset(G, finish); } catch (e) { refuse(e.message); }
   if (name === "ring") return ring(o, G, p);
   const s = given ?? shape(name, o);
+  if (p.finish === "bulk") return [o.accent ? `<path d="${s.d}" />` : `<path d="${s.d}" fill-opacity=".4" />`];
   if (p.finish !== "filled") return [`<path d="${s.d}" fill="currentColor" fill-opacity="${FILL}" />`];
   const out = [toneLine(s.d)];
   const side = o.shade ?? (s.P ? "right" : "none");
@@ -402,11 +418,12 @@ export function repairFile(text) {
 
 // every flag parseArgs takes, by the value it takes: a number, an x,y pair, a word or text, none
 const NUMERIC = ["w", "h", "rot", "bulge", "lean", "grid", "tip", "skew", "waist", "thick", "narrow", "angle", "depth", "rx", "r", "hole", "shoulder", "neck", "tail"];
-const TEXT = ["shade", "seam", "side", "anchors", "from"];
-export const FLAGS = [...NUMERIC, "at", ...TEXT, "sharp"];
+const TEXT = ["shade", "seam", "side", "anchors", "from", "finish"];
+export const FLAGS = [...NUMERIC, "at", ...TEXT, "sharp", "accent"];
 export const USAGE = [
   "usage: node shapes.mjs <primitive> [flags]  |  node shapes.mjs --from \"<d>\"|<file.svg> [--grid N]",
   "  every primitive: --w N --h N (its box) --at x,y --rot N (steps of 15) --bulge N (default 0.55) --lean -1..1 --grid 16|20|24|48 (default 48)",
+  "  at 24 (bulk):    --finish bulk (a body at .4) --accent (full)",
   "  at 48 (filled):  --shade right|lower|none --seam straight|curved",
   "  drop      --tip 0..1",
   "  leaf      --skew -1..1",
@@ -422,6 +439,7 @@ export const USAGE = [
   "  wedge     --angle 15..120",
   "  scoop     --depth 0..1 --side top|right|bottom|left --rx N",
   "  blob      --anchors \"x,y[,t][,c] …\" (absolute anchors; c a cusp, t the handle length)",
+  "  squircle  --w N --h N [--r N] (bulk only: 5 when the short side is 12 or more, 3 below, or a pill)",
   "  ring      --r N --hole N (the filled finish only: a body with a hole, five elements)",
 ].join("\n");
 
@@ -431,7 +449,7 @@ export function parseArgs(argv) {
     const a = argv[i];
     if (!a.startsWith("--")) { rest.push(a); continue; }
     const k = a.slice(2);
-    if (k === "sharp") { o.sharp = true; continue; }
+    if (k === "sharp" || k === "accent") { o[k] = true; continue; }
     const v = argv[++i];
     if (v === undefined) return null;
     if (NUMERIC.includes(k)) { o[k] = Number(v); if (!Number.isFinite(o[k])) return null; }
