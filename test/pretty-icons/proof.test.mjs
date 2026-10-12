@@ -106,3 +106,21 @@ test("a path the reader cannot read is left out of construction, and the proof i
   writeFileSync(join(set, "bad.svg"), bad.text);
   assert.ok(existsSync(writeProof(set, { out: join(dir, "out") })));
 });
+
+import { knockout } from "../../skills/pretty-icons/knockout.mjs";
+
+test("at bulk the proof draws the uncut body under the cut in amber, uses the bulk keylines, and its reference row is examples/bulk or empty until it is drawn", (t) => {
+  const root = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">';
+  const SQ = '<path d="M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z" fill-opacity=".4" />';
+  const cut = knockout(`${root}\n  ${SQ}\n  <path d="M 12 6 L 18 12 L 12 18 L 6 12 Z" />\n</svg>`, { name: "a" }).text;
+  const s = { name: "a", text: cut };
+  const svg = composeProof([s], 24, { finish: "bulk" });
+  assert.ok(svg.includes('fill="#fde68a"'), "the uncut body shows under the cut");
+  assert.ok(svg.includes("reference: examples/bulk"));
+  assert.equal(referenceSet(24, "bulk").length, existsSync(examples("bulk")) ? 3 : 0);
+  // the 20 circle keyline, dashed, at the construction view's scale
+  assert.ok(svg.includes('width="20" height="20"'), "the bulk circle keyline");
+  const dir = tmp(t); writeFileSync(join(dir, "a.svg"), cut);
+  const file = writeProof(dir, { out: dir });
+  assert.ok(existsSync(file));
+});

@@ -28,6 +28,7 @@ const THEMES = { light: { bg: "#fafafa", ink: "#737373", text: "#171717" }, dark
 // The rows each finish is shown in: a sidebar glyph in light and dark at 1× and 2×; a filled icon
 // in light, on grey and in dark at 1× (each tone swapped for its dark twin), then on grey at 2×.
 const ROWS = { duotone: [["light", 1], ["dark", 1], ["light", 2], ["dark", 2]], filled: [["light", 1], ["grey", 1], ["dark", 1], ["grey", 2]] };
+ROWS.bulk = ROWS.duotone;
 const rowWidth = (G) => Math.max(180, G + 140);
 const tileScale = (G) => (G > 24 ? 3 : 6);
 const isCurrent = (v) => String(v ?? "").trim().toLowerCase() === "currentcolor";
@@ -36,7 +37,7 @@ const isCurrent = (v) => String(v ?? "").trim().toLowerCase() === "currentcolor"
 const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 /** An attribute value made safe inside double quotes. An entity already in the value is kept as it is. */
-const escAttr = (v) => String(v).replace(/&(?!(?:#\d+|#x[0-9a-f]+|[a-z]\w*);)/gi, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+export const escAttr = (v) => String(v).replace(/&(?!(?:#\d+|#x[0-9a-f]+|[a-z]\w*);)/gi, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
 // What an element may carry onto a sheet: geometry and paint. Anything else
 // (data-*, aria-*, ids) is dropped, so no name reaches the blind sheet that way.
@@ -58,8 +59,11 @@ export function place(s, G, x, y, size, colour) {
   const paint = (v) => escAttr(String(v).replace(/currentColor/gi, colour));
   const inner = elements.map((el) => `<${el.tag}${Object.entries(el.attrs).filter(([k]) => DRAW_ATTRS.has(k)).map(([k, v]) => ` ${k}="${paint(v)}"`).join("")} />`).join("");
   const inherited = ROOT_INHERITED.filter((k) => k in root).map((k) => ` ${k}="${paint(root[k])}"`).join("");
-  const stroke = isCurrent(root.stroke) || !root.stroke ? colour : escAttr(root.stroke);
-  return `<g transform="translate(${x} ${y}) scale(${size / G})" fill="none" stroke="${stroke}" stroke-width="${escAttr(root["stroke-width"])}" stroke-linecap="round" stroke-linejoin="round"${inherited}>${inner}</g>`;
+  // a root that fills in currentColor (bulk) fills the group and strokes nothing: each line carries its own stroke
+  const fill = isCurrent(root.fill) ? colour : "none";
+  const stroke = root.stroke ? (isCurrent(root.stroke) ? colour : escAttr(root.stroke)) : isCurrent(root.fill) ? "none" : colour;
+  const width = root["stroke-width"] !== undefined ? ` stroke-width="${escAttr(root["stroke-width"])}"` : "";
+  return `<g transform="translate(${x} ${y}) scale(${size / G})" fill="${fill}" stroke="${stroke}"${width} stroke-linecap="round" stroke-linejoin="round"${inherited}>${inner}</g>`;
 }
 
 function rowsBlock(set, G, scale, theme, x, y) {
@@ -74,7 +78,7 @@ function rowsBlock(set, G, scale, theme, x, y) {
   return out + "</g>";
 }
 
-function keylineTiles(set, G, rows, x, y) {
+function keylineTiles(set, G, rows, x, y, finish) {
   const S = tileScale(G), tile = G * S + 24, pitch = Math.max(tile + 12, 168), perRow = 5;
   let out = `<g data-keyline="tiles">`;
   set.forEach((s, i) => {
@@ -84,7 +88,7 @@ function keylineTiles(set, G, rows, x, y) {
     for (let g = 1; g < G; g++) out += `<path d="M${tx + g * S} ${ty}v${G * S}M${tx} ${ty + g * S}h${G * S}" stroke="#f0f0f0" />`;
     out += place(s, G, tx, ty, G * S, "#262626");
     if (row.keyline && row.keyline !== "—") {
-      const { keylines, centre: [cx, cy] } = preset(G), [kw, kh] = keylines[row.keyline];
+      const { keylines, centre: [cx, cy] } = preset(G, finish), [kw, kh] = keylines[row.keyline];
       out += `<rect x="${tx + (cx - kw / 2) * S}" y="${ty + (cy - kh / 2) * S}" width="${kw * S}" height="${kh * S}" fill="none" stroke="#3b82f6" stroke-opacity=".9" stroke-dasharray="4 3" />`;
     }
     // the ink box, thin and solid, over the keyline: an off-centre body shows as the gap between them
@@ -96,15 +100,15 @@ function keylineTiles(set, G, rows, x, y) {
   return out + "</g>";
 }
 
-export function composeSheet(set, G, rows) {
-  const left = 24, top = 24, gapX = 24, blocks = ROWS[preset(G).finish], rw = rowWidth(G), S = tileScale(G);
+export function composeSheet(set, G, rows, finish) {
+  const left = 24, top = 24, gapX = 24, blocks = ROWS[preset(G, finish).finish], rw = rowWidth(G), S = tileScale(G);
   const rowsH = Math.max(...blocks.map(([, scale]) => set.length * (G + 12) * scale + 20 * scale));
   const tilesY = top + rowsH + 48, tilesH = Math.ceil(set.length / 5) * (G * S + 60);
   const W = 24 + blocks.reduce((w, [, scale]) => w + rw * scale + gapX, 0) - gapX + 24, H = tilesY + tilesH + 24;
   let x = left, out = "";
   for (const [theme, scale] of blocks) { out += rowsBlock(set, G, scale, theme, x, top); x += rw * scale + gapX; }
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fff" />`
-    + out + keylineTiles(set, G, rows, left, tilesY) + "</svg>";
+    + out + keylineTiles(set, G, rows, left, tilesY, finish) + "</svg>";
 }
 
 /** mulberry32: a small seeded shuffle so a test can pin the order. */
@@ -116,8 +120,8 @@ function shuffled(items, seed) {
   return out;
 }
 
-export function composeBlind(set, G, seed = Date.now()) {
-  const order = shuffled(set, seed), icon = G * 2, cell = icon + 48, perRow = 5, bg = THEMES[preset(G).finish === "filled" ? "grey" : "light"].bg;
+export function composeBlind(set, G, seed = Date.now(), finish) {
+  const order = shuffled(set, seed), icon = G * 2, cell = icon + 48, perRow = 5, bg = THEMES[preset(G, finish).finish === "filled" ? "grey" : "light"].bg;
   const W = 24 * 2 + perRow * cell, H = 24 * 2 + Math.ceil(order.length / perRow) * cell;
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="${bg}" />`;
   const key = order.map((s, i) => {
@@ -130,8 +134,8 @@ export function composeBlind(set, G, seed = Date.now()) {
 }
 
 /** The set as one grid on its finish's page, at twice its grid, five to a row: no names, no tiles. */
-export function composeShowcase(set, G) {
-  const t = THEMES[preset(G).finish === "filled" ? "grey" : "light"], icon = G * 2, gap = Math.max(16, G), perRow = 5;
+export function composeShowcase(set, G, finish) {
+  const t = THEMES[preset(G, finish).finish === "filled" ? "grey" : "light"], icon = G * 2, gap = Math.max(16, G), perRow = 5;
   const cols = Math.min(perRow, set.length), rows = Math.ceil(set.length / perRow);
   const W = gap * 2 + cols * icon + (cols - 1) * gap, H = gap * 2 + rows * icon + (rows - 1) * gap;
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="${t.bg}" />`;
@@ -175,16 +179,16 @@ export async function writeSheets(folder, { out, seed = Date.now() % 2 ** 32 } =
   const r = await passed(dir), set = readSet(dir);
   mkdirSync(dest, { recursive: true });
   const sheet = join(dest, "pretty-icons-sheet.png"), blind = join(dest, "pretty-icons-blind.png");
-  const sheetSvg = composeSheet(set, r.G, r.rows);
+  const sheetSvg = composeSheet(set, r.G, r.rows, r.finish);
   writeFileSync(sheet, png(sheetSvg, widthOf(sheetSvg)));
-  const b = composeBlind(set, r.G, seed);
+  const b = composeBlind(set, r.G, seed, r.finish);
   writeFileSync(blind, png(b.svg, widthOf(b.svg)));
   return { sheet, blind, key: b.key, seed };
 }
 
 export async function writeShowcase(folder, { out } = {}) {
   const dir = resolve(folder), dest = out ? resolve(out) : defaultOut(dir);
-  const r = await passed(dir), svg = composeShowcase(readSet(dir), r.G);
+  const r = await passed(dir), svg = composeShowcase(readSet(dir), r.G, r.finish);
   mkdirSync(dest, { recursive: true });
   const showcase = join(dest, "pretty-icons-showcase.png");
   writeFileSync(showcase, png(svg, widthOf(svg)));
@@ -194,7 +198,7 @@ export async function writeShowcase(folder, { out } = {}) {
 export async function writeShadowPair(folder, { out, seed = Date.now() % 2 ** 32 } = {}) {
   const dir = resolve(folder), dest = out ? resolve(out) : defaultOut(dir);
   const r = await passed(dir);
-  if (preset(r.G).finish !== "filled") throw new Error("--shadow-pair: a shadow at the filled finish only (48)");
+  if (preset(r.G, r.finish).finish !== "filled") throw new Error("--shadow-pair: a shadow at the filled finish only (48)");
   const pair = composeShadowPair(readSet(dir), r.G, seed);
   mkdirSync(dest, { recursive: true });
   const A = join(dest, "pretty-icons-shadow-A.png"), B = join(dest, "pretty-icons-shadow-B.png");

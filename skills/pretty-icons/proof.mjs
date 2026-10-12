@@ -12,26 +12,27 @@
  * It never reaches the blind sheet. The proof is drawn whether or not the set passes check.mjs:
  * a kink is what it is for.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readSet, setGrid } from "./check.mjs";
+import { readSet, setFinish, setGrid } from "./check.mjs";
 import { segments, joins, DISPLAY } from "./curve.mjs";
 import { sampleParts } from "./geometry.mjs";
 import { CORNERS, halo, isModifier, placement, slashEnds } from "./modifiers.mjs";
-import { preset, PALETTE } from "./presets.mjs";
+import { finishOf, preset, PALETTE } from "./presets.mjs";
 import { png } from "./raster.mjs";
 import { parse } from "./svg.mjs";
-import { place, defaultOut } from "./sheet.mjs";
+import { escAttr, place, defaultOut } from "./sheet.mjs";
 
 const FONT = `font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"`;
 /** Each view is VIEW px square; the small renders sit in CELL px squares, two to a column. */
 export const VIEW = 192, CELL = 96, GAP = 16, LABEL = 28;
 export const PANEL = { w: VIEW * 3 + CELL + GAP * 3, h: VIEW + LABEL };
 export const JOIN_COLOUR = { smooth: "#16a34a", corner: "#2563eb", kink: "#dc2626" };
-export const REFERENCE = { duotone: ["hairline", ["data", "devices", "security"]], filled: ["garage", ["car", "traffic-light", "wrench"]] };
+export const REFERENCE = { duotone: ["hairline", ["data", "devices", "security"]], filled: ["garage", ["car", "traffic-light", "wrench"]], bulk: ["bulk", ["data", "devices", "security"]] };
 const SKILL = dirname(fileURLToPath(import.meta.url));
 const BG = { duotone: { bg: "#fafafa", ink: "#737373" }, filled: { bg: "#edeeee", ink: PALETTE.line } };
+BG.bulk = BG.duotone;
 
 /** The sizes the pixels view shows: 16, 24 and 32 for the filled grid, the grid at 1× and 2× in duotone. */
 export const pixelSizes = (G) => DISPLAY[G] ?? [16, 24, 32];
@@ -57,7 +58,7 @@ export function silhouette(s, G, size, ink) {
 
 /** The construction overlay in canvas units: anchors, handles, joins coloured by kind, a modifier's halo. */
 export function construction(s, G) {
-  const parsed = parse(s.text), u = 1 / (VIEW / G), out = [];
+  const parsed = parse(s.text), finish = finishOf(parsed.attrs) ?? undefined, u = 1 / (VIEW / G), out = [];
   const dot = (p, r, fill) => `<circle cx="${p[0]}" cy="${p[1]}" r="${r * u}" fill="${fill}" stroke="none" />`;
   for (const el of parsed.elements) {
     if (el.tag !== "path" || !el.attrs.d) continue;
@@ -79,8 +80,8 @@ export function construction(s, G) {
     try {
       const pts = mods.flatMap((el) => sampleParts(el, 0.1).flat());
       const mid = [(Math.min(...pts.map((q) => q[0])) + Math.max(...pts.map((q) => q[0]))) / 2, (Math.min(...pts.map((q) => q[1])) + Math.max(...pts.map((q) => q[1]))) / 2];
-      const corner = kind === "slash" ? "br" : CORNERS.reduce((a, b) => (Math.hypot(...placement(G, kind, a).c.map((v, i) => v - mid[i])) <= Math.hypot(...placement(G, kind, b).c.map((v, i) => v - mid[i])) ? a : b));
-      const H = halo(G, kind, corner);
+      const corner = kind === "slash" ? "br" : CORNERS.reduce((a, b) => (Math.hypot(...placement(G, kind, a, finish).c.map((v, i) => v - mid[i])) <= Math.hypot(...placement(G, kind, b, finish).c.map((v, i) => v - mid[i])) ? a : b));
+      const H = halo(G, kind, corner, finish);
       if (kind === "slash") { const [a, b] = slashEnds(G); out.push(`<path d="M${a}L${b}" stroke="#9333ea" stroke-opacity=".15" stroke-width="${2 * H.r}" stroke-linecap="round" fill="none" />`); }
       else out.push(`<circle cx="${H.c[0]}" cy="${H.c[1]}" r="${H.r}" fill="none" stroke="#9333ea" stroke-width="${u}" stroke-dasharray="${4 * u} ${3 * u}" />`);
     } catch { /* an unknown kind: check.mjs names it */ }
@@ -89,12 +90,15 @@ export function construction(s, G) {
 }
 
 /** One icon's panel: its name, then construction, finish, silhouette and pixels, at x, y. */
-export function panel(s, G, x, y) {
-  const finish = preset(G).finish, { bg, ink } = BG[finish], scale = VIEW / G, top = y + LABEL;
-  const { keylines, centre: [cx, cy] } = preset(G);
+export function panel(s, G, x, y, finish) {
+  const fin = preset(G, finish).finish, { bg, ink } = BG[fin], scale = VIEW / G, top = y + LABEL;
+  const { keylines, centre: [cx, cy] } = preset(G, finish);
   let out = `<text x="${x}" y="${y + 18}" ${FONT} font-size="14" fill="#171717">${String(s.name).replace(/[&<>]/g, "")}</text>`;
   // construction: a pale icon under the overlay, the keylines dashed
   out += `<rect x="${x}" y="${top}" width="${VIEW}" height="${VIEW}" fill="#fff" stroke="#e5e5e5" />`;
+  // a cut body: the uncut geometry in amber under the icon, so the drawer sees what the knockout took
+  const cuts = parse(s.text).elements.filter((el) => el.attrs["data-body"]);
+  if (cuts.length) out += `<g transform="translate(${x} ${top}) scale(${scale})">${cuts.map((el) => `<path d="${escAttr(el.attrs["data-body"])}" fill="#fde68a" stroke="none" />`).join("")}</g>`;
   out += `<g opacity=".45">${place(s, G, x, top, VIEW, ink)}</g>`;
   out += `<g transform="translate(${x} ${top}) scale(${scale})">`;
   for (const [kw, kh] of Object.values(keylines)) out += `<rect x="${cx - kw / 2}" y="${cy - kh / 2}" width="${kw}" height="${kh}" fill="none" stroke="#93c5fd" stroke-width="${1 / scale}" stroke-dasharray="${3 / scale} ${3 / scale}" />`;
@@ -114,30 +118,31 @@ export function panel(s, G, x, y) {
 }
 
 /** The reference icons of a grid's finish, read from the skill's examples. */
-export function referenceSet(G) {
-  const [folder, names] = REFERENCE[preset(G).finish];
-  return readSet(join(SKILL, "examples", folder)).filter((s) => names.includes(s.name));
+export function referenceSet(G, finish) {
+  const [folder, names] = REFERENCE[preset(G, finish).finish], dir = join(SKILL, "examples", folder);
+  if (!existsSync(dir)) return []; // examples/bulk is drawn after the motor; the proof must draw before it exists
+  return readSet(dir).filter((s) => names.includes(s.name));
 }
 
 /**
  * The proof as SVG: the reference row, a rule, then the set's panels, three to a row.
  * `only` keeps one icon, by name; an unknown name is an error that lists the names.
  */
-export function composeProof(set, G, { only } = {}) {
+export function composeProof(set, G, { only, finish } = {}) {
   const icons = only === undefined ? set : set.filter((s) => s.name === only);
   if (!icons.length) throw new Error(`--only ${only}: no such icon; the set has ${set.map((s) => s.name).join(", ")}`);
-  const refs = referenceSet(G), perRow = 3, pitchX = PANEL.w + 32, pitchY = PANEL.h + 24, left = 24;
+  const refs = referenceSet(G, finish), perRow = 3, pitchX = PANEL.w + 32, pitchY = PANEL.h + 24, left = 24;
   const rows = Math.ceil(icons.length / perRow), W = left * 2 + perRow * pitchX - 32, refH = 24 + pitchY;
   const H = 24 + refH + 24 + rows * pitchY + 24;
   let out = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fff" />`;
   out += `<g data-reference="row"><rect x="${left - 12}" y="12" width="${W - 2 * left + 24}" height="${refH}" rx="8" fill="#f5f5f4" />`;
-  out += `<text x="${left}" y="34" ${FONT} font-size="12" fill="#737373">reference: examples/${REFERENCE[preset(G).finish][0]}</text>`;
+  out += `<text x="${left}" y="34" ${FONT} font-size="12" fill="#737373">reference: examples/${REFERENCE[preset(G, finish).finish][0]}</text>`;
   // the reference icons draw at their own grid, not the set's: a 20 or 24 set still shows the 16 reference at 16
-  const RG = setGrid(refs);
-  refs.forEach((s, i) => { out += panel(s, RG, left + i * pitchX, 44); });
+  const RG = refs.length ? setGrid(refs) : G;
+  refs.forEach((s, i) => { out += panel(s, RG, left + i * pitchX, 44, finish); });
   out += "</g>";
   const y0 = 24 + refH + 24;
-  icons.forEach((s, i) => { out += panel(s, G, left + (i % perRow) * pitchX, y0 + Math.floor(i / perRow) * pitchY); });
+  icons.forEach((s, i) => { out += panel(s, G, left + (i % perRow) * pitchX, y0 + Math.floor(i / perRow) * pitchY, finish); });
   return out + "</svg>";
 }
 
@@ -145,8 +150,8 @@ export function composeProof(set, G, { only } = {}) {
 export function writeProof(folder, { out, only, grid } = {}) {
   const dir = resolve(folder), dest = out ? resolve(out) : defaultOut(dir), set = readSet(dir);
   if (!set.length) throw new Error(`${folder}: no .svg files`);
-  const G = setGrid(set, grid);
-  const svg = composeProof(set, G, { only });
+  const G = setGrid(set, grid), finish = setFinish(set);
+  const svg = composeProof(set, G, { only, finish });
   mkdirSync(dest, { recursive: true });
   const file = join(dest, "pretty-icons-proof.png");
   writeFileSync(file, png(svg, Number(/width="(\d+)"/.exec(svg)[1])));

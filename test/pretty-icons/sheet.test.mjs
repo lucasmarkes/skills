@@ -178,3 +178,37 @@ test("the shadow pair: one sheet shadowed, one not, in one order, the letters sh
   assert.equal(show.status, 0, show.stderr);
   assert.equal(show.stdout.trim(), join(out, "pretty-icons-showcase.png"));
 });
+
+import { knockout } from "../../skills/pretty-icons/knockout.mjs";
+import { place } from "../../skills/pretty-icons/sheet.mjs";
+
+const bulkFolder = (t) => {
+  const dir = tmp(t);
+  const root = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">';
+  const L = (d) => `<path d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />`;
+  const SQ = '<path d="M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z" fill-opacity=".4" />';
+  writeFileSync(join(dir, "a.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 6 L 18 12 L 12 18 L 6 12 Z" />\n</svg>`, { name: "a" }).text);
+  writeFileSync(join(dir, "b.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 6.5 L 17.5 12 L 12 17.5 L 6.5 12 Z" />\n</svg>`, { name: "b" }).text);
+  writeFileSync(join(dir, "c.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 6 L 18 12 L 12 18 L 6 12 Z" />\n  ${L("M 6 12 L 12 6")}\n</svg>`, { name: "c" }).text);
+  return dir;
+};
+
+test("at bulk, place paints the root's fill, no stroke and no stroke-width on the group; the sheet has duotone's four blocks", async (t) => {
+  const dir = bulkFolder(t), set = readSet(dir), r = await checkSet(dir);
+  assert.equal(r.finish, "bulk");
+  assert.deepEqual(r.failures.filter((f) => f.rule !== "weight"), []);
+  const g = place(set[2], 24, 0, 0, 24, "#123456");
+  assert.match(g, /^<g transform="[^"]+" fill="#123456" stroke="none" stroke-linecap="round" stroke-linejoin="round">/);
+  assert.ok(!g.includes("undefined"), g);
+  assert.ok(g.includes('fill-opacity=".4"') && g.includes('stroke="#123456"'), "the body keeps its opacity, the line its own stroke");
+  assert.ok(!g.includes("data-cut") && !g.includes("data-body"), "no mark reaches the sheet");
+  const svg = composeSheet(set, 24, r.rows, "bulk");
+  assert.equal((svg.match(/<g data-theme=/g) ?? []).length, 4);
+  assert.ok(svg.includes('data-theme="dark" data-scale="2"'));
+  // the keyline tiles use the bulk keylines: a square of 18 at the tile scale (6 at grid 24)
+  assert.ok(svg.includes(`width="${18 * 6}" height="${18 * 6}" fill="none" stroke="#3b82f6"`), "the bulk square keyline of 18 at the tile scale, not duotone's 20");
+  const out = tmp(t), w = await writeSheets(dir, { out, seed: 1 });
+  assert.ok(statSync(w.sheet).size > 1000 && statSync(w.blind).size > 1000);
+  const show = composeShowcase(set, 24, "bulk");
+  assert.ok(show.includes('fill="#fafafa"'), "bulk shows on duotone's page");
+});
