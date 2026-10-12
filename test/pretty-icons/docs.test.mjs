@@ -98,7 +98,7 @@ test("the reference set's name is in no file of the skill", () => {
   assert.deepEqual(walk(root).filter((p) => /\.(md|mjs|svg)$/.test(p) && named(p)), []);
 });
 
-const ruled = async (rule, G, ...icons) => (await measuredChecks(icons.map(([name, text]) => ({ name, text })), G)).failures.filter((f) => f.rule === rule).map(line);
+const ruled = async (rule, G, ...icons) => (await measuredChecks(icons.map(([name, text]) => ({ name, text })), G, G === 24 && /^<svg[^>]* fill="currentColor"/.test(icons[0][1]) ? "bulk" : undefined)).failures.filter((f) => f.rule === rule).map(line);
 const svg48 = (b) => `<svg viewBox="0 0 48 48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${b}</svg>`;
 const CARD16 = '<rect x="2" y="2" width="12" height="12" rx="1.5" fill="currentColor" fill-opacity=".2" />';
 const BOX48 = '<rect x="5" y="9" width="38" height="30" rx="6" fill="#ececea" stroke="none" /><rect x="5" y="9" width="38" height="30" rx="6" stroke-width="2" />';
@@ -242,4 +242,38 @@ test("SKILL.md step 4 names its target, step 3 (Draw); rules.md 09 describes int
   const interfaces = readFileSync(new URL("../../skills/pretty-icons/examples/hairline/interfaces.svg", import.meta.url), "utf8");
   assert.ok(interfaces.includes('data-modifier="dot"') && interfaces.includes('<circle cx="13.5" cy="13.5"'), "interfaces carries a dot, lower right");
   assert.ok(doc("rules.md").includes("its interfaces a pointer in a window, with a `dot` modifier in the window's lower-right corner."));
+});
+
+test("rules-bulk.md quotes what check.mjs prints at bulk: stroke, construction, radius, knockout, share, gap, count", async () => {
+  const bulk = doc("rules-bulk.md");
+  const root = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">';
+  const B = (inner, r = root) => `${r}\n  ${inner}\n</svg>`;
+  const SQ = '<path d="M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z" fill-opacity=".4" />';
+  const CIRCLE = '<circle cx="12" cy="12" r="10" fill-opacity=".4" />';
+  const L = (d) => `<path d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />`;
+  const text = (icon, svg) => textChecks(icon, svg, 24).failures.map(line).map((l) => l.replace(/node knockout\.mjs \S*edit\.svg/, "node knockout.mjs pretty-icons/edit.svg"));
+  const quoted = [
+    ...text("edit", B(`${CIRCLE}\n  ${L("M 2 2 H 5")}`, root.replace(' aria-hidden', ' stroke-width="2" aria-hidden'))),
+    ...text("edit", B(`${CIRCLE}\n  ${L("M 2 2 H 5").replace('stroke-width="2"', 'stroke-width="1.5"')}`)),
+    ...text("edit", B(CIRCLE)),
+    ...text("edit", B(`${CIRCLE}\n  <path d="M 2 2 H 5" />`)),
+    ...text("edit", B(`${CIRCLE}\n  ${L("M 2 2 H 4")}`)),
+    ...text("edit", B(`${CIRCLE}\n  ${L("M 2 2 L 6 6 L 2 6 L 6 2 L 2 4 L 6 4 L 4 2 L 4 6 L 3 3")}`)),
+    ...text("edit", B(`<circle cx="12" cy="12" r="10" fill-opacity=".4" stroke="currentColor" stroke-width="2" />\n  ${L("M 2 2 H 5")}`)),
+    ...text("edit", B(`<rect x="3" y="3" width="18" height="18" rx="5" fill-opacity=".4" />\n  ${L("M 2 2 H 5")}`)),
+    ...text("edit", B(`${CIRCLE}\n  <path d="M 1 1 H 7 V 2.5 H 1 Z" />`)),
+    ...text("edit", B(`${SQ}\n  <path d="M 12 6 L 18 12 L 12 18 L 6 12 Z" />`)),
+    ...(await ruled("share", 24, ["empty", B(`${SQ}\n  <path d="M 1 1 H 3 V 3 H 1 Z" />`)])),
+    ...(await ruled("gap", 24, ["edit", B(`${CIRCLE}\n  <path d="M 1 1 H 4 V 4 H 1 Z" />\n  <path d="M 5 1 H 8 V 4 H 5 Z" />`)])),
+  ];
+  const { knockout } = await import("../../skills/pretty-icons/knockout.mjs");
+  const crumb = B('<path d="M 3 3 H 21 V 21 H 3 Z" fill-opacity=".4" />\n  ' + L("M 2 18 H 22"));
+  try { knockout(crumb, { name: "edit" }); } catch (e) { quoted.push(e.message); }
+  assert.ok(quoted.length >= 7, quoted.join("\n"));
+  for (const l of quoted) assert.ok(bulk.includes(`\`${l}\``), `rules-bulk.md quotes ${l}`);
+  const { d } = shape("squircle", { grid: 24, w: 18, h: 18, at: [12, 12], finish: "bulk" });
+  assert.ok(bulk.includes(d), "the 18 squircle's d is in rules-bulk.md");
+  const read = doc("read.md");
+  assert.ok(read.includes("## The studio read"));
+  assert.ok(read.includes("> These are two sets of icons, A and B, from two apps. Which set looks drawn by an icon studio: A, B, or both? Answer with the letter or \"both\" and, in five words or fewer, why."));
 });

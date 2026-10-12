@@ -56,6 +56,14 @@ At the filled finish only, once the set passes the blind, craft and set reads, a
 
 The reader's pick stands unless the person overrules it: `shadow.mjs --on` for the shadowed one, `shadow.mjs --off` for the other, run as `node <skill-dir>/shadow.mjs pretty-icons/ --on` or `--off`. Then `check.mjs` once more. Say in the hand-over which was picked and the reader's words. Without a reader, leave the set unshadowed and say **not read for the shadow**.
 
+## The studio read
+
+Once a bulk set passes the blind, craft and set reads: `sheet.mjs --showcase` for the set, and the person's reference image of the bar it is measured against, placed side by side in one image, lettered A and B at random (a coin, recorded). A new reader, the image alone:
+
+> These are two sets of icons, A and B, from two apps. Which set looks drawn by an icon studio: A, B, or both? Answer with the letter or "both" and, in five words or fewer, why.
+
+Pass: "both". A set singled out goes back to step 3 (Draw) with the reader's words, then all of step 4.
+
 ## Without a second agent
 
 Say so in the hand-over, in these words: **not read blind**, **not read for craft**, **not read as a set** and, at the filled finish, **not read for the shadow**. Do not read the sheet yourself and call it read.
