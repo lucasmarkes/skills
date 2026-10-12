@@ -173,8 +173,8 @@ test("jsx: every kebab attribute is camel-cased except data-* and aria-*; namesp
 
 test("a bulk icon emits with fillOpacity and without data-cut or data-body, in react, the sprite and the svg file", async (t) => {
   const root = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">';
-  const SQ = '<path d="M 7 2 H 17 C 19.75 2 22 4.25 22 7 V 17 C 22 19.75 19.75 22 17 22 H 7 C 4.25 22 2 19.75 2 17 V 7 C 2 4.25 4.25 2 7 2 Z" fill-opacity=".4" />';
-  const cut = knockout(`${root}\n  ${SQ}\n  <path d="M 12 6 L 18 12 L 12 18 L 6 12 Z" />\n</svg>`, { name: "edit" }).text;
+  const SQ = '<path d="M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z" fill-opacity=".4" />';
+  const cut = knockout(`${root}\n  ${SQ}\n  <path d="M 12 7.5 L 16.5 12 L 12 16.5 L 7.5 12 Z" />\n</svg>`, { name: "edit" }).text;
   assert.ok(cut.includes('data-cut="knockout"') && cut.includes("data-body="));
   const set = [{ name: "edit", text: cut }];
   const tsx = toReact(set, {});
@@ -186,7 +186,7 @@ test("a bulk icon emits with fillOpacity and without data-cut or data-body, in r
   const dir = mkdtempSync(join(tmpdir(), "pi-emit-")); t.after(() => rmSync(dir, { recursive: true, force: true }));
   mkdirSync(join(dir, "src"), { recursive: true });
   writeFileSync(join(dir, "src", "edit.svg"), cut);
-  // the set is one icon of one body and one accent, so weight has no median to fail against
+  // one icon: weight is judged against the reference ink alone, so the fixture sits near examples/bulk's median
   const written = await emit(join(dir, "src"), { as: "svg", to: join(dir, "out") });
   const file = readFileSync(join(dir, "out", "edit.svg"), "utf8");
   assert.ok(!/data-(cut|body)/.test(file) && file.includes('fill-opacity=".4"') && file.includes("xmlns="), file);

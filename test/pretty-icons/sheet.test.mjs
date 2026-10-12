@@ -187,9 +187,9 @@ const bulkFolder = (t) => {
   const root = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">';
   const L = (d) => `<path d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />`;
   const SQ = '<path d="M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z" fill-opacity=".4" />';
-  writeFileSync(join(dir, "a.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 6 L 18 12 L 12 18 L 6 12 Z" />\n</svg>`, { name: "a" }).text);
-  writeFileSync(join(dir, "b.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 6.5 L 17.5 12 L 12 17.5 L 6.5 12 Z" />\n</svg>`, { name: "b" }).text);
-  writeFileSync(join(dir, "c.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 6 L 18 12 L 12 18 L 6 12 Z" />\n  ${L("M 6 12 L 12 6")}\n</svg>`, { name: "c" }).text);
+  writeFileSync(join(dir, "a.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 7 L 17 12 L 12 17 L 7 12 Z" />\n</svg>`, { name: "a" }).text);
+  writeFileSync(join(dir, "b.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 7.5 L 16.5 12 L 12 16.5 L 7.5 12 Z" />\n</svg>`, { name: "b" }).text);
+  writeFileSync(join(dir, "c.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 7 L 17 12 L 12 17 L 7 12 Z" />\n  ${L("M 7 12 L 12 7")}\n</svg>`, { name: "c" }).text);
   return dir;
 };
 

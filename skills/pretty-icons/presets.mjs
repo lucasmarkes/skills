@@ -58,7 +58,7 @@ export const BULK_PRESETS = {
 };
 /** How far a measured knockout band may sit from `knockout`, in grid units. */
 export const KNOCKOUT_TOL = 0.25;
-export const BULK_REFERENCE_INK = { 24: 170 };
+export const BULK_REFERENCE_INK = { 24: 114 };
 
 /** The finish a root declares: bulk is fill="currentColor" with no stroke, duotone is fill="none" stroke="currentColor". */
 export function finishOf(root) {
