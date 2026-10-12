@@ -95,3 +95,7 @@ export function G(attrs) {
 
 /** A standalone .svg needs the namespace to render in <img>, a CSS url() or resvg; only the root tag is touched. */
 export const withNs = (text) => text.replace(/<svg\b([^>]*)>/, (m, rest) => (/\sxmlns\s*=/.test(m) ? m : `<svg xmlns="http://www.w3.org/2000/svg"${rest}>`));
+
+/** Attributes no icon may carry; the root also refuses a transform and a fill-opacity (shared by check.mjs and bulk.mjs). */
+export const FORBIDDEN_ATTRS = ["style", "opacity", "stroke-opacity", "filter", "class", "id", "mask", "clip-path", "stroke-dashoffset", "vector-effect", "paint-order"];
+export const ROOT_FORBIDDEN = [...FORBIDDEN_ATTRS, "transform", "fill-opacity"];

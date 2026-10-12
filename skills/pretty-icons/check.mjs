@@ -31,7 +31,7 @@ import { readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { preset, radiiFor, finishOf, FILL, GRIDS } from "./presets.mjs";
-import { parse, num, G as gridOf, ELEMENTS, pathNumbers, pathCommands, moves, isClosed } from "./svg.mjs";
+import { FORBIDDEN_ATTRS, ROOT_FORBIDDEN, parse, num, G as gridOf, ELEMENTS, pathNumbers, pathCommands, moves, isClosed } from "./svg.mjs";
 import { straightSides } from "./geometry.mjs";
 import { filledChecks } from "./filled.mjs";
 import { curveFailures, curveColumns, pixelNotes } from "./curve.mjs";
@@ -42,8 +42,6 @@ import { bulkChecks, isKnockout, uncut } from "./bulk.mjs";
 export { pathCommands, isClosed };
 
 const COLOUR_ATTRS = ["stroke", "fill", "color", "stop-color"];
-const FORBIDDEN_ATTRS = ["style", "opacity", "stroke-opacity", "filter", "class", "id", "mask", "clip-path", "stroke-dashoffset", "vector-effect", "paint-order"];
-const ROOT_FORBIDDEN = [...FORBIDDEN_ATTRS, "transform", "fill-opacity"];
 const ROUND_ATTRS = ["stroke-linecap", "stroke-linejoin"];
 const DASH_RE = /^\s*(\d+(?:\.\d+)?)[\s,]+(\d+(?:\.\d+)?)\s*$/;
 // A body's straight sides past this are facets (a hexagon, a cut stone); five is a house. The details' cap, over all of them.

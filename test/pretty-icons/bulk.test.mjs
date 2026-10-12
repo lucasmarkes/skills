@@ -51,6 +51,18 @@ test("the root at bulk: fill currentColor, no stroke, no stroke-width; a line de
   assert.deepEqual(lines(painted), ["stroke  edit  circle@2 fill #333 → currentColor, by the root"]);
 });
 
+test("root paint at bulk: opacity, style, transform, fill-opacity, a dash; fill-opacity on a line", () => {
+  const root = (extra) => `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" ${extra} aria-hidden="true">\n  ${BODY24B}\n  ${LINE("M 2 2 H 5")}\n</svg>`;
+  const got = (extra) => textChecks("edit", root(extra), 24).failures.map(formatFailure);
+  assert.deepEqual(got('opacity=".5"'), ["stroke  edit  root opacity → not set"]);
+  assert.deepEqual(got('fill-opacity=".5"'), ["stroke  edit  root fill-opacity → not set"]);
+  assert.deepEqual(got('style="x:y"'), ["stroke  edit  root style → not set"]);
+  assert.deepEqual(got('transform="scale(1)"'), ["stroke  edit  root transform → not set"]);
+  assert.deepEqual(got('stroke-dasharray="2 2"'), ["stroke  edit  root stroke-dasharray → not set"]);
+  const lined = svg24b(`${BODY24B}\n  <path d="M 2 2 H 5" fill="none" fill-opacity=".4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />`);
+  assert.deepEqual(lines(lined), ["construction  edit  path@3 fill-opacity on a line → not set"]);
+});
+
 test("construction: a contour, a wrong opacity, an open unstroked path, no body, no accent, a rect", () => {
   assert.deepEqual(lines(svg24b(`<circle cx="12" cy="12" r="10" fill-opacity=".4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />\n  <path d="M 9 9 H 15 V 15 H 9 Z" />`)), ["construction  edit  circle@2 fill and stroke → a body at .4 or an accent, no contour"]);
   assert.deepEqual(lines(svg24b(`<circle cx="12" cy="12" r="10" fill-opacity=".3" />\n  <path d="M 1 1 H 3.5 V 3.5 H 1 Z" />`)), ["construction  edit  circle@2 fill-opacity .3 → .4"]);

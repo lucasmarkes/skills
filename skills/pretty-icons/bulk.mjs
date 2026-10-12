@@ -10,7 +10,7 @@
  * uncut geometry in data-body (knockout.mjs writes both); crossings are judged
  * on the uncut geometry. A modifier is an accent for the crossing rule only.
  */
-import { num, isClosed, pathCommands } from "./svg.mjs";
+import { num, isClosed, pathCommands, ROOT_FORBIDDEN } from "./svg.mjs";
 import { sampleParts, inside, bounds } from "./geometry.mjs";
 import { isModifier } from "./modifiers.mjs";
 
@@ -87,6 +87,7 @@ export function bulkChecks(icon, parsed, p, { folder } = {}) {
   const failures = [], root = parsed.attrs, els = parsed.elements;
   if (root.fill !== "currentColor") fail(failures, "stroke", icon, `root fill ${root.fill ?? "missing"}`, "currentColor");
   for (const k of ["stroke", "stroke-width", "stroke-linecap", "stroke-linejoin"]) if (k in root) fail(failures, "stroke", icon, `root ${k} ${root[k]}`, "not set at bulk");
+  for (const k of [...ROOT_FORBIDDEN, "stroke-dasharray"]) if (k in root) fail(failures, "stroke", icon, `root ${k}`, "not set");
   for (const el of els) {
     const a = el.attrs, at = el.at;
     if (el.tag === "rect") { fail(failures, "radius", icon, at, "shapes.mjs squircle"); continue; }
@@ -94,6 +95,7 @@ export function bulkChecks(icon, parsed, p, { folder } = {}) {
     if (isLine(el)) {
       if (a.stroke !== "currentColor") fail(failures, "stroke", icon, `${at} stroke ${a.stroke}`, "currentColor");
       if (!isClosed(el) && a.fill !== "none") fail(failures, "stroke", icon, `${at} fill ${a.fill ?? "missing"}`, "none on a line");
+      if (!isClosed(el) && "fill-opacity" in a) fail(failures, "construction", icon, `${at} fill-opacity on a line`, "not set");
       if (num(a, "stroke-width") !== p.stroke) fail(failures, "stroke", icon, `${at} stroke-width ${a["stroke-width"] ?? "missing"}`, `${p.stroke}`);
       for (const k of ["stroke-linecap", "stroke-linejoin"]) if (a[k] !== "round") fail(failures, "stroke", icon, `${at} ${k} ${a[k] ?? "missing"}`, "round");
       if (isClosed(el)) fail(failures, "construction", icon, `${at} fill and stroke`, "a body at .4 or an accent, no contour");
