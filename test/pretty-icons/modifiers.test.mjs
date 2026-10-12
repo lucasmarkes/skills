@@ -141,6 +141,7 @@ test("CLI: parseArgs, --print, and a refusal on stderr", () => {
   const ok = spawnSync(process.execPath, [cli, file, "--add", "badge:check", "--print"], { encoding: "utf8" });
   assert.equal(ok.status, 0);
   assert.match(ok.stdout, /data-modifier="badge:check"/);
+  assert.ok(ok.stdout.endsWith("</svg>\n") && !ok.stdout.endsWith("\n\n"), "exactly one trailing newline");
   const car = new URL("../../skills/pretty-icons/examples/garage/car.svg", import.meta.url).pathname;
   const no = spawnSync(process.execPath, [cli, car, "--add", "badge:check", "--print"], { encoding: "utf8" });
   assert.equal(no.status, 1);

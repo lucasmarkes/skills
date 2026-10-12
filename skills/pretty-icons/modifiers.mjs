@@ -366,7 +366,7 @@ export async function addModifier(text, kind, { corner = "br", solid = false, na
   }
   out.push(...glyph(G, kind, { corner, solid }));
   // one element a line, as the icons are written
-  const result = compose(parsed.attrs, out).replace(/ \/><(?!\/svg>)/g, " />\n  <").replace(/^(<svg[^>]*>)/, "$1\n  ").replace(/<\/svg>$/, "\n</svg>");
+  const result = compose(parsed.attrs, out).replace(/ \/><(?!\/svg>)/g, " />\n  <").replace(/^(<svg[^>]*>)/, "$1\n  ").replace(/<\/svg>$/, "\n</svg>\n");
   const failures = textChecks(name, result, G).failures;
   // gap and live are measured: a cut can leave a stub nearer a body than a stroke. Without the
   // rasteriser they wait for check.mjs, which says "not measured".
@@ -407,7 +407,7 @@ async function addBulk(parsed, G, kind, { corner, name, finish, p, textChecks })
   }
   const { at: _at, ...gl } = g;
   out.push(gl);
-  const result = compose(parsed.attrs, out).replace(/ \/><(?!\/svg>)/g, " />\n  <").replace(/^(<svg[^>]*>)/, "$1\n  ").replace(/<\/svg>$/, "\n</svg>");
+  const result = compose(parsed.attrs, out).replace(/ \/><(?!\/svg>)/g, " />\n  <").replace(/^(<svg[^>]*>)/, "$1\n  ").replace(/<\/svg>$/, "\n</svg>\n");
   const failures = textChecks(name, result, G, finish).failures;
   if (!failures.length) {
     const { measuredChecks } = await import("./measure.mjs"), { NO_RASTER } = await import("./raster.mjs");
@@ -489,7 +489,7 @@ export async function main(argv) {
   try {
     const text = readFileSync(args.file, "utf8");
     const out = await addModifier(text, args.add, { ...args, name: args.file.replace(/^.*\/|\.svg$/g, "") });
-    if (args.print) process.stdout.write(out + "\n"); else { writeFileSync(args.file, out + "\n"); console.log(`${args.file}: ${args.add}`); }
+    if (args.print) process.stdout.write(out); else { writeFileSync(args.file, out); console.log(`${args.file}: ${args.add}`); }
   } catch (e) {
     if (!(e instanceof ModifierError)) throw e;
     console.error(`modifiers: ${e.message}`);

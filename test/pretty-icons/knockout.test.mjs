@@ -35,7 +35,7 @@ test("a squircle less a rotated square: one body, data-cut and data-body, a band
   assert.deepEqual(await band(...renders(r.text), 24, 1.5, 0.25), []);
   assert.deepEqual(textChecks("edit", r.text, 24).failures.map(formatFailure), []);
   // one element per line, two-space indent, as modifiers.mjs writes
-  assert.match(r.text, /^<svg[^>]*>\n  <path [^\n]*\/>\n  <path [^\n]*\/>\n<\/svg>$/);
+  assert.match(r.text, /^<svg[^>]*>\n  <path [^\n]*\/>\n  <path [^\n]*\/>\n<\/svg>\n$/);
 });
 
 test("a line through a body leaves one element with two subpaths; a line crossing two bodies cuts both", async () => {
@@ -106,7 +106,8 @@ test("the CLI writes the file and says what it cut; --print prints without writi
   writeFileSync(file, src);
   const p = spawnSync("node", [SCRIPT, file, "--print"], { encoding: "utf8" });
   assert.equal(p.status, 0);
-  assert.equal(p.stdout, knockout(src, { name: "edit" }).text + "\n");
+  assert.equal(p.stdout, knockout(src, { name: "edit" }).text);
+  assert.ok(p.stdout.endsWith("</svg>\n") && !p.stdout.endsWith("\n\n"), "exactly one trailing newline");
   assert.equal(readFileSync(file, "utf8"), src);
   const w = spawnSync("node", [SCRIPT, file], { encoding: "utf8" });
   assert.equal(w.status, 0);

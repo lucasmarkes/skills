@@ -191,7 +191,7 @@ export function knockout(text, { name = "icon", folder } = {}) {
   const svg = compose(parsed.attrs, out)
     .replace(/ \/><(?!\/svg>)/g, " />\n  <")
     .replace(/^(<svg[^>]*>)/, "$1\n  ")
-    .replace(/<\/svg>$/, "\n</svg>");
+    .replace(/<\/svg>$/, "\n</svg>\n");
   return { text: svg, cut };
 }
 
@@ -205,7 +205,7 @@ export function main(argv) {
   try { text = readFileSync(file, "utf8"); } catch (e) { console.error(`knockout: ${file}: ${e.code === "ENOENT" ? "no such file" : e.message}`); process.exit(1); }
   try {
     const r = knockout(text, { name, folder: dirname(file) });
-    if (print) { process.stdout.write(r.text + "\n"); return; }
+    if (print) { process.stdout.write(r.text); return; }
     if (r.text !== text) writeFileSync(file, r.text);
     // an unchanged file has nothing to cut, even when its cuts are already there
     if (r.text === text || !r.cut.length) console.log(`${name}  nothing to cut`);

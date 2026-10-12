@@ -70,3 +70,11 @@ test("examples/hairline and examples/garage still pass: the duotone and filled p
     assert.deepEqual(r.failures.map((x) => `${x.rule} ${x.icon}`), [], f);
   }
 });
+
+test("examples/bulk: every file ends with exactly one newline", () => {
+  const dir = new URL("../../skills/pretty-icons/examples/bulk/", import.meta.url).pathname;
+  for (const f of readdirSync(dir).filter((n) => n.endsWith(".svg"))) {
+    const t = readFileSync(dir + f, "utf8");
+    assert.ok(t.endsWith("</svg>\n"), `${f} ends </svg> and a newline`);
+  }
+});
