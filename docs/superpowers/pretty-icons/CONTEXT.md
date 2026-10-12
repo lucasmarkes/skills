@@ -4,15 +4,16 @@ Escrito em 2026-10-12, a partir das sessões do Claude Code (ver "Sessões") e d
 
 ## O que é
 
-Uma skill (`/pretty-icons`) que desenha um conjunto de ícones SVG para um app, em dois acabamentos: **duotone** (16, 20, 24...) e **filled** (48). Ela tem passos fixos, medidas (`check.mjs`), leituras cegas por um leitor novo, leitura de conjunto e leitura de acabamento, e uma folha visual (`sheet.mjs`).
+Uma skill (`/pretty-icons`) que desenha um conjunto de ícones SVG para um app, em três acabamentos: **duotone** (16, 20, 24), **bulk** (24, duas tintas de `currentColor`, com knockout) e **filled** (48). Ela tem passos fixos, medidas (`check.mjs`), leituras cegas por um leitor novo, leitura de conjunto e leitura de acabamento, e uma folha visual (`sheet.mjs`).
 
 ## Onde vive
 
 | Coisa | Caminho |
 | --- | --- |
-| Código da skill | `skills/pretty-icons/` (`SKILL.md`, `check.mjs`, `sheet.mjs`, `rules.md`, `rules-filled.md`, `read.md`, `examples/`...) |
+| Código da skill | `skills/pretty-icons/` (`SKILL.md`, `check.mjs`, `sheet.mjs`, `rules.md`, `rules-filled.md`, `rules-bulk.md`, `knockout.mjs`, `bulk.mjs`, `read.md`, `examples/`...) |
 | Branch com a versão atual | `pretty-icons-polish` (90 commits à frente de `main`; **sem merge, sem push, sem PR**) |
 | Branch mais antiga | `pretty-icons` |
+| Referência do bulk | `docs/superpowers/baselines/2026-10-12-pretty-icons-bulk-reference.md` (inclui "The trial") |
 | Referência do polish | `docs/superpowers/baselines/2026-10-11-pretty-icons-polish-reference.md` (inclui "The trial") |
 | Spec e plano do polish | `docs/superpowers/specs/2026-10-11-pretty-icons-polish-design.md` e `docs/superpowers/plans/2026-10-11-pretty-icons-polish.md` |
 | Instalação | `~/.claude/skills/pretty-icons` é um **link** para `~/estudos/skills/skills/pretty-icons` |
@@ -28,6 +29,7 @@ Uma skill (`/pretty-icons`) que desenha um conjunto de ícones SVG para um app, 
 - **10/out:** artifact da garagem, republicado várias vezes até 11/out 00:03: https://claude.ai/artifact/UwErGKY2j4Quj7KMNy2Fcc (garagem, carro e padaria, antes e agora, com as leituras às cegas, de acabamento e de conjunto).
 - **11/out:** o **polish** (branch `pretty-icons-polish`): regras novas (air, loose, bend, diagonal, corpos suaves, leitura de sombra, regra 08 com números, regra 09 de interfaces), conjuntos `examples/hairline` e `examples/garage` redesenhados, e duas provas com agentes novos. O branch foi mantido como está, sem merge.
 - **11/out 19:53:** teste manual da sidebar (duotone 16: inbox, calendar, chat, profile, search, upload). Resultado publicado em https://claude.ai/artifact/NQpPGXCs32xNDimy8fYG3Z (é o **artifact mais recente** do pretty-icons).
+- **12/out:** o acabamento **bulk** (spec `docs/superpowers/specs/2026-10-12-pretty-icons-bulk-design.md`, plano `docs/superpowers/plans/2026-10-12-pretty-icons-bulk.md`, referência `docs/superpowers/baselines/2026-10-12-pretty-icons-bulk-reference.md`): `knockout.mjs`, `bulk.mjs`, `examples/bulk`, e a prova com dois agentes novos.
 
 ## Pontos em aberto
 
@@ -35,7 +37,8 @@ Uma skill (`/pretty-icons`) que desenha um conjunto de ícones SVG para um app, 
 2. **Faixa de peso no 16.** As falhas de `weight` se repetem em inbox (acima da mediana, +15% a +36%) e upload (abaixo, -15% a -26%). A faixa de ±15% da mediana e ±20% da referência parece apertada demais para 16.
 3. **Branch sem destino.** `pretty-icons-polish` não foi mesclado nem enviado. Decidir: abrir PR para `main`, ou seguir isolado.
 4. **Instalação acoplada ao branch** (ver o cuidado acima). Se o link virar problema, copiar a skill para `~/.claude/skills/pretty-icons` em vez de linkar.
-5. **Teste da cozinha (filled 48)** ainda não rodado (`~/estudos/teste-pretty-icons/cozinha/` está vazia).
+5. **Teste da cozinha (filled 48)** ainda não rodado (`~/estudos/teste-pretty-icons/cozinha/` está vazia). A cozinha já rodou no **bulk 24**, numa pasta temporária (12/out): falhou a cláusula do `check` (primeiro `ok` na rodada 7) e a leitura cega do controlador foi 6 de 6.
+6. **Prova do bulk: as duas falharam a cláusula das rodadas de `check`** (notes e cozinha, primeiro `ok` na rodada 7, meta 1 ou 2). Peso e gravidade comandaram as rodadas 1 a 6; a leitura de acabamento de notes nunca passou (a faixa de 1,5 deixa o cabo da lupa "solto"); o batedor da cozinha não dá para desenhar no bulk (share até 0,6 e o corpo a .4).
 
 ## Como testar
 
