@@ -303,3 +303,19 @@ test("--finish bulk prints one body at .4, --accent prints it full; other grids 
   assert.ok(acc.trim().startsWith('<path d="') && acc.trim().endsWith('" />') && !acc.includes("fill-opacity"), acc);
   assert.deepEqual(parseArgs(["lens", "--finish", "bulk", "--accent"]), { name: "lens", o: { finish: "bulk", accent: true } });
 });
+
+test("--accent is for the bulk finish only; a bulk shape takes its whole width, no inset", () => {
+  refused(() => finishOf("dome", { grid: 24, accent: true }), "--accent: only with --finish bulk");
+  refused(() => finishOf("dome", { grid: 48, accent: true }), "--accent: only with --finish bulk");
+  const xs = shape("dome", { finish: "bulk", w: 20 }).P.map((q) => q[0]);
+  assert.equal(Math.min(...xs), 2);
+  assert.equal(Math.max(...xs), 22);
+  const r = spawnSync("node", [SCRIPT, "dome", "--grid", "24", "--accent"], { encoding: "utf8" });
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /--accent: only with --finish bulk/);
+});
+
+test("squircle has no turn: a non-zero --rot is refused", () => {
+  refused(() => shape("squircle", { w: 18, h: 18, rot: 15, grid: 24, finish: "bulk" }), "squircle: it has no turn; swap --w and --h");
+  assert.ok(shape("squircle", { w: 18, h: 18, rot: 0, grid: 24, finish: "bulk" }).d);
+});

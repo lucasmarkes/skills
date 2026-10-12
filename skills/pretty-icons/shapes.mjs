@@ -195,9 +195,11 @@ export function shape(name, o = {}) {
   if (finish !== undefined && finish !== "bulk") refuse(`--finish ${finish}: bulk, or leave it out`);
   const G = o.grid ?? (finish === "bulk" ? 24 : 48);
   let p; try { p = preset(G, finish); } catch (e) { refuse(e.message); }
-  const inset = insetOf(G, finish);
+  // a bulk body is the keyline itself: no inset
+  const inset = finish === "bulk" ? 0 : insetOf(G, finish);
   if (name === "squircle") {
     if (finish !== "bulk") refuse("squircle: the bulk finish, --finish bulk");
+    if (o.rot) refuse("squircle: it has no turn; swap --w and --h");
     const half = (n) => Math.floor(n * 2) / 2;
     const w = half(o.w ?? p.live), h = half(o.h ?? p.live), [cx, cy] = (o.at ?? p.centre).map(snap);
     const short = Math.min(w, h), r = o.r ?? radiusFor(G, short, finish);
@@ -325,6 +327,7 @@ export function finishOf(name, o = {}, given = null) {
   if (finish !== undefined && finish !== "bulk") refuse(`--finish ${finish}: bulk, or leave it out`);
   const G = o.grid ?? (finish === "bulk" ? 24 : 48);
   let p; try { p = preset(G, finish); } catch (e) { refuse(e.message); }
+  if (o.accent && finish !== "bulk") refuse("--accent: only with --finish bulk");
   if (name === "ring") return ring(o, G, p);
   const s = given ?? shape(name, o);
   if (p.finish === "bulk") return [o.accent ? `<path d="${s.d}" />` : `<path d="${s.d}" fill-opacity=".4" />`];
