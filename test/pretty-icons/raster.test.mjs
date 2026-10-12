@@ -134,3 +134,15 @@ test("elongation: a 45° line is long and at 45°; the other way is −45; a dis
   assert.ok((await elongation(one('<circle cx="8" cy="8" r="6" />'), 16)).ratio < 1.1);
   assert.deepEqual(await elongation(one(""), 16), { ratio: 1, angle: 0 });
 });
+
+test("paper(): 0.12.18 from the cache, set up on a 24 canvas, loaded once", async () => {
+  const { paper, PAPER_PKG } = await import("../../skills/pretty-icons/raster.mjs");
+  assert.equal(PAPER_PKG, "paper@0.12.18");
+  const P = paper();
+  assert.equal(P.version, "0.12.18");
+  assert.equal(paper(), P);
+  const a = new P.Path.Rectangle({ point: [0, 0], size: [10, 10], insert: false });
+  const b = new P.Path.Circle({ center: [10, 5], radius: 3, insert: false });
+  const cut = a.subtract(b, { insert: false });
+  assert.ok(Math.abs(cut.area - (100 - Math.PI * 9 / 2)) < 0.5, String(cut.area));
+});

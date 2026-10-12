@@ -53,6 +53,31 @@ export function resvg() {
   return Resvg;
 }
 
+export const PAPER_PKG = "paper@0.12.18";
+
+let paperNs = null;
+/** The paper.js namespace from the cache (installed there first when it is not), set up once on a 24 × 24 canvas. Throws a NO_RASTER error when it cannot be had. */
+export function paper() {
+  if (paperNs) return paperNs;
+  const dir = cacheDir();
+  const pkg = join(dir, "node_modules", "paper");
+  const has = () => existsSync(join(pkg, "package.json"));
+  if (!has()) {
+    console.error(`installing ${PAPER_PKG} once, into ${dir}`);
+    mkdirSync(dir, { recursive: true });
+    const win = process.platform === "win32";
+    const run = spawnSync(win ? "npm.cmd" : "npm", ["install", PAPER_PKG, "--prefix", win ? `"${dir}"` : dir, "--save-exact", "--no-audit", "--no-fund", "--loglevel=error"], { encoding: "utf8", shell: win });
+    const why = run.error?.code === "ENOENT" ? "npm is not on the PATH" : run.error?.message ?? /Error: (.*)$/m.exec(run.stderr ?? "")?.[1] ?? (run.stderr ?? "").trim().split("\n")[0];
+    if (run.status !== 0 || !has()) throw noRaster(`could not install ${PAPER_PKG} into ${dir}: ${why || "npm failed"}`);
+  }
+  let ns;
+  try { ns = createRequire(join(dir, "raster.cjs"))(pkg); }
+  catch (e) { throw noRaster(`could not load paper from ${dir}: ${String(e?.message ?? e).split("\n")[0]}; delete that folder to reinstall`); }
+  ns.setup(new ns.Size(24, 24));
+  paperNs = ns;
+  return paperNs;
+}
+
 const black = (svg) => svg.replace(/currentColor/gi, "#000");
 
 export function render(svgText, widthPx, { background } = {}) {
