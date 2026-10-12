@@ -122,10 +122,10 @@ export function bulkChecks(icon, parsed, p, { folder } = {}) {
   }
   const drawn = base.reduce((t, el) => t + (el.tag === "path" ? pathCommands(el.attrs.d ?? "") : 1), 0);
   if (drawn > ACCENT_COMMANDS) fail(failures, "count", icon, `accents ${drawn} drawing commands`, `at most ${ACCENT_COMMANDS}`);
-  // crossings: every accent against each body's uncut geometry. Only a path body can be cut
-  // (knockout.mjs rewrites its d), and a body at the wrong opacity has been reported already.
+  // crossings: every accent against each body's uncut geometry (any body tag; knockout.mjs turns a circle into a path)
+  // A body at the wrong opacity has been reported already.
   for (const body of bodies) {
-    if (body.tag !== "path" || Number(body.attrs["fill-opacity"]) !== OPACITY) continue;
+    if (body.tag === "rect" || Number(body.attrs["fill-opacity"]) !== OPACITY) continue;
     const crossing = accents.filter((a) => a.tag !== "rect" && crosses(a, body));
     if (crossing.length && !isKnockout(body)) for (const a of crossing) fail(failures, "knockout", icon, `${a.at} crosses ${body.at} without a cut`, `node knockout.mjs ${knockoutPath(folder, icon)}`);
     if (!crossing.length && isKnockout(body)) fail(failures, "knockout", icon, `${body.at} cut with no crossing`, "re-run knockout.mjs");

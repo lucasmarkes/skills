@@ -53,7 +53,7 @@ test("the root at bulk: fill currentColor, no stroke, no stroke-width; a line de
 
 test("construction: a contour, a wrong opacity, an open unstroked path, no body, no accent, a rect", () => {
   assert.deepEqual(lines(svg24b(`<circle cx="12" cy="12" r="10" fill-opacity=".4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />\n  <path d="M 9 9 H 15 V 15 H 9 Z" />`)), ["construction  edit  circle@2 fill and stroke → a body at .4 or an accent, no contour"]);
-  assert.deepEqual(lines(svg24b(`<circle cx="12" cy="12" r="10" fill-opacity=".3" />\n  <path d="M 9 9 H 15 V 15 H 9 Z" />`)), ["construction  edit  circle@2 fill-opacity .3 → .4"]);
+  assert.deepEqual(lines(svg24b(`<circle cx="12" cy="12" r="10" fill-opacity=".3" />\n  <path d="M 1 1 H 3.5 V 3.5 H 1 Z" />`)), ["construction  edit  circle@2 fill-opacity .3 → .4"]);
   assert.deepEqual(lines(svg24b(`${BODY24B}\n  <path d="M 2 2 H 6" />`)), ["construction  edit  path@3 open and unstroked → a line declares stroke"]);
   assert.deepEqual(lines(svg24b('<path d="M 9 9 H 15 V 15 H 9 Z" />')), ["construction  edit  no body → at least one body at .4"]);
   assert.deepEqual(lines(svg24b(BODY24B)), ["construction  edit  no accent → at least one accent, full"]);
@@ -71,7 +71,7 @@ test("a crossing without a cut names the file to cut; data-cut only on a body; a
   assert.deepEqual(lines(svg24b(`${SQ24B}\n  ${LINE("M 2 12 H 22")}`)), ["knockout  edit  path@3 crosses path@2 without a cut → node knockout.mjs pretty-icons/edit.svg"]);
   const r = bulkChecks("edit", parse(svg24b(`${SQ24B}\n  ${LINE("M 2 12 H 22")}`)), p, { folder: "./icons" });
   assert.equal(formatFailure(r[0]), "knockout  edit  path@3 crosses path@2 without a cut → node knockout.mjs icons/edit.svg");
-  assert.deepEqual(lines(svg24b(`${BODY24B}\n  <path d="M 9 9 H 15 V 15 H 9 Z" data-cut="knockout" data-body="M 9 9 H 15 V 15 H 9 Z" />`)), ["knockout  edit  path@3 data-cut → only on a body"]);
+  assert.deepEqual(lines(svg24b(`${BODY24B}\n  <path d="M 1 1 H 3.5 V 3.5 H 1 Z" data-cut="knockout" data-body="M 1 1 H 3.5 V 3.5 H 1 Z" />`)), ["knockout  edit  path@3 data-cut → only on a body"]);
   const stale = svg24b(`<path d="M 3 3 H 21 V 21 H 3 Z" fill-opacity=".4" data-cut="knockout" data-body="M 3 3 H 21 V 21 H 3 Z" />\n  <path d="M 22 4 H 23 V 20 H 22 Z" />`);
   assert.deepEqual(lines(stale).filter((l) => l.startsWith("knockout")), ["knockout  edit  path@2 cut with no crossing → re-run knockout.mjs"]);
 });
@@ -82,6 +82,10 @@ test("a cut body is exempt from grid, the per-path cap and the curve rules; an a
   assert.deepEqual(lines(ok).filter((l) => /^(grid|count|join|bend)/.test(l)), []);
   const off = svg24b(`${BODY24B}\n  <path d="M 9.1 9 H 15 V 15 H 9.1 Z" />`);
   assert.ok(lines(off).some((l) => l.startsWith("grid  edit  path@3 d[0] 9.1")));
+});
+
+test("a circle body with a line through it and no cut names the file to cut", () => {
+  assert.deepEqual(lines(svg24b(`${BODY24B}\n  ${LINE("M 2 12 H 22")}`)), ["knockout  edit  path@3 crosses circle@2 without a cut → node knockout.mjs pretty-icons/edit.svg"]);
 });
 
 test("an accent touching a body without crossing is not a crossing", () => {
