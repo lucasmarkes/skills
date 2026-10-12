@@ -150,7 +150,7 @@ export function textChecks(icon, text, expectG, finish) {
     seen.add(whole.attrs.d);
     failures.push(...curveFailures(icon, whole, p?.stroke));
   }
-  if (!bulk) failures.push(...modifierFailures(icon, parsed, expectG)); // bulk modifiers: bulkChecks for now
+  failures.push(...modifierFailures(icon, parsed, expectG));
   failures.push(...shadowFailures(icon, parsed, expectG));
 
   return { G, failures, parsed };

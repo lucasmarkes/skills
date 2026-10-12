@@ -207,3 +207,54 @@ test("cut: a run whose every piece is dropped leaves no bare move", () => {
   assert.equal(cut("M2.5 8C4.5 9.25 4.75 2 7.75 14.25", { ...halo(16, "badge:plus", "bl"), minR: 1 }), "M7.5 13C7.5 13.5 7.75 14.25 7.75 14.25");
   assert.equal(cut("M10 4.75C14 10.25 8.25 2 10.5 12.25", { ...halo(16, "badge:check", "br"), minR: 1 }), "");
 });
+
+const svg24b = (b) => `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">\n  ${b}\n</svg>`;
+const CIRCLE24B = '<circle cx="12" cy="12" r="10" fill-opacity=".4" />';
+const LINE24B = (d) => `<path d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />`;
+
+test("at bulk: placement with pad 2, a halo of the box plus the knockout, the five kinds, the glyph as a full accent", async () => {
+  const { KINDS_BULK } = await import("../../skills/pretty-icons/modifiers.mjs");
+  assert.deepEqual(KINDS_BULK, ["badge:plus", "badge:minus", "badge:check", "badge:x", "dot"]);
+  assert.deepEqual(placement(24, "badge:plus", "br", "bulk"), { c: [18, 18], half: 4 });
+  assert.deepEqual(placement(24, "dot", "tl", "bulk"), { c: [4.25, 4.25], half: 2.25 });
+  assert.equal(halo(24, "dot", "br", "bulk").r, 2.25 + 1.5);
+  assert.equal(halo(24, "badge:plus", "br", "bulk").r, 4 + 1.5);
+  const [plus] = glyph(24, "badge:plus", { finish: "bulk" });
+  assert.deepEqual(plus, { tag: "path", attrs: { d: "M15 18H21M18 15V21", fill: "none", stroke: "currentColor", "stroke-width": "2", "stroke-linecap": "round", "stroke-linejoin": "round", "data-modifier": "badge:plus" } });
+  assert.deepEqual(glyph(24, "dot", { finish: "bulk" }), [{ tag: "circle", attrs: { cx: "19.75", cy: "19.75", r: "2.25", "data-modifier": "dot" } }]);
+  assert.deepEqual(glyph(24, "badge:check", { finish: "bulk" })[0].attrs.d, "M15 18L17 20L21 16");
+});
+
+test("addModifier at bulk cuts the body the badge crosses and writes a full accent; check passes on the result", async () => {
+  const src = svg24b(`${CIRCLE24B}\n  ${LINE24B("M 8 9 H 16")}`);
+  const out = await addModifier(src, "badge:plus", { name: "edit" });
+  const p = parse(out);
+  assert.equal(p.elements.length, 3);
+  assert.equal(p.elements[0].attrs["data-cut"], "knockout");
+  assert.ok(p.elements[0].attrs["data-body"].startsWith("M"), "data-body holds the uncut circle as a path");
+  assert.equal(p.elements[0].attrs["fill-opacity"], ".4");
+  assert.equal(p.elements[1].attrs.d, "M 8 9 H 16");
+  assert.deepEqual(p.elements[2].attrs["data-modifier"], "badge:plus");
+  assert.equal(p.elements[2].attrs["stroke-opacity"], undefined);
+  assert.deepEqual(textChecks("edit", out, 24).failures, []);
+  const dot = await addModifier(src, "dot", { name: "edit", corner: "tr" });
+  assert.equal(parse(dot).elements[2].tag, "circle");
+  assert.deepEqual(textChecks("edit", dot, 24).failures, []);
+});
+
+test("at bulk, slash, lock and arrow refuse in one line; a badge whose halo covers an accent refuses", async () => {
+  const src = svg24b(`${CIRCLE24B}\n  ${LINE24B("M 8 9 H 16")}`);
+  for (const kind of ["slash", "lock", "arrow:up"]) await assert.rejects(() => addModifier(src, kind, { name: "edit" }), (e) => e instanceof ModifierError && e.message === `${kind} is not drawn at bulk: badge:plus, badge:minus, badge:check, badge:x or dot`);
+  const near = svg24b(`${CIRCLE24B}\n  ${LINE24B("M 8 17 H 16")}`);
+  await assert.rejects(() => addModifier(near, "badge:plus", { name: "edit" }), (e) => e instanceof ModifierError && e.message === "path@3 lies under the badge:plus's halo: try another --corner, or move the accent");
+});
+
+test("modifierFailures at bulk: an accent inside the halo is flagged, the cut body is not, a dot without paint is right", async () => {
+  const src = svg24b(`${CIRCLE24B}\n  ${LINE24B("M 8 9 H 16")}`);
+  const out = await addModifier(src, "badge:plus", { name: "edit" });
+  assert.deepEqual(modifierFailures("edit", parse(out), 24), []);
+  const moved = out.replace('d="M 8 9 H 16"', 'd="M 8 17 H 16"');
+  const f = modifierFailures("edit", parse(moved), 24);
+  assert.equal(f.length, 1);
+  assert.match(f[0].got, /^path@3 [\d.]+ inside badge:plus's halo$/);
+});

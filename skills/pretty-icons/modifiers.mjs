@@ -21,13 +21,14 @@
  */
 import { readFileSync, writeFileSync, realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { preset, inset, BEND, MODIFIER, PALETTE } from "./presets.mjs";
+import { preset, inset, finishOf, BEND, MODIFIER, PALETTE } from "./presets.mjs";
 import { parse, compose, num, G as gridOf, isClosed } from "./svg.mjs";
 import { sampleParts } from "./geometry.mjs";
 import { isShadow } from "./shadow.mjs";
 import { segments, inflections, tightest, angle } from "./curve.mjs";
 
 export const KINDS = ["badge:plus", "badge:minus", "badge:check", "badge:x", "arrow:up", "arrow:right", "arrow:down", "arrow:left", "lock", "dot", "slash"];
+export const KINDS_BULK = ["badge:plus", "badge:minus", "badge:check", "badge:x", "dot"];
 export const CORNERS = ["br", "tr", "bl", "tl"];
 export const OPACITY = 0.6;
 export const CRUMB = 1;
@@ -35,6 +36,7 @@ const STEP = 0.25, SAMPLES = 96;
 
 export class ModifierError extends Error {}
 const refuse = (m) => { throw new ModifierError(m); };
+const BULK_REFUSAL = (kind) => `${kind} is not drawn at bulk: badge:plus, badge:minus, badge:check, badge:x or dot`;
 const snap = (n) => Math.round(n / STEP) * STEP;
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1]], add = (a, b) => [a[0] + b[0], a[1] + b[1]], mul = (a, k) => [a[0] * k, a[1] * k];
 const len = (v) => Math.hypot(v[0], v[1]), lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
@@ -48,15 +50,15 @@ export const isCut = (el) => "data-cut" in el.attrs;
 export const isSplit = (el) => !!el && el.attrs["data-cut"] === "split";
 
 /** The base's widest stroke: the filled finish's contour, or the duotone stroke. */
-const baseStroke = (G) => { const p = preset(G); return p.contour ?? p.stroke; };
+const baseStroke = (G, finish) => { const p = preset(G, finish); return p.contour ?? p.stroke; };
 /** The modifier's own stroke: 2 at the filled finish (a contour), the root's in duotone. */
-const ownStroke = (G) => { const p = preset(G); return p.finish === "filled" ? p.contour : p.stroke; };
+const ownStroke = (G, finish) => { const p = preset(G, finish); return p.finish === "filled" ? p.contour : p.stroke; };
 
 /** Where a modifier sits: the centre of its box in a corner of the live area, and its ink's half-width. */
-export function placement(G, kind, corner = "br") {
+export function placement(G, kind, corner = "br", finish) {
   if (!KINDS.includes(kind)) refuse(`--add ${kind}: one of ${KINDS.join(", ")}`);
   if (!CORNERS.includes(corner)) refuse(`--corner ${corner}: br, tr, bl or tl`);
-  const p = preset(G), m = MODIFIER[G], half = kind === "dot" ? m.dot : m.size / 2;
+  const p = preset(G, finish), m = MODIFIER[G], half = kind === "dot" ? m.dot : m.size / 2;
   const lo = p.pad + half, hi = G - p.pad - half;
   return { c: [corner.endsWith("l") ? lo : hi, corner.startsWith("t") ? lo : hi], half };
 }
@@ -65,21 +67,21 @@ export function placement(G, kind, corner = "br") {
  * The halo, as a distance function: how far a point is from the modifier, less the clear space it needs.
  * Negative inside. A badge, an arrow, a lock and a dot clear a circle; a slash clears a band along itself.
  */
-export function halo(G, kind, corner = "br") {
-  const clear = 1.5 * baseStroke(G);
+export function halo(G, kind, corner = "br", finish) {
+  const p = preset(G, finish), clear = p.finish === "bulk" ? p.knockout : 1.5 * baseStroke(G, finish);
   if (kind === "slash") {
-    const [a, b] = slashEnds(G), r = ownStroke(G) / 2 + clear, ab = sub(b, a), L2 = ab[0] ** 2 + ab[1] ** 2;
+    const [a, b] = slashEnds(G), r = ownStroke(G, finish) / 2 + clear, ab = sub(b, a), L2 = ab[0] ** 2 + ab[1] ** 2;
     return { r, inside: (q) => { const t = Math.max(0, Math.min(1, ((q[0] - a[0]) * ab[0] + (q[1] - a[1]) * ab[1]) / L2)); return len(sub(q, lerp(a, b, t))) - r; } };
   }
-  const { c, half } = placement(G, kind, corner), r = Math.max(half, reach(G, kind, corner)) + clear;
+  const { c, half } = placement(G, kind, corner, finish), r = Math.max(half, reach(G, kind, corner, finish)) + clear;
   return { r, c, inside: (q) => len(sub(q, c)) - r };
 }
 /** The farthest a glyph's ink reaches from its centre: its elements' sampled points, widened by half their stroke. */
-function reach(G, kind, corner) {
-  if (kind === "dot") return placement(G, kind, corner).half;
-  const { c } = placement(G, kind, corner), s = ownStroke(G);
+function reach(G, kind, corner, finish) {
+  if (kind === "dot") return placement(G, kind, corner, finish).half;
+  const { c } = placement(G, kind, corner, finish), s = ownStroke(G, finish);
   let far = 0;
-  for (const el of glyph(G, kind, { corner })) {
+  for (const el of glyph(G, kind, { corner, finish })) {
     const w = Number(el.attrs["stroke-width"] ?? s) / 2;
     let parts;
     if (el.tag === "rect") {
@@ -286,16 +288,20 @@ export function cut(d, { inside, minR = 0 }) {
 }
 
 /** The modifier's elements, as { tag, attrs } with data-modifier set. */
-export function glyph(G, kind, { corner = "br", solid = false } = {}) {
-  const p = preset(G), filled = p.finish === "filled", s = ownStroke(G);
-  const { c, half } = placement(G, kind, corner), [cx, cy] = c;
-  const mark = { "data-modifier": kind, ...(filled ? {} : solid ? {} : { "stroke-opacity": String(OPACITY) }) };
+export function glyph(G, kind, { corner = "br", solid = false, finish } = {}) {
+  const p = preset(G, finish), filled = p.finish === "filled", bulk = p.finish === "bulk", s = ownStroke(G, finish);
+  if (bulk && !KINDS_BULK.includes(kind)) refuse(BULK_REFUSAL(kind));
+  const { c, half } = placement(G, kind, corner, finish), [cx, cy] = c;
+  const mark = bulk
+    ? { fill: "none", stroke: "currentColor", "stroke-width": String(p.stroke), "stroke-linecap": "round", "stroke-linejoin": "round", "data-modifier": kind }
+    : { "data-modifier": kind, ...(filled ? {} : solid ? {} : { "stroke-opacity": String(OPACITY) }) };
   const P = (...xy) => { const o = []; for (let i = 0; i < xy.length; i += 2) o.push(pt([snap(xy[i]), snap(xy[i + 1])])); return o; };
+  if (kind === "dot" && bulk) return [{ tag: "circle", attrs: { cx: fmt(cx), cy: fmt(cy), r: fmt(half), "data-modifier": kind } }];
   if (kind === "dot") return [{ tag: "circle", attrs: { cx: fmt(cx), cy: fmt(cy), r: fmt(half), fill: filled ? PALETTE.line : "currentColor", stroke: "none", "data-modifier": kind } }];
   if (kind === "slash") { const [a, b] = slashEnds(G); return [{ tag: "path", attrs: { d: `M${pt(a)}L${pt(b)}`, ...(filled ? { "stroke-width": String(s) } : {}), ...mark } }]; }
   const out = [];
   // the glyph's half-extent: the box less an inset; at 48 inside a paper circle, half that circle's
-  let h = half - inset(G);
+  let h = half - inset(G, finish);
   if (filled && kind.startsWith("badge")) {
     out.push({ tag: "circle", attrs: { cx: fmt(cx), cy: fmt(cy), r: fmt(h), fill: PALETTE.paper, "stroke-width": String(s), ...mark } });
     h = snap(h / 2);
@@ -330,12 +336,16 @@ export function glyph(G, kind, { corner = "br", solid = false } = {}) {
 export async function addModifier(text, kind, { corner = "br", solid = false, name = "icon" } = {}) {
   const parsed = parse(text), G = gridOf(parsed.attrs);
   if (G === null) refuse("no viewBox of a grid");
+  const finish = finishOf(parsed.attrs) ?? undefined, p = preset(G, finish), bulk = p.finish === "bulk";
+  if (bulk && !KINDS_BULK.includes(kind)) refuse(BULK_REFUSAL(kind));
   const { textChecks } = await import("./check.mjs");
-  const before = textChecks(name, text, G).failures;
+  // at bulk an uncut body is the very thing this command cuts (for the glyph and the accents alike)
+  const before = textChecks(name, text, G, finish).failures.filter((f) => !(bulk && f.rule === "knockout"));
   if (before.length) refuse(`it fails check before the modifier; fix it first:\n${before.map((f) => `${f.rule}  ${f.icon}  ${f.got} → ${f.want}`).join("\n")}`);
   if (parsed.elements.some(isModifier)) refuse("it has a modifier already: one per icon");
   if (parsed.elements.some(isShadow)) refuse("it has a shadow: take it off with shadow.mjs --off, add the modifier, put it back with --on");
   if (kind === "slash" && corner !== "br") refuse("--corner: a slash crosses the whole icon");
+  if (bulk) return addBulk(parsed, G, kind, { corner, name, finish, p, textChecks });
   const H = { ...halo(G, kind, corner), minR: BEND * preset(G).stroke }, rootStroke = parsed.attrs.stroke;
   const strokes = (el) => !isNone(el.attrs.stroke ?? rootStroke);
   const paints = (el) => el.attrs.fill !== undefined && !isNone(el.attrs.fill);
@@ -370,27 +380,66 @@ export async function addModifier(text, kind, { corner = "br", solid = false, na
   return result;
 }
 
+/** The bulk finish: the badge or dot is a full accent, and each body it crosses is cut by cutBody. */
+async function addBulk(parsed, G, kind, { corner, name, finish, p, textChecks }) {
+  const { cutBody, KnockoutError } = await import("./knockout.mjs");
+  const { classify, isKnockout } = await import("./bulk.mjs");
+  const { paper } = await import("./raster.mjs");
+  const g = glyph(G, kind, { corner, finish })[0];
+  g.at = `${g.tag}@${parsed.elements.length + 2}`;
+  const H = halo(G, kind, corner, finish), P = paper();
+  const { bodies, accents } = classify(parsed), out = [];
+  for (const el of accents) {
+    // an accent must lie clear of the halo, or the badge would cover it
+    let q;
+    try { q = sampleParts(el.tag === "path" ? el : { ...el, tag: "path", attrs: { ...el.attrs, d: asPath(el) } }, 0.05).flat(); } catch { continue; }
+    if (Math.min(...q.map(H.inside)) < -0.1) refuse(`${el.at} lies under the ${kind}'s halo: try another --corner, or move the accent`);
+  }
+  for (const el of parsed.elements) {
+    if (!bodies.includes(el)) { out.push(el); continue; }
+    let d, crossed;
+    try { ({ d, crossed } = cutBody(el, [g, ...accents], p.knockout, P, name)); }
+    catch (e) { if (e instanceof KnockoutError) refuse(e.message); throw e; }
+    if (!crossed.length) { out.push(el); continue; }
+    const src = isKnockout(el) && el.attrs["data-body"] ? { ...el, attrs: { ...el.attrs, d: el.attrs["data-body"] } } : el;
+    const { d: _d, "data-cut": _c, "data-body": _b, cx, cy, r, ...rest } = src.attrs;
+    out.push({ tag: "path", attrs: { d, ...rest, "data-cut": "knockout", "data-body": src.tag === "circle" ? asPath(src) : src.attrs.d } });
+  }
+  const { at: _at, ...gl } = g;
+  out.push(gl);
+  const result = compose(parsed.attrs, out).replace(/ \/><(?!\/svg>)/g, " />\n  <").replace(/^(<svg[^>]*>)/, "$1\n  ").replace(/<\/svg>$/, "\n</svg>");
+  const failures = textChecks(name, result, G, finish).failures;
+  if (!failures.length) {
+    const { measuredChecks } = await import("./measure.mjs"), { NO_RASTER } = await import("./raster.mjs");
+    try { failures.push(...(await measuredChecks([{ name, text: result }], G, finish)).failures.filter((f) => ["gap", "live", "knockout"].includes(f.rule))); }
+    catch (e) { if (e?.code !== NO_RASTER) throw e; }
+  }
+  if (failures.length) refuse(`the result would fail check:\n${failures.map((f) => `${f.rule}  ${f.icon}  ${f.got} → ${f.want}`).join("\n")}\ntry another --corner or another kind`);
+  return result;
+}
+
 /**
  * The modifier rule, for check.mjs: one modifier per icon, of a known kind, its size and corner from the
  * preset, stroke-opacity 0.6 or none in duotone and none at 48, and no other stroke inside its halo.
  */
 export function modifierFailures(icon, parsed, G) {
-  const out = [], mods = parsed.elements.filter(isModifier), p = preset(G), filled = p.finish === "filled";
+  const finish = finishOf(parsed.attrs) ?? undefined, out = [], mods = parsed.elements.filter(isModifier), p = preset(G, finish), filled = p.finish === "filled", bulk = p.finish === "bulk";
   const f = (got, want) => out.push({ rule: "modifier", icon, got, want });
-  for (const el of parsed.elements) if (isCut(el) && !mods.length) f(`${el.at} data-cut`, "only in an icon with a modifier");
+  for (const el of parsed.elements) if (isCut(el) && !mods.length && !(bulk && el.attrs["data-cut"] === "knockout")) f(`${el.at} data-cut`, "only in an icon with a modifier");
   if (!mods.length) return out;
   const kinds = [...new Set(mods.map((el) => el.attrs["data-modifier"]))];
   if (kinds.length > 1) { f(`${kinds.length} modifiers: ${kinds.join(", ")}`, "one"); return out; }
   const kind = kinds[0];
-  if (!KINDS.includes(kind)) { f(`${mods[0].at} data-modifier ${kind}`, KINDS.join(", ")); return out; }
+  const allowed = bulk ? KINDS_BULK : KINDS;
+  if (!allowed.includes(kind)) { f(`${mods[0].at} data-modifier ${kind}`, allowed.join(", ")); return out; }
   for (const el of mods) {
     const o = el.attrs["stroke-opacity"];
-    if (o !== undefined && (filled || Number(o) !== OPACITY)) f(`${el.at} stroke-opacity ${o}`, filled ? "not set at the filled finish" : `${OPACITY}, or not set (--solid)`);
+    if (o !== undefined && (filled || bulk || Number(o) !== OPACITY)) f(`${el.at} stroke-opacity ${o}`, bulk ? "not set at bulk" : filled ? "not set at the filled finish" : `${OPACITY}, or not set (--solid)`);
   }
   // where it sits: the corner whose box its ink centres on, and its ink's size
   let pts;
   try { pts = mods.flatMap((el) => sampleParts(el, 0.05).flat()); } catch { return out; }
-  const s = kind === "dot" ? 0 : ownStroke(G);
+  const s = kind === "dot" ? 0 : ownStroke(G, finish);
   const x0 = Math.min(...pts.map((q) => q[0])) - s / 2, x1 = Math.max(...pts.map((q) => q[0])) + s / 2;
   const y0 = Math.min(...pts.map((q) => q[1])) - s / 2, y1 = Math.max(...pts.map((q) => q[1])) + s / 2;
   const box = Math.max(x1 - x0, y1 - y0), mid = [(x0 + x1) / 2, (y0 + y1) / 2];
@@ -402,18 +451,19 @@ export function modifierFailures(icon, parsed, G) {
     corner = "br";
   } else {
     const want = kind === "dot" ? 2 * MODIFIER[G].dot : MODIFIER[G].size;
-    corner = CORNERS.find((k) => len(sub(placement(G, kind, k).c, mid)) <= 0.3);
-    if (!corner || Math.abs(box - want) > 0.3) f(`${kind} ${fmt(box)} wide, centred at ${pt(mid)}`, `${fmt(want)} wide, in a corner of the live area: ${CORNERS.map((k) => pt(placement(G, kind, k).c)).join(" / ")}`);
+    corner = CORNERS.find((k) => len(sub(placement(G, kind, k, finish).c, mid)) <= 0.3);
+    if (!corner || Math.abs(box - want) > 0.3) f(`${kind} ${fmt(box)} wide, centred at ${pt(mid)}`, `${fmt(want)} wide, in a corner of the live area: ${CORNERS.map((k) => pt(placement(G, kind, k, finish).c)).join(" / ")}`);
   }
   if (!corner) return out;
   // the halo: every other stroke's centreline clear of it (a tenth for the snap)
-  const H = halo(G, kind, corner), rootStroke = parsed.attrs.stroke;
+  const H = halo(G, kind, corner, finish), rootStroke = parsed.attrs.stroke;
   for (const el of parsed.elements) {
-    if (isModifier(el) || isShadow(el) || isNone(el.attrs.stroke ?? rootStroke)) continue;
+    if (isModifier(el) || isShadow(el)) continue;
+    if (bulk ? el.attrs["data-cut"] === "knockout" : isNone(el.attrs.stroke ?? rootStroke)) continue;
     let q;
     try { q = sampleParts(el, 0.05).flat(); } catch { continue; }
     const worst = Math.min(...q.map(H.inside));
-    if (worst < -0.1) f(`${el.at} ${fmt(-worst)} inside ${kind}'s halo`, "clear of it: add the modifier with modifiers.mjs, which cuts the stroke");
+    if (worst < -0.1) f(`${el.at} ${fmt(-worst)} inside ${kind}'s halo`, bulk ? "clear of it: add the modifier with modifiers.mjs, which cuts the body" : "clear of it: add the modifier with modifiers.mjs, which cuts the stroke");
   }
   return out;
 }

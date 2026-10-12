@@ -72,8 +72,9 @@ export async function measuredChecks(set, G, finish) {
     try {
       const filled = p.finish === "filled";
       const parsed = parse(s.text);
-      const els = parsed.elements.filter((el) => !(filled && "transform" in el.attrs) && !isModifier(el) && !isShadow(el));
-      const modified = parsed.elements.some(isModifier), shadowed = parsed.elements.some(isShadow);
+      const els = parsed.elements.filter((el) => !(filled && "transform" in el.attrs) && (bulk || !isModifier(el)) && !isShadow(el));
+      // at bulk a modifier is a full accent: measured with the rest, the band and the share included
+      const modified = !bulk && parsed.elements.some(isModifier), shadowed = parsed.elements.some(isShadow);
       const base = !modified && !shadowed ? s.text : compose(parsed.attrs, parsed.elements.filter((el) => !isModifier(el) && !isShadow(el)));
       const c = filled ? classify(els) : bulk ? bulkClassify({ ...parsed, elements: els }) : null;
       const details = new Set(filled ? c.details.map((el) => el.at) : []);
