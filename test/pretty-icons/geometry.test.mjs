@@ -123,3 +123,15 @@ test("subpaths: one d per subpath, each opening at its own absolute point", () =
   const d = "M2 2C2 4 4 4 4 2s2-2 2 0m1 1a1 1 0 0 0 2 0";
   assert.deepEqual(subpaths(d).map((x) => pathParts(x, 0.1)[0]), pathParts(d, 0.1));
 });
+
+test("squircle: on the quarter grid, closed, two cubics per corner, pill when r is half the short side", async () => {
+  const { squircle } = await import("../../skills/pretty-icons/geometry.mjs");
+  const { pathNumbers } = await import("../../skills/pretty-icons/svg.mjs");
+  const d = squircle(3, 3, 18, 18, 5);
+  assert.equal(d, "M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z");
+  for (const n of pathNumbers(d)) assert.equal(Math.round(n * 4) / 4, n, `${n} off the quarter grid`);
+  assert.equal(d.match(/[MHVCZ]/g).length, 14);
+  assert.equal(squircle(4, 4, 8, 8, 3), "M 7 4 H 9 C 9.5 4 10 4 11 5 C 12 6 12 6.5 12 7 V 9 C 12 9.5 12 10 11 11 C 10 12 9.5 12 9 12 H 7 C 6.5 12 6 12 5 11 C 4 10 4 9.5 4 9 V 7 C 4 6.5 4 6 5 5 C 6 4 6.5 4 7 4 Z");
+  assert.equal(squircle(2, 8, 20, 8, 4), "M 6 8 H 18 A 4 4 0 0 1 18 16 H 6 A 4 4 0 0 1 6 8 Z");
+  assert.throws(() => squircle(3, 3, 18, 18, 10), /radius 10 over half the short side 18/);
+});

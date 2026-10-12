@@ -1,3 +1,6 @@
+import { squircle } from "./geometry.mjs";
+export { squircle };
+
 /**
  * The grids pretty-icons draws on, and what each one fixes: finish, stroke,
  * padding, fill, radii, and the four keylines an icon's ink lands on. A body
@@ -32,6 +35,38 @@ export const FILLED_PRESETS = {
   },
 };
 export const GRIDS = { ...PRESETS, ...FILLED_PRESETS };
+
+/**
+ * The bulk finish, on grid 24 only: a filled line-and-body set. Keylines are ink sizes
+ * (a filled body has no stroke), bodies are squircles at 40% opacity, accents are knocked
+ * out of them by `knockout`. Share is accent ink over whole ink.
+ */
+export const BULK_PRESETS = {
+  24: {
+    finish: "bulk",
+    stroke: 2,
+    weights: [2],
+    pad: 2,
+    knockout: 1.5,
+    gap: 1.5,
+    share: [0.25, 0.6],
+    radius: [5, 3],
+    radiusAt: 12,
+    commands: 14,
+    keylines: { circle: [20, 20], square: [18, 18], portrait: [16, 20], landscape: [20, 16] },
+  },
+};
+/** How far a measured knockout band may sit from `knockout`, in grid units. */
+export const KNOCKOUT_TOL = 0.25;
+export const BULK_REFERENCE_INK = { 24: 170 };
+
+/** The finish a root declares: bulk is fill="currentColor" with no stroke, duotone is fill="none" stroke="currentColor". */
+export function finishOf(root) {
+  const fill = root.fill, stroke = root.stroke;
+  if (fill === "currentColor" && stroke === undefined) return "bulk";
+  if (fill === "none" && stroke === "currentColor") return "duotone";
+  return null;
+}
 
 /**
  * The filled finish's five tones, light and dark. The file holds the light ones; a dark
@@ -72,9 +107,19 @@ export const DARK_LUMA = 89;
 export const RADIUS_AT = 8;
 export const FORMATS = ["circle", "square", "portrait", "landscape"];
 
-export function preset(G) {
+export function preset(G, finish) {
+  const want = finish ?? GRIDS[G]?.finish ?? "duotone";
+  if (want === "bulk") {
+    const b = BULK_PRESETS[G];
+    if (!b) throw new Error(`no bulk preset for grid ${G}: bulk is 24`);
+    return {
+      G, fill: FILL, live: G - 2 * b.pad, step: GRID_STEP, elements: 3, keylineTol: KEYLINE_TOL, gravityTol: GRAVITY_TOL,
+      weightTol: WEIGHT_TOL, referenceTol: REFERENCE_TOL, centre: [G / 2, G / 2], ...b,
+    };
+  }
   const p = GRIDS[G];
   if (!p) throw new Error(`no preset for grid ${G}`);
+  if (want !== (p.finish ?? "duotone")) throw new Error(`no ${want} preset for grid ${G}`);
   const pad = p.pad ?? PAD;
   return {
     G, finish: "duotone", pad, fill: FILL, live: G - 2 * pad, step: GRID_STEP, radiusAt: RADIUS_AT, elements: 3, commands: 8,
@@ -84,35 +129,46 @@ export function preset(G) {
 }
 
 /** The radius a shape of this size (its smaller side) takes on this grid; at the filled finish, a cased one's. */
-export function radiusFor(G, size) {
-  return radiiFor(G, size)[preset(G).finish === "filled" ? 1 : 0];
+export function radiusFor(G, size, finish) {
+  const p = preset(G, finish);
+  if (p.finish === "bulk") return size >= p.radiusAt ? p.radius[0] : p.radius[1];
+  return radiiFor(G, size, finish)[p.finish === "filled" ? 1 : 0];
 }
 
 /** Every radius a shape of this size may take: the duotone's one; the filled finish's cut, cased, moulded and pill. */
-export function radiiFor(G, size) {
-  const p = preset(G);
+export function radiiFor(G, size, finish) {
+  const p = preset(G, finish);
+  if (p.finish === "bulk") return [radiusFor(G, size, finish), size / 2];
   if (p.finish !== "filled") return [size >= p.radiusAt ? p.radius[0] : p.radius[1]];
   const step = size >= 16 ? 0 : size >= 8 ? 1 : 2;
   return [RADII.cut[step], RADII.cased[step], RADII.moulded[step], size / 2];
 }
 
 /** How far a body's edge sits inside its keyline: half the drawn stroke (the contour at 48), rounded up to the quarter grid. */
-export const inset = (G) => { const p = preset(G); return Math.ceil((p.contour ?? p.stroke) / 2 / GRID_STEP - 1e-9) * GRID_STEP; };
+export const inset = (G, finish) => { const p = preset(G, finish); return Math.ceil((p.contour ?? p.stroke) / 2 / GRID_STEP - 1e-9) * GRID_STEP; };
 
 /** The element whose ink lands on a keyline, its edge an inset inside it. */
-export function body(G, format) {
-  const { keylines, centre: [cx, cy] } = preset(G), i = inset(G);
+export function body(G, format, finish) {
+  const p = preset(G, finish), { keylines, centre: [cx, cy] } = p, i = inset(G, finish);
   const kl = keylines[format];
   if (!kl) throw new Error(`no keyline "${format}"; one of ${FORMATS.join(", ")}`);
   const [kw, kh] = kl;
+  if (p.finish === "bulk") {
+    // the keyline is the ink size and a filled body has no stroke: the body is the keyline itself
+    if (format === "circle") return { tag: "circle", cx, cy, r: kw / 2 };
+    return { tag: "path", d: squircle(cx - kw / 2, cy - kh / 2, kw, kh, radiusFor(G, Math.min(kw, kh), finish)) };
+  }
   if (format === "circle") return { tag: "circle", cx, cy, r: kw / 2 - i };
   const w = kw - 2 * i, h = kh - 2 * i;
-  return { tag: "rect", x: cx - kw / 2 + i, y: cy - kh / 2 + i, w, h, rx: radiusFor(G, Math.min(w, h)) };
+  return { tag: "rect", x: cx - kw / 2 + i, y: cy - kh / 2 + i, w, h, rx: radiusFor(G, Math.min(w, h), finish) };
 }
 
 /** A body as SVG text, with the duotone fill under its stroke (the duotone finish's). */
-export function bodySvg(G, format) {
-  const b = body(G, format);
+export function bodySvg(G, format, finish) {
+  const b = body(G, format, finish);
+  if (preset(G, finish).finish === "bulk") {
+    return b.tag === "circle" ? `<circle cx="${b.cx}" cy="${b.cy}" r="${b.r}" fill-opacity=".4" />` : `<path d="${b.d}" fill-opacity=".4" />`;
+  }
   const fill = `fill="currentColor" fill-opacity="${FILL}"`;
   return b.tag === "circle"
     ? `<circle cx="${b.cx}" cy="${b.cy}" r="${b.r}" ${fill} />`
@@ -126,7 +182,7 @@ export function bodySvg(G, format) {
  * On 48 it is the median line ink of examples/garage: the contours and marks, not the paint.
  */
 export const REFERENCE_INK = { 16: 64.1, 20: 103.5, 24: 152.6, 48: 347 };
-export const referenceInk = (G) => REFERENCE_INK[G];
+export const referenceInk = (G, finish) => (preset(G, finish).finish === "bulk" ? BULK_REFERENCE_INK[G] : REFERENCE_INK[G]);
 
 /**
  * A modifier's box on each grid (its ink's larger side) and a dot's radius. Its halo, the clear space

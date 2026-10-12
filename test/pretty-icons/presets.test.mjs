@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PRESETS, preset, body, inset, radiusFor, KEYLINE_TOL, WEIGHT_TOL, GRAVITY_TOL } from "../../skills/pretty-icons/presets.mjs";
+import { PRESETS, preset, body, bodySvg, inset, radiusFor, referenceInk, KEYLINE_TOL, WEIGHT_TOL, GRAVITY_TOL } from "../../skills/pretty-icons/presets.mjs";
 
 test("three grids, padding 1, fill .2", () => {
   assert.deepEqual(Object.keys(PRESETS).map(Number), [16, 20, 24]);
@@ -71,7 +71,7 @@ test("the duotone line: 1 on 16, 1.25 on 20, 1.5 on 24; the filled line and cont
 });
 
 test("inset: half the drawn stroke, rounded up to the quarter grid", () => {
-  assert.deepEqual([16, 20, 24, 48].map(inset), [0.5, 0.75, 0.75, 1]);
+  assert.deepEqual([16, 20, 24, 48].map((G) => inset(G)), [0.5, 0.75, 0.75, 1]);
 });
 
 test("a body sits an inset inside its keyline", () => {
@@ -83,4 +83,61 @@ test("a body sits an inset inside its keyline", () => {
   assert.deepEqual(body(24, "circle"), { tag: "circle", cx: 12, cy: 12, r: 10.25 });
   assert.deepEqual(body(24, "portrait"), { tag: "rect", x: 3.75, y: 1.75, w: 16.5, h: 20.5, rx: 2 });
   assert.deepEqual(body(48, "circle"), { tag: "circle", cx: 24, cy: 24, r: 19 });
+});
+
+test("bulk: 24 only, pad 2, stroke 2, knockout 1.5, share band, squircle radii", async () => {
+  const { BULK_PRESETS, KNOCKOUT_TOL } = await import("../../skills/pretty-icons/presets.mjs");
+  assert.deepEqual(Object.keys(BULK_PRESETS).map(Number), [24]);
+  const p = preset(24, "bulk");
+  assert.equal(p.finish, "bulk");
+  assert.equal(p.G, 24);
+  assert.equal(p.pad, 2);
+  assert.equal(p.live, 20);
+  assert.equal(p.step, 0.25);
+  assert.equal(p.stroke, 2);
+  assert.deepEqual(p.weights, [2]);
+  assert.equal(p.knockout, 1.5);
+  assert.equal(p.gap, 1.5);
+  assert.deepEqual(p.share, [0.25, 0.6]);
+  assert.deepEqual(p.radius, [5, 3]);
+  assert.equal(p.radiusAt, 12);
+  assert.equal(p.elements, 3);
+  assert.equal(p.commands, 14);
+  assert.deepEqual(p.keylines, { circle: [20, 20], square: [18, 18], portrait: [16, 20], landscape: [20, 16] });
+  assert.equal(KNOCKOUT_TOL, 0.25);
+  assert.throws(() => preset(16, "bulk"), /no bulk preset for grid 16: bulk is 24/);
+  assert.throws(() => preset(48, "bulk"), /no bulk preset for grid 48: bulk is 24/);
+  assert.throws(() => preset(24, "filled"), /no filled preset for grid 24/);
+});
+
+test("finishOf reads the root; 24 without a hint is duotone", async () => {
+  const { finishOf } = await import("../../skills/pretty-icons/presets.mjs");
+  assert.equal(finishOf({ fill: "currentColor" }), "bulk");
+  assert.equal(finishOf({ fill: "currentColor", "aria-hidden": "true", viewBox: "0 0 24 24" }), "bulk");
+  assert.equal(finishOf({ fill: "none", stroke: "currentColor" }), "duotone");
+  assert.equal(finishOf({ fill: "currentColor", stroke: "currentColor" }), null);
+  assert.equal(finishOf({}), null);
+  assert.equal(preset(24).finish, "duotone");
+  assert.equal(preset(24, "duotone").stroke, 1.5);
+  assert.equal(preset(48).finish, "filled");
+});
+
+test("bulk bodies: inset 1, a circle of 10, squircles for the rest, reference ink", async () => {
+  const { BULK_REFERENCE_INK, squircle } = await import("../../skills/pretty-icons/presets.mjs");
+  assert.equal(inset(24, "bulk"), 1);
+  assert.equal(inset(24), 0.75);
+  assert.equal(radiusFor(24, 12, "bulk"), 5);
+  assert.equal(radiusFor(24, 11.75, "bulk"), 3);
+  assert.equal(radiusFor(24, 8), 2);
+  assert.deepEqual(body(24, "circle", "bulk"), { tag: "circle", cx: 12, cy: 12, r: 10 });
+  const sq = body(24, "square", "bulk");
+  assert.equal(sq.tag, "path");
+  assert.equal(sq.d, squircle(3, 3, 18, 18, 5));
+  assert.equal(body(24, "portrait", "bulk").d, squircle(4, 2, 16, 20, 5));
+  assert.equal(body(24, "landscape", "bulk").d, squircle(2, 4, 20, 16, 5));
+  assert.equal(bodySvg(24, "circle", "bulk"), '<circle cx="12" cy="12" r="10" fill-opacity=".4" />');
+  assert.equal(bodySvg(24, "square", "bulk"), `<path d="${squircle(3, 3, 18, 18, 5)}" fill-opacity=".4" />`);
+  assert.equal(BULK_REFERENCE_INK[24], 170);
+  assert.equal(referenceInk(24, "bulk"), 170);
+  assert.equal(referenceInk(24), 152.6);
 });

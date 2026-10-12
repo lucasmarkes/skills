@@ -232,3 +232,42 @@ export function interiorParts(el, bodies) {
 
 /** The least edge-to-edge distance from an element to a body's outline, each at its stroke width. */
 export const clearance = (el, body, wEl, wBody) => minDistance(sampleParts(el, 0.05).flat(), sampleParts(body, 0.05).flat()) - (wEl + wBody) / 2;
+
+const snapQ = (v) => Math.round(v * 4) / 4;
+const fmtQ = (v) => String(Math.round(v * 100) / 100);
+
+// A continuous-curvature rounded rect: each corner is two cubics that leave and
+// arrive along the tangent, their handles placed so curvature grows from zero at
+// the straight side to its peak at the corner's middle. Radius r is the length
+// of side the corner eats: m = snap(0.293 r) is the handle at the corner's
+// middle, a = snap((r + 2m) / 2) the handle leaving the side.
+export function squircle(x, y, w, h, r) {
+  const short = Math.min(w, h);
+  if (r > short / 2 + 1e-9) throw new Error(`radius ${r} over half the short side ${short}`);
+  if (Math.abs(r - short / 2) < 1e-9) {
+    // a pill: two arcs
+    return w >= h
+      ? `M ${fmtQ(x + r)} ${fmtQ(y)} H ${fmtQ(x + w - r)} A ${fmtQ(r)} ${fmtQ(r)} 0 0 1 ${fmtQ(x + w - r)} ${fmtQ(y + h)} H ${fmtQ(x + r)} A ${fmtQ(r)} ${fmtQ(r)} 0 0 1 ${fmtQ(x + r)} ${fmtQ(y)} Z`
+      : `M ${fmtQ(x + w)} ${fmtQ(y + r)} V ${fmtQ(y + h - r)} A ${fmtQ(r)} ${fmtQ(r)} 0 0 1 ${fmtQ(x)} ${fmtQ(y + h - r)} V ${fmtQ(y + r)} A ${fmtQ(r)} ${fmtQ(r)} 0 0 1 ${fmtQ(x + w)} ${fmtQ(y + r)} Z`;
+  }
+  const m = snapQ(0.293 * r), a = snapQ((r + 2 * m) / 2);
+  // corner C with in-direction u (along the side we arrive on) and out-direction v (along the side we leave on)
+  const corner = ([cx, cy], [ux, uy], [vx, vy]) => {
+    const P = (kx, ky) => `${fmtQ(cx + kx)} ${fmtQ(cy + ky)}`;
+    const first = `C ${P(-a * ux, -a * uy)} ${P(-2 * m * ux, -2 * m * uy)} ${P(-m * ux + m * vx, -m * uy + m * vy)}`;
+    const second = `C ${P(2 * m * vx, 2 * m * vy)} ${P(a * vx, a * vy)} ${P(r * vx, r * vy)}`;
+    return `${first} ${second}`;
+  };
+  return [
+    `M ${fmtQ(x + r)} ${fmtQ(y)}`,
+    `H ${fmtQ(x + w - r)}`,
+    corner([x + w, y], [1, 0], [0, 1]),
+    `V ${fmtQ(y + h - r)}`,
+    corner([x + w, y + h], [0, 1], [-1, 0]),
+    `H ${fmtQ(x + r)}`,
+    corner([x, y + h], [-1, 0], [0, -1]),
+    `V ${fmtQ(y + r)}`,
+    corner([x, y], [0, -1], [1, 0]),
+    "Z",
+  ].join(" ");
+}
