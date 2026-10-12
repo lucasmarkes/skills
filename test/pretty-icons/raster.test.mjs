@@ -146,3 +146,19 @@ test("paper(): 0.12.18 from the cache, set up on a 24 canvas, loaded once", asyn
   const cut = a.subtract(b, { insert: false });
   assert.ok(Math.abs(cut.area - (100 - Math.PI * 9 / 2)) < 0.5, String(cut.area));
 });
+
+test("band: the paper between a cut body and its accent, measured at the band's edge", async () => {
+  const { band } = await import("../../skills/pretty-icons/raster.mjs");
+  const root = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">';
+  const uncut = `${root}<path d="M 3 3 H 21 V 21 H 3 Z" /></svg>`;
+  const accent = `${root}<path d="M 10 10 H 14 V 14 H 10 Z" /></svg>`;
+  // a band of 1.5 around the accent: the hole runs from 8.5 to 15.5, its corners round at 1.5
+  const good = `${root}<path d="M 3 3 H 21 V 21 H 3 Z M 8.5 10 V 14 A 1.5 1.5 0 0 0 10 15.5 H 14 A 1.5 1.5 0 0 0 15.5 14 V 10 A 1.5 1.5 0 0 0 14 8.5 H 10 A 1.5 1.5 0 0 0 8.5 10 Z" /></svg>`;
+  assert.deepEqual(await band(good, uncut, accent, 24, 1.5, 0.25), []);
+  // a band of 1 on the right side
+  const tight = `${root}<path d="M 3 3 H 21 V 21 H 3 Z M 8.5 10 V 14 A 1.5 1.5 0 0 0 10 15.5 H 13.5 A 1.5 1.5 0 0 0 15 14 V 10 A 1.5 1.5 0 0 0 13.5 8.5 H 10 A 1.5 1.5 0 0 0 8.5 10 Z" /></svg>`;
+  const r = await band(tight, uncut, accent, 24, 1.5, 0.25);
+  assert.ok(r.length >= 1);
+  assert.ok(Math.abs(r[0].width - 1) <= 0.15, String(r[0].width));
+  assert.ok(Math.abs(r[0].at[0] - 15) <= 0.5 && r[0].at[1] > 8 && r[0].at[1] < 16, JSON.stringify(r[0].at));
+});

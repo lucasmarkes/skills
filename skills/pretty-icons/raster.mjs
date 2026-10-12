@@ -127,7 +127,7 @@ export async function shares(svgText, G) {
 }
 
 // Air is read at 8 px a stroke; a pixel darker than 0.6 is ink (the line and mark tones; fill, shade and paper are paper).
-const PX = 8, INK_LUMA = 0.6;
+export const PX = 8, INK_LUMA = 0.6;
 
 // Felzenszwalb and Huttenlocher's exact squared distance transform, one dimension.
 function edt1d(f, n, d, v, z) {
@@ -207,6 +207,35 @@ export async function air(svgText, G, stroke) {
     if (area >= AIR_AREA) out.push({ kind: "paper", across: +widest(c.px).toFixed(2), area: +area.toFixed(2), at: at(c.px) });
   }
   return out;
+}
+
+/** A mask of an SVG's ink at PX pixels a grid unit: a pixel darker than INK_LUMA on white. */
+function inkMask(svgText, G) {
+  const size = G * PX, { width, height, pixels } = render(svgText, size, { background: "#ffffff" });
+  const mask = new Uint8Array(width * height);
+  for (let i = 0; i < width * height; i++) if ((pixels[i * 4] + pixels[i * 4 + 1] + pixels[i * 4 + 2]) / 3 / 255 < INK_LUMA) mask[i] = 1;
+  return { mask, W: width, H: height };
+}
+
+/**
+ * The knockout band: the paper the cut removed from the body, measured where it meets the cut
+ * body's ink. Every such edge pixel should sit `want` from the accent's ink, ± `tol`. The three
+ * SVGs render with every body full (no fill-opacity), so the .4 body reads as ink.
+ */
+export async function band(cutSvg, uncutSvg, accentSvg, G, want, tol) {
+  const { mask: C, W, H } = inkMask(cutSvg, G), { mask: U } = inkMask(uncutSvg, G), { mask: A } = inkMask(accentSvg, G);
+  const dt = edt(A, W, H), out = [];
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+    const i = y * W + x;
+    if (!U[i] || C[i] || A[i]) continue; // removed paper only
+    if (!(U[i - 1] && U[i + 1] && U[i - W] && U[i + W])) continue; // on the body's own outline: antialiasing, not band
+    if (!(C[i - 1] || C[i + 1] || C[i - W] || C[i + W])) continue; // at the band's outer edge
+    const width = (dt[i] + 0.5) / PX;
+    if (Math.abs(width - want) <= tol) continue;
+    out.push({ width: +width.toFixed(2), at: [+((x + 0.5) / PX).toFixed(2), +((y + 0.5) / PX).toFixed(2)] });
+  }
+  out.sort((a, b) => Math.abs(b.width - want) - Math.abs(a.width - want));
+  return out.slice(0, 3);
 }
 
 /**
