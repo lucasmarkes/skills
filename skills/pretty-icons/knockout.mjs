@@ -20,7 +20,8 @@ import { asPath } from "./modifiers.mjs";
 
 export class KnockoutError extends Error {}
 const refuse = (m) => { throw new KnockoutError(m); };
-const FLAT = 0.05, CRUMB = 1, G = 24;
+// FLAT: how far a flattened halo may stray; THIN: the lattice and flattening a crumb is read on
+const FLAT = 0.05, THIN = 0.05, CRUMB = 1, G = 24;
 const f = (v) => String(Math.round(v * 100) / 100);
 
 /** A stadium: the segment a→b grown by r, as a paper path with two arcs. */
@@ -43,16 +44,18 @@ const unite = (items) => items.reduce((acc, it) => (acc ? acc.unite(it, { insert
 /** An accent's halo: its outline offset by k (a line: half its width, plus k). A circle's is exact. */
 export function haloOf(accent, k, P) {
   if (accent.tag === "circle" && !isLine(accent)) return new P.Path.Circle({ center: [num(accent.attrs, "cx"), num(accent.attrs, "cy")], radius: num(accent.attrs, "r") + k, insert: false });
-  const d = asPath(accent);
-  const outline = new P.Path(d);
+  // a CompoundPath keeps every subpath apart (a Path chains them into one polygon): a plus has two arms
+  const outline = new P.CompoundPath(asPath(accent));
   outline.remove();
   const r = isLine(accent) ? num(accent.attrs, "stroke-width", 2) / 2 + k : k;
-  const flat = outline.clone({ insert: false });
-  flat.flatten(FLAT);
-  const pts = flat.segments.map((s) => [s.point.x, s.point.y]);
   const runs = [];
-  for (let i = 0; i + 1 < pts.length; i++) runs.push(stadium(pts[i], pts[i + 1], r, P));
-  if (flat.closed && pts.length > 1) runs.push(stadium(pts[pts.length - 1], pts[0], r, P));
+  for (const child of outline.children) {
+    const flat = child.clone({ insert: false });
+    flat.flatten(FLAT);
+    const pts = flat.segments.map((s) => [s.point.x, s.point.y]);
+    for (let i = 0; i + 1 < pts.length; i++) runs.push(stadium(pts[i], pts[i + 1], r, P));
+    if (flat.closed && pts.length > 1) runs.push(stadium(pts[pts.length - 1], pts[0], r, P));
+  }
   const grown = unite(runs);
   return isLine(accent) ? grown : unite([outline.clone({ insert: false }), grown]);
 }
@@ -73,7 +76,65 @@ function pathD(path) {
   return d + (path.closed ? " Z" : "");
 }
 const toD = (item) => (item.children ? item.children : [item]).map(pathD).filter(Boolean).join(" ");
-const pieces = (item) => (item.children ? item.children : [item]);
+/** The cut's pieces: its outlines wound as the largest one is, so a hole is never a piece. */
+function pieces(item) {
+  const all = item.children ? item.children : [item];
+  const outer = all.reduce((m, c) => (Math.abs(c.area) > Math.abs(m.area) ? c : m));
+  return all.filter((c) => c.clockwise === outer.clockwise);
+}
+
+/** Every outline of a paper item as flat polygons, [[x, y]…] each. */
+function polygons(item) {
+  return (item.children ? item.children : [item]).map((c) => {
+    const flat = c.clone({ insert: false });
+    flat.flatten(THIN);
+    return flat.segments.map((s) => [s.point.x, s.point.y]);
+  });
+}
+const inPolygon = ([x, y], poly) => {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [ax, ay] = poly[j], [bx, by] = poly[i];
+    if ((ay > y) !== (by > y) && x < ((bx - ax) * (y - ay)) / (by - ay) + ax) inside = !inside;
+  }
+  return inside;
+};
+function toEdges([x, y], polys) {
+  let best = Infinity;
+  for (const poly of polys) for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [ax, ay] = poly[j], [bx, by] = poly[i], dx = bx - ax, dy = by - ay, len2 = dx * dx + dy * dy;
+    const t = len2 ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / len2)) : 0;
+    best = Math.min(best, Math.hypot(x - ax - t * dx, y - ay - t * dy));
+  }
+  return best;
+}
+/**
+ * A piece's thickness: the widest circle that fits in it (holes and all), read on a THIN lattice
+ * over its box. It stops at CRUMB, the only question being whether the piece is thinner.
+ */
+function thickness(piece, polys) {
+  const own = polygons(piece)[0], b = piece.bounds;
+  const filled = (q) => inPolygon(q, own) && polys.reduce((n, poly) => n !== inPolygon(q, poly), false);
+  const depth = (q) => (filled(q) ? 2 * toEdges(q, polys) : 0);
+  let widest = 0, best = null;
+  for (let y = b.y; y <= b.y + b.height; y += THIN) for (let x = b.x; x <= b.x + b.width; x += THIN) {
+    const w = depth([x, y]);
+    if (w > widest) { widest = w; best = [x, y]; }
+    if (widest >= CRUMB) return widest;
+  }
+  // the lattice can miss a slanted piece's midline by THIN/√2: climb from the best point in finer steps
+  for (let s = THIN / 2; best && s > 0.001; s /= 2) {
+    for (let moved = true; moved;) {
+      moved = false;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+        const q = [best[0] + dx * s, best[1] + dy * s], w = depth(q);
+        if (w > widest + 1e-9) { widest = w; best = q; moved = true; }
+      }
+    }
+    if (widest >= CRUMB) return widest;
+  }
+  return widest;
+}
 
 /** A body less the halos of the accents that cross it. `crossed` is empty when nothing crosses. */
 export function cutBody(body, accents, k, P, icon = "icon") {
@@ -82,13 +143,14 @@ export function cutBody(body, accents, k, P, icon = "icon") {
   if (!crossed.length) return { d: null, crossed };
   let item = src.tag === "circle"
     ? new P.Path.Circle({ center: [num(src.attrs, "cx"), num(src.attrs, "cy")], radius: num(src.attrs, "r"), insert: false })
-    : new P.Path(asPath(src));
+    : new P.CompoundPath(asPath(src));
   item.remove();
   for (const a of crossed) {
     item = item.subtract(haloOf(a, k, P), { insert: false });
+    const polys = polygons(item);
     for (const piece of pieces(item)) {
-      const across = Math.min(piece.bounds.width, piece.bounds.height), area = Math.abs(piece.area);
-      if (across < CRUMB || area < CRUMB) refuse(`crumb  ${icon}  ${body.at} a piece ${f(Math.min(across, area))} across under ${a.at} → at least ${CRUMB}: move the accent, or make it a body`);
+      const across = thickness(piece, polys);
+      if (Number(f(across)) < CRUMB) refuse(`crumb  ${icon}  ${body.at} a piece ${f(across)} across under ${a.at} → at least ${CRUMB}: move the accent, or make it a body`);
     }
   }
   return { d: toD(item), crossed };

@@ -142,9 +142,36 @@ test("cutBody: a circle body, a filled accent inside: the hole is the accent gro
   const acc = el(svg24b('<path d="M 10 10 H 14 V 14 H 10 Z" />'));
   const { d, crossed } = cutBody(body, [acc], 1.5, P);
   assert.deepEqual(crossed.map((e) => e.at), ["path@2"]);
-  const cut = new P.Path(d);
-  assert.ok(cut.children || cut.segments.length > 4);
   const item = new P.CompoundPath(d);
+  item.remove();
+  assert.equal(item.children.length, 2); // the disc and its hole
   const hole = 16 + 4 * 1.5 * 4 + Math.PI * 1.5 * 1.5; // the square, four 4 × 1.5 sides, four quarter circles
   assert.ok(Math.abs(Math.abs(item.area) - (Math.PI * 100 - hole)) < 0.5, String(item.area));
+});
+
+test("a line of two subpaths, a plus or an x, is haloed on every arm: a band of 1.5 all round", async () => {
+  for (const d of ["M 8 12 H 16 M 12 8 V 16", "M 9 9 L 15 15 M 15 9 L 9 15"]) {
+    const r = knockout(svg24b(`${SQ24B}\n  ${LINE(d)}`), { name: "edit" });
+    assert.deepEqual(r.cut, [{ body: "path@2", under: ["path@3"] }], d);
+    assert.deepEqual(await band(...renders(r.text), 24, 1.5, 0.25), [], d);
+  }
+  const P = paper();
+  const h = haloOf(el(svg24b(LINE("M 8 12 H 16 M 12 8 V 16"))), 1.5, P);
+  assert.ok(h.contains(new P.Point(12, 6)) && h.contains(new P.Point(12, 18)) && !h.contains(new P.Point(9, 9)));
+});
+
+test("a crumb is judged by its thickness, not its box: a crescent 0.6 thick refuses", () => {
+  const crescent = svg24b(`<circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  ${LINE("M 20.5 13.25 L 13.25 20.5")}`);
+  assert.throws(() => knockout(crescent, { name: "edit" }), (e) => e instanceof KnockoutError && /^crumb  edit  circle@2 a piece 0\.\d+ across under path@3 → at least 1: move the accent, or make it a body$/.test(e.message) && Number(/piece ([\d.]+)/.exec(e.message)[1]) < 1);
+  // a slanted strip left t thick: the band x + y from 24 to 30, the accent's halo edge at x + y = 30 − t√2
+  const P = paper();
+  const body = el(svg24b('<path d="M 3 21 L 21 3 L 21 9 L 9 21 Z" fill-opacity=".4" />'));
+  const strip = (t) => { const e = 30 - t * Math.SQRT2 - 1.5 * Math.SQRT2; return cutBody(body, [el(svg24b(`<path d="M ${e - 3} 3 L 3 ${e - 3} L 3 3 Z" />`))], 1.5, P, "edit"); };
+  assert.equal(strip(1).crossed.length, 1);
+  assert.throws(() => strip(0.9), (e) => e instanceof KnockoutError && e.message === "crumb  edit  path@2 a piece 0.9 across under path@2 → at least 1: move the accent, or make it a body");
+});
+
+test("a contour is refused with check's line", () => {
+  const contour = svg24b(`<path d="M 3 3 H 21 V 21 H 3 Z" fill-opacity=".4" stroke="currentColor" stroke-width="2" />\n  ${DIAMOND}`);
+  assert.throws(() => knockout(contour, { name: "edit" }), (e) => e instanceof KnockoutError && e.message === "stroke  edit  path@2 stroke-linecap missing → round");
 });
