@@ -60,8 +60,10 @@ export function place(s, G, x, y, size, colour) {
   const inner = elements.map((el) => `<${el.tag}${Object.entries(el.attrs).filter(([k]) => DRAW_ATTRS.has(k)).map(([k, v]) => ` ${k}="${paint(v)}"`).join("")} />`).join("");
   const inherited = ROOT_INHERITED.filter((k) => k in root).map((k) => ` ${k}="${paint(root[k])}"`).join("");
   // a root that fills in currentColor (bulk) fills the group and strokes nothing: each line carries its own stroke
-  const fill = isCurrent(root.fill) ? colour : "none";
-  const stroke = root.stroke ? (isCurrent(root.stroke) ? colour : escAttr(root.stroke)) : isCurrent(root.fill) ? "none" : colour;
+  // (any concrete root fill does the same, so a silhouette that inks the root stays a mass)
+  const filled = root.fill !== undefined && String(root.fill).trim().toLowerCase() !== "none";
+  const fill = filled ? (isCurrent(root.fill) ? colour : escAttr(root.fill)) : "none";
+  const stroke = root.stroke ? (isCurrent(root.stroke) ? colour : escAttr(root.stroke)) : filled ? "none" : colour;
   const width = root["stroke-width"] !== undefined ? ` stroke-width="${escAttr(root["stroke-width"])}"` : "";
   return `<g transform="translate(${x} ${y}) scale(${size / G})" fill="${fill}" stroke="${stroke}"${width} stroke-linecap="round" stroke-linejoin="round"${inherited}>${inner}</g>`;
 }

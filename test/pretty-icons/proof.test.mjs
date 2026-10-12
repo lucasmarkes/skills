@@ -124,3 +124,12 @@ test("at bulk the proof draws the uncut body under the cut in amber, uses the bu
   const file = writeProof(dir, { out: dir });
   assert.ok(existsSync(file));
 });
+
+test("the silhouette is a mass at bulk: the group fills in the ink; the duotone silhouette still strokes", () => {
+  const body = '<path d="M 3 3 H 21 V 21 H 3 Z" fill-opacity=".4" />';
+  const bulk = silhouette({ name: "m", text: `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">\n  ${body}\n</svg>` }, 24, 24, "#262626");
+  assert.match(bulk, /^<g [^>]*fill="#262626" stroke="none"/);
+  assert.ok(!bulk.includes("fill-opacity"));
+  const duo = silhouette({ name: "d", text: svg48('<path d="M8 8H40V40H8Z" />') }, 48, 24, "#262626");
+  assert.match(duo, /^<g [^>]*fill="none" stroke="#262626"/);
+});

@@ -196,7 +196,7 @@ const bulkFolder = (t) => {
 test("at bulk, place paints the root's fill, no stroke and no stroke-width on the group; the sheet has duotone's four blocks", async (t) => {
   const dir = bulkFolder(t), set = readSet(dir), r = await checkSet(dir);
   assert.equal(r.finish, "bulk");
-  assert.deepEqual(r.failures.filter((f) => f.rule !== "weight"), []);
+  assert.deepEqual(r.failures, []);
   const g = place(set[2], 24, 0, 0, 24, "#123456");
   assert.match(g, /^<g transform="[^"]+" fill="#123456" stroke="none" stroke-linecap="round" stroke-linejoin="round">/);
   assert.ok(!g.includes("undefined"), g);
