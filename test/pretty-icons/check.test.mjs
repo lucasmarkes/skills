@@ -358,3 +358,34 @@ test("a folder of one bulk root and nine duotone at 24: the majority finish, the
   assert.equal(r.finish, "duotone");
   assert.deepEqual(of(r, "stroke"), ["odd"]);
 });
+
+test("bulk, measured: a cut icon passes gap, air, live and the band; share, the band and gap report with the bulk numbers", async (t) => {
+  const { knockout } = await import("../../skills/pretty-icons/knockout.mjs");
+  const dir = tmp(t);
+  const root = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">';
+  const B = (inner) => `${root}\n  ${inner}\n</svg>`;
+  const SQ = '<path d="M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z" fill-opacity=".4" />';
+  const L = (d) => `<path d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />`;
+  // three good icons: a diamond in a squircle, a line through a circle, a bar beside a circle
+  writeFileSync(join(dir, "a.svg"), knockout(B(`${SQ}\n  <path d="M 12 6 L 18 12 L 12 18 L 6 12 Z" />`), { name: "a" }).text);
+  writeFileSync(join(dir, "b.svg"), knockout(B(`<circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  ${L("M 4 12 H 20")}`), { name: "b" }).text);
+  writeFileSync(join(dir, "c.svg"), knockout(B(`<circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  ${L("M 7 9 H 17 M 7 15 H 17")}`), { name: "c" }).text);
+  const r = await checkSet(dir);
+  assert.equal(r.finish, "bulk");
+  assert.equal(r.measured, true);
+  assert.deepEqual(r.failures.filter((f) => f.rule !== "weight").map((f) => `${f.rule} ${f.icon} ${f.got}`), []);
+  assert.ok(r.rows.every((x) => typeof x["share%"] === "number" && x["share%"] > 25 && x["share%"] < 60), JSON.stringify(r.rows));
+  // share: a body with a sliver of accent
+  writeFileSync(join(dir, "d.svg"), B(`${SQ}\n  <path d="M 1 1 H 3 V 3 H 1 Z" />`));
+  // the band: a hand-cut hole 1 wide on the right of the accent
+  writeFileSync(join(dir, "e.svg"), B(`<path d="M 3 3 H 21 V 21 H 3 Z M 10 8.5 A 1.5 1.5 0 0 0 8.5 10 V 14 A 1.5 1.5 0 0 0 10 15.5 H 14 A 1 1.5 0 0 0 15 14 V 10 A 1 1.5 0 0 0 14 8.5 Z" fill-opacity=".4" data-cut="knockout" data-body="M 3 3 H 21 V 21 H 3 Z" />\n  <path d="M 10 10 H 14 V 14 H 10 Z" />`));
+  // gap: two line accents 1 apart, edge to edge (centrelines 3 apart, 2 wide); the body sits clear of them
+  writeFileSync(join(dir, "f.svg"), B(`<circle cx="12" cy="14" r="8" fill-opacity=".4" />\n  ${L("M 1 1 H 4")}\n  ${L("M 1 4 H 4")}`));
+  const r2 = await checkSet(dir);
+  const got = (icon, rule) => r2.failures.filter((f) => f.icon === icon && f.rule === rule).map((f) => `${f.got} → ${f.want}`);
+  assert.deepEqual(got("d", "share"), ["accent 0.03 of the ink → 0.25 to 0.6"]);
+  assert.match(got("e", "knockout")[0], /^paper 1(\.\d+)? wide at 14(\.\d+)?, 1\d(\.\d+)? → 1\.5: re-run knockout\.mjs$/);
+  assert.deepEqual(got("f", "gap"), ["path@3 to path@4 1 apart → ≥ 1.5 apart, or crossing"]);
+  assert.deepEqual(got("f", "air"), ["paper 1.1 wide at 2.5, 2.5 → ≥ 1.5 apart, or touching"]);
+  assert.deepEqual(got("a", "air"), []);
+});

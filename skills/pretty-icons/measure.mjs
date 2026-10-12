@@ -15,20 +15,21 @@
  * Gap and air may both name one pair of parallel lines.
  * diagonal: the base's ink axes; an elongated icon at 45° rising to the right counts, a set holds at most max(1, round(0.3 × N)), and one falling to the right is refused.
  */
-import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE, COUNTER, DIAGONAL, SHADOW } from "./presets.mjs";
-import { measure, shares, resvg, air, elongation, NO_RASTER } from "./raster.mjs";
+import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE, COUNTER, DIAGONAL, SHADOW, KNOCKOUT_TOL } from "./presets.mjs";
+import { measure, shares, resvg, air, elongation, band, NO_RASTER } from "./raster.mjs";
 import { parse, compose, num, geometryKey } from "./svg.mjs";
 import { isModifier } from "./modifiers.mjs";
 import { isShadow } from "./shadow.mjs";
 import { sampleParts, minDistance, interiorParts, subpaths } from "./geometry.mjs";
 import { objectOf, linesOf, classify } from "./filled.mjs";
+import { classify as bulkClassify, crosses, isKnockout, uncut } from "./bulk.mjs";
 
 // `+ 0` turns -0 into 0, so a centred icon prints 0, not -0.
 const r2 = (n) => Math.round(n * 100) / 100 + 0;
 const fail = (list, rule, icon, got, want) => list.push({ rule, icon, got, want });
 
-export function nearestKeyline(G, w, h) {
-  const { keylines } = preset(G);
+export function nearestKeyline(G, w, h, finish) {
+  const { keylines } = preset(G, finish);
   let best = null;
   for (const format of FORMATS) {
     const [kw, kh] = keylines[format], dw = w - kw, dh = h - kh, score = Math.abs(dw) + Math.abs(dh);
@@ -60,8 +61,8 @@ function interiorDetails(parsed, els, p, c, rootW) {
   return out;
 }
 
-export async function measuredChecks(set, G) {
-  const p = preset(G), failures = [], rows = [];
+export async function measuredChecks(set, G, finish) {
+  const p = preset(G, finish), bulk = p.finish === "bulk", failures = [], rows = [];
   // The rasteriser first, outside the per-icon guard: when it cannot be had, nothing is measured.
   if (set.length) resvg();
   const measures = [];
@@ -74,10 +75,10 @@ export async function measuredChecks(set, G) {
       const els = parsed.elements.filter((el) => !(filled && "transform" in el.attrs) && !isModifier(el) && !isShadow(el));
       const modified = parsed.elements.some(isModifier), shadowed = parsed.elements.some(isShadow);
       const base = !modified && !shadowed ? s.text : compose(parsed.attrs, parsed.elements.filter((el) => !isModifier(el) && !isShadow(el)));
-      const c = filled ? classify(els) : null;
+      const c = filled ? classify(els) : bulk ? bulkClassify({ ...parsed, elements: els }) : null;
       const details = new Set(filled ? c.details.map((el) => el.at) : []);
-      const paint = new Set(filled ? [...c.paint].map((el) => el.at) : els.filter((el) => String(el.attrs.stroke).trim().toLowerCase() === "none").map((el) => el.at));
-      const rootW = num(parsed.attrs, "stroke-width", p.stroke);
+      const paint = new Set(filled ? [...c.paint].map((el) => el.at) : bulk ? [] : els.filter((el) => String(el.attrs.stroke).trim().toLowerCase() === "none").map((el) => el.at));
+      const rootW = bulk ? 0 : num(parsed.attrs, "stroke-width", p.stroke);
       const parts = els.map((el) => { try { return sampleParts(el, 0.05); } catch (e) { throw new Error(`${el.at} ${e.message}`); } });
       const whole = await measure(s.text, G);
       const m = filled
@@ -85,29 +86,45 @@ export async function measuredChecks(set, G) {
         : { ...(await measure(base, G)), live: whole.box };
       const e = await elongation(filled ? objectOf(base) : base, G);
       const share = filled ? await shares(base, G) : null;
-      const inner = interiorDetails(parsed, els, p, c, rootW);
+      const accentInk = bulk ? (await measure(compose(parsed.attrs, c.accents), G)).ink : null;
+      const inner = bulk ? [] : interiorDetails(parsed, els, p, c, rootW);
       // air reads the base without its interior details, subpath by subpath: those are loose's, a stroke from the contour;
       // a path with a detail and an outside part keeps the outside part
       const innerParts = new Map();
       for (const { el, i } of inner) innerParts.set(el.at, (innerParts.get(el.at) ?? new Set()).add(i));
-      const outside = els.flatMap((el) => {
-        const drop = innerParts.get(el.at);
-        if (!drop) return [el];
-        const keep = el.tag === "path" ? subpaths(el.attrs.d ?? "").filter((_, i) => !drop.has(i)) : [];
-        return keep.length ? [{ ...el, attrs: { ...el.attrs, d: keep.join("") } }] : [];
-      });
-      const narrow = await air(compose(parsed.attrs, outside), G, p.stroke);
+      // at bulk a crossing accent and its cut body are the band's, not gap's or air's; air sees every body full
+      const crossing = new Set();
+      if (bulk) for (const b of c.bodies) for (const a of c.accents) if (crosses(a, b)) crossing.add(`${a.at}|${b.at}`);
+      const full = (list) => list.map((el) => { const { "fill-opacity": _, "data-cut": __, "data-body": ___, ...a } = el.attrs; return { ...el, attrs: a }; });
+      const outside = bulk
+        ? full(els.filter((el) => !c.accents.includes(el) || ![...crossing].some((k) => k.startsWith(`${el.at}|`))))
+        : els.flatMap((el) => {
+          const drop = innerParts.get(el.at);
+          if (!drop) return [el];
+          const keep = el.tag === "path" ? subpaths(el.attrs.d ?? "").filter((_, i) => !drop.has(i)) : [];
+          return keep.length ? [{ ...el, attrs: { ...el.attrs, d: keep.join("") } }] : [];
+        });
+      const narrow = await air(compose(parsed.attrs, outside), G, bulk ? p.gap / AIR : p.stroke);
       // a detail and its body (and the body's contour, the same geometry) are loose's, not gap's: keyed by the detail's subpath
       const skip = new Set();
-      for (const { el, i, body } of inner) for (const x of els) if (geometryKey(x) === geometryKey(body)) skip.add(`${el.at}#${i}|${x.at}`);
-      measures.push({ ...s, els, parts, details, paint, m, modified, share, rootW, inner, skip, narrow, e, shadowed });
+      if (bulk) for (const k of crossing) { const [a, b] = k.split("|"); skip.add(`${a}|${b}`); skip.add(`${b}|${a}`); }
+      else for (const { el, i, body } of inner) for (const x of els) if (geometryKey(x) === geometryKey(body)) skip.add(`${el.at}#${i}|${x.at}`);
+      // the band, on every cut body: the cut, its uncut geometry, and the accents that cross it, each rendered full
+      const bands = [];
+      if (bulk) for (const b of c.bodies.filter(isKnockout)) {
+        const under = c.accents.filter((a) => crossing.has(`${a.at}|${b.at}`));
+        if (!under.length) continue; // bulkChecks reports a stale cut
+        bands.push(...(await band(compose(parsed.attrs, full([b])), compose(parsed.attrs, full([uncut(b)])), compose(parsed.attrs, full(under)), G, p.knockout, KNOCKOUT_TOL)));
+      }
+      const bodyAt = bulk ? new Set(c.bodies.map((b) => b.at)) : new Set();
+      measures.push({ ...s, els, parts, details, paint, m, modified, share, accentInk, rootW, inner, skip, narrow, e, shadowed, bands, bodyAt });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
     }
   }
 
-  for (const { name, els, parts, details, paint, m, modified, share, rootW, inner, skip, narrow, shadowed } of measures) {
+  for (const { name, els, parts, details, paint, m, modified, share, accentInk, rootW, inner, skip, narrow, shadowed, bands, bodyAt } of measures) {
     const { box, mass, ink, live } = m;
     // an empty icon has no box or mass to judge; count already reports it
     const inked = live.w > 0;
@@ -115,7 +132,7 @@ export async function measuredChecks(set, G) {
     const edge = G - p.pad + (shadowed ? SHADOW : 0), lo = p.pad - 0.05, hi = edge + 0.05;
     if (inked && (live.x0 < lo || live.y0 < lo || live.x1 > hi || live.y1 > hi)) fail(failures, "live", name, `ink ${r2(live.x0)},${r2(live.y0)}–${r2(live.x1)},${r2(live.y1)}`, `inside ${p.pad}–${edge}`);
     // keyline
-    const k = nearestKeyline(G, box.w, box.h);
+    const k = nearestKeyline(G, box.w, box.h, finish);
     const fits = inked && modified ? true : inked && Math.abs(k.dw) <= p.keylineTol + 1e-9 && Math.abs(k.dh) <= p.keylineTol + 1e-9;
     if (inked && !modified && !fits) fail(failures, "keyline", name, `${r2(box.w)} × ${r2(box.h)}`, `${k.format} ${p.keylines[k.format].join(" × ")} ±${p.keylineTol}`);
     // gravity: the object's mass about its keyline's centre
@@ -133,7 +150,8 @@ export async function measuredChecks(set, G) {
     const width = new Map(els.map((el) => [el.at, num(el.attrs, "stroke-width", rootW)]));
     const gap = (A, B, a, b) => {
       const ka = a.replace(/\[\d+\]$/, ""), kb = b.replace(/\[\d+\]$/, "");
-      const min = (details.has(ka) || details.has(kb) ? AIR / 2 : AIR) * p.stroke;
+      if (bulk && skip.has(`${ka}|${kb}`)) return;
+      const min = bulk ? p.gap : (details.has(ka) || details.has(kb) ? AIR / 2 : AIR) * p.stroke;
       const centre = minDistance(A, B), outer = centre - (width.get(ka) + width.get(kb)) / 2;
       if (centre > TOUCH && outer < min - 1e-9) fail(failures, "gap", name, `${a} to ${b} ${outer < 0 ? `overlapping, centrelines ${r2(centre)} apart` : `${r2(outer)} apart`}`, `≥ ${+min.toFixed(3)} apart, or crossing`);
     };
@@ -149,14 +167,20 @@ export async function measuredChecks(set, G) {
       if (paint.has(els[i].at)) continue;
       for (let j = i + 1; j < els.length; j++) if (!paint.has(els[j].at)) for (const [A, a] of side(i, j)) for (const [B, b] of side(j, i)) gap(A, B, a, b);
       const sub = parts[i];
-      if (sub.length > 1) for (let a = 0; a < sub.length; a++) for (let b = a + 1; b < sub.length; b++) gap(sub[a], sub[b], `${els[i].at}[${a}]`, `${els[i].at}[${b}]`);
+      if (sub.length > 1 && !bodyAt.has(els[i].at)) for (let a = 0; a < sub.length; a++) for (let b = a + 1; b < sub.length; b++) gap(sub[a], sub[b], `${els[i].at}[${a}]`, `${els[i].at}[${b}]`);
     }
     // air: paper narrower than AIR strokes between inks that do not touch, or a counter under COUNTER
     for (const a of narrow) {
-      if (a.kind === "paper") fail(failures, "air", name, `paper ${a.across.toFixed(1)} strokes wide at ${a.at[0]}, ${a.at[1]}`, `≥ ${AIR} apart, or touching`);
-      else fail(failures, "air", name, `counter ${a.across.toFixed(1)} strokes across at ${a.at[0]}, ${a.at[1]}`, `≥ ${COUNTER} across`);
+      const unit = bulk ? "" : " strokes";
+      if (a.kind === "paper") fail(failures, "air", name, `paper ${a.across.toFixed(1)}${unit} wide at ${a.at[0]}, ${a.at[1]}`, `≥ ${AIR} apart, or touching`);
+      else fail(failures, "air", name, `counter ${a.across.toFixed(1)}${unit} across at ${a.at[0]}, ${a.at[1]}`, `≥ ${COUNTER} across`);
     }
-    rows.push({ icon: name, x0: r2(box.x0), y0: r2(box.y0), w: r2(box.w), h: r2(box.h), keyline: fits ? k.format : "—", ink: r2(ink), dx: r2(dx), dy: r2(dy), ...(share ? { "line%": share.paint ? Math.round((1000 * share.dark) / share.paint) / 10 : 0 } : {}) });
+    if (bulk && ink > 0) {
+      const sh = accentInk / ink;
+      if (sh < p.share[0] || sh > p.share[1]) fail(failures, "share", name, `accent ${sh.toFixed(2)} of the ink`, `${p.share[0]} to ${p.share[1]}`);
+    }
+    for (const b of bands) fail(failures, "knockout", name, `paper ${b.width} wide at ${b.at[0]}, ${b.at[1]}`, `${p.knockout}: re-run knockout.mjs`);
+    rows.push({ icon: name, x0: r2(box.x0), y0: r2(box.y0), w: r2(box.w), h: r2(box.h), keyline: fits ? k.format : "—", ink: r2(ink), dx: r2(dx), dy: r2(dy), ...(share ? { "line%": share.paint ? Math.round((1000 * share.dark) / share.paint) / 10 : 0 } : {}), ...(bulk && ink > 0 ? { "share%": Math.round((1000 * accentInk) / ink) / 10 } : {}) });
   }
 
   // diagonal: an elongated icon may lie at 45°, lower-left to upper-right, in a share of the set; never the other way
@@ -171,7 +195,7 @@ export async function measuredChecks(set, G) {
   const inks = weighed.map((x) => x.m.ink).sort((a, b) => a - b);
   const own = inks.length >= 3;
   const mid = inks.length >> 1;
-  const ref = referenceInk(G);
+  const ref = referenceInk(G, finish);
   const median = !own ? ref : inks.length % 2 ? inks[mid] : (inks[mid - 1] + inks[mid]) / 2;
   const pct = (t) => Math.round(t * 100);
   const weigh = (name, ink, against, tol, what) => {
