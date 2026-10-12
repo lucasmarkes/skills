@@ -153,7 +153,7 @@ Blind (verbatim):
 9. machines: gear or cog with a hub.
 10. connectivity: Wi-Fi signal fan.
 
-"Numbers 2 and 8 both fit 'interfaces'. 2 is a window or panel layout. 8 is an app-grid, which could also read as 'all'. I gave 2 'interfaces' and 8 'all'." "8 is the weakest. It reads as 'all' or 'interfaces', and I took 'all' because 2 was the better fit for 'interfaces'. 9 (gear to 'machines') is a mild fit too." Verdict: all ten match; fail: interfaces and all. Empty now reads as "open inbox tray, empty".
+"Numbers 2 and 8 both fit 'interfaces'. 2 is a window or panel layout. 8 is an app-grid, which could also read as 'all'. I gave 2 'interfaces' and 8 'all'. …" "8 is the weakest. It reads as 'all' or 'interfaces', and I took 'all' because 2 was the better fit for 'interfaces'. 9 (gear to 'machines') is a mild fit too. …" Verdict: all ten match; fail: interfaces and all. Empty now reads as "open inbox tray, empty".
 
 Craft (verbatim defects):
 
@@ -170,7 +170,7 @@ Craft (verbatim defects):
 
 Weakest three: empty, interfaces, machines. Verdict: fail: all but `all`.
 
-Set (verbatim): "Icons that look like a different set: 4 (data) and 9 (marks). 4 (data): a taller, heavier, detailed cylinder. 9 (marks): a different, bookmark-like shape with a bold checkmark." Verdict: fail, two named.
+Set (verbatim): "Icons that look like a different set: 4 (data) and 9 (marks). 4 (data): a taller, heavier, detailed cylinder. 9 (marks): a different, bookmark-like shape with a bold checkmark. …" Verdict: fail, two named.
 
 Studio (coin A = ours): "A. Cohesive, consistent two-tone geometry." Verdict: fail as written; the second round in a row the reader singled out ours.
 
@@ -206,7 +206,7 @@ Craft (verbatim defects):
 
 Verdict: fail: nine; machines passes for the first time.
 
-Set (verbatim): "Outlier: 3 (connectivity), because it has no inner outline, flat wedge. ... I'm not confident on this call: the sheet looks mostly like one set, so 3 is a marginal outlier." Verdict: pass, one named (connectivity, "no inner outline, flat wedge").
+Set (verbatim): "Outlier: 3 (connectivity), because it has no inner outline, flat wedge. … I'm not confident on this call: the sheet looks mostly like one set, so 3 is a marginal outlier." Verdict: pass, one named (connectivity, "no inner outline, flat wedge").
 
 Studio (coin B = ours): "B. Consistent grid, shapes, weight." Verdict: fail as written. The third round in a row the reader picked our set, now with the coin flipped, so it is not a position bias.
 
@@ -225,7 +225,7 @@ Blind (verbatim):
 9. security: shield with a keyhole
 10. machines: gear/cog with a center hole
 
-"1 (marks) is weak. A bookmark with a dot could be 'marks' by literal reading, but it also fits 'all' or 'interfaces'. 7 (all) is fairly weak. A four-square grid fits 'all' as a generic 'everything' icon, but it could also be 'interfaces' or 'machines'. 10 (machines) is a mild guess. The gear fits 'machines', but 'coding' or 'interfaces' would also be reasonable." Verdict: all ten match; fail by elimination: marks and all; machines a borderline pass ("a mild guess", not elimination).
+"1 (marks) is weak. A bookmark with a dot could be 'marks' by literal reading, but it also fits 'all' or 'interfaces'. … 7 (all) is fairly weak. A four-square grid fits 'all' as a generic 'everything' icon, but it could also be 'interfaces' or 'machines'. 10 (machines) is a mild guess. The gear fits 'machines', but 'coding' or 'interfaces' would also be reasonable. …" Verdict: all ten match; fail by elimination: marks and all; machines a borderline pass ("a mild guess", not elimination).
 
 Craft (verbatim defects):
 
@@ -242,7 +242,7 @@ Craft (verbatim defects):
 
 Weakest three: empty, devices, connectivity. Verdict: fail, nine of ten (only `all` passes).
 
-Set (verbatim): "Odd one out: 10 (security), because the keyhole shield has an outline. ... the plainest reason is 'different outline/detail style'." Verdict: pass, one named.
+Set (verbatim): "Odd one out: 10 (security), because the keyhole shield has an outline. … the plainest reason is 'different outline/detail style'." Verdict: pass, one named.
 
 Studio (coin B = ours): "B. Consistent, cohesive, polished geometry." Verdict: fail as written; the fourth round in a row the reader picked ours, under both coin sides.
 
@@ -462,4 +462,4 @@ Findings the kitchen drawer reported about the skill:
 
 Both trials **fail** against the spec's success 3. Each drawer's first `ok` was on check run 7, not 1 or 2, in both trials (notes runs 1 to 6 exit 1; kitchen runs 1 to 6 exit 1). The controller's blind read is 6 of 6, none by elimination, in both, so that clause passes.
 
-What the failures point at: weight (±15% of the median, ±20% of the reference 111.6) and gravity drove most of runs 1 to 6 in both trials; share and keyline came next. Neither drawer passed its own craft read (kitchen: whisk, toaster, cup and kettle named in round 5; its set read named whisk and toaster). The notes drawer's: search "handle detached" every round (the 1.5 band reads as a gap between a full handle and a .4 lens), inbox and upload "confused silhouette", chat "tail tiny". In the kitchen trial a whisk's several wires cannot be drawn at bulk (the knockout plus a share of at most 0.6), and the drawer's own reader failed the whisk. Candidates for a later change, for the person to judge: the weight band at bulk, which the first runs of both drawers broke by 15% to 47% on thin or on dense icons; a warning in the skill that icons resting on several thin inner lines (a whisk) do not fit bulk; and the handle gap of the 1.5 band.
+What the failures point at: weight (±15% of the median, ±20% of the reference 111.6) and gravity drove most of runs 1 to 6 in both trials; share and keyline came next. Neither drawer passed its own craft read (kitchen: whisk, toaster, cup and kettle named in round 5; its set read named whisk and toaster). The notes drawer's: search "handle detached" every round (the 1.5 band reads as a gap between a full handle and a .4 lens), inbox and upload "confused silhouette", chat "tail tiny". In the kitchen trial a whisk's several wires cannot be drawn at bulk (the knockout plus a share of at most 0.6), and the drawer's own reader failed the whisk. Candidates for a later change, for the person to judge: the weight band at bulk, which the first runs of both drawers broke by about 19% to 47% on thin or on dense icons; a warning in the skill that icons resting on several thin inner lines (a whisk) do not fit bulk; and the handle gap of the 1.5 band.

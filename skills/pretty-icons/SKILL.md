@@ -15,7 +15,7 @@ Files named below are in this skill's folder, `<skill-dir>`. Draw icons in `pret
 The argument is names, a file, or nothing. With nothing, find the app's navigation and icons. Before drawing, write back:
 
 - the names to cover;
-- the finish, which the person chooses: duotone (one colour, the text's, that follows hover and active states, thin), bulk (the same colour at two inks, with presence) or filled (neutral tones, light and shade, the same in every state). Ask, and recommend from where the icon is shown: bulk in a sidebar, a nav or tabs when the app wants presence, duotone when the app is thin, beside text in a table row; filled in a feature grid, a category list, a card header or an empty state. With nobody to ask, take the recommendation and say so;
+- the finish, which the person chooses: duotone (one colour, the text's, that follows hover and active states, thin), bulk (the same colour at two inks, with presence) or filled (neutral tones, light and shade, the same in every state). Ask, and recommend from where the icon is shown: bulk in a sidebar, a nav or tabs when the app wants presence, duotone when the app is thin or the icon sits beside text in a table row; filled in a feature grid, a category list, a card header or an empty state. With nobody to ask, take the recommendation and say so;
 - the grid, from the finish. Duotone is drawn at the size it is shown: measure the existing icon's rendered box, 16 beside 13–14px text, 20 beside 15–16px, 24 beside larger; never draw 24 for a 16px slot. Filled is drawn on 48 and shown at 16–64 px by CSS; below 32 its line is under one pixel on a 1× screen, so say so when the slot is that small. Never draw duotone for a 48 px slot. Bulk is drawn on 24 and shown at 16 to 32 px by CSS; never draw bulk on 16 or 20;
 - how the app takes icons: React (and any wrapper, like `svg(children)`), `.svg` files, or a sprite.
 
@@ -44,7 +44,7 @@ A state (add, off, locked, new) is the base icon plus `node <skill-dir>/modifier
 
 ## 4. Check
 
-1. `node <skill-dir>/check.mjs pretty-icons/`. Fix each line by its rule until it prints `ok`; a `join` line is mended by step 3's repair. The first run installs `@resvg/resvg-js` into a cache (`PRETTY_ICONS_CACHE` moves it).
+1. `node <skill-dir>/check.mjs pretty-icons/`. Fix each line by its rule until it prints `ok`; a `join` line is mended by step 3's item 2 (repair). The first run installs `@resvg/resvg-js` into a cache (`PRETTY_ICONS_CACHE` moves it).
 2. `node <skill-dir>/sheet.mjs pretty-icons/`. It writes `pretty-icons-sheet.png` and `pretty-icons-blind.png` to a temp folder of this set's own (`--out=<dir>` moves them) and prints their paths and the key. Never put them in the app. Look at the sheet.
 3. `node <skill-dir>/sheet.mjs pretty-icons/ --showcase` writes `pretty-icons-showcase.png`: the set alone, five to a row. Look at it whole: an icon heavier, darker or more crowded than its neighbours goes back to step 3 (Draw).
 4. Do the blind read in `read.md`. A failure goes back to step 3 (Draw), then all of step 4, with a new reader.
