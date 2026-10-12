@@ -105,8 +105,8 @@ export function toIndex(set, { banner: head = BANNER } = {}) {
   return `${head}\n${set.map((s, i) => `import ${ids[i]} from "./${s.name}.svg";`).join("\n")}\n\nexport const ${EXPORT} = { ${ids.join(", ")} };\n`;
 }
 
-// The file as written, less the two marks; the regex matches an attribute written by knockout.mjs or modifiers.mjs (compose quotes with ").
-const stripText = (text) => text.replace(/\s+data-(cut|body)="[^"]*"/g, "");
+// The file as written, less the two marks; the regex matches an attribute written by knockout.mjs or modifiers.mjs (compose quotes with "; a hand-edited file may use ').
+const stripText = (text) => text.replace(/\s+data-(cut|body)=("[^"]*"|'[^']*')/g, "");
 
 export async function emit(folder, { as, to, wrapper }) {
   if (!AS.includes(as)) throw new Error(`--as must be ${AS.join(", ")}, not "${as}"`);
