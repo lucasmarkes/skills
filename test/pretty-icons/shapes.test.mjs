@@ -284,7 +284,8 @@ test("squircle: a primitive on 24 at bulk, 5 or 3 by the short side, a pill at -
   assert.equal(s.P, null);
   assert.ok(onGrid(s.d));
   assert.deepEqual(clean(s.d), []);
-  assert.ok(shape("squircle", { w: 8, h: 8, at: [8, 8], grid: 24, finish: "bulk" }).d.includes("C 9.5 4 10 4 11 5"));
+  assert.ok(shape("squircle", { w: 8, h: 8, at: [8, 8], grid: 24, finish: "bulk" }).d.includes("C 9.5 4 10.5 4 11.25 4.75"));
+  for (const n of [8, 11]) assert.deepEqual(clean(shape("squircle", { w: n, h: n, at: [12, 12], grid: 24, finish: "bulk" }).d), [], `${n}x${n} squircle`);
   assert.equal(shape("squircle", { w: 20, h: 8, at: [12, 12], r: 4, grid: 24, finish: "bulk" }).d, "M 6 8 H 18 A 4 4 0 0 1 18 16 H 6 A 4 4 0 0 1 6 8 Z");
   refused(() => shape("squircle", { w: 18, h: 18, at: [12, 12], r: 10, grid: 24, finish: "bulk" }), "--r 10: at most 9");
   refused(() => shape("squircle", { w: 18, h: 18, grid: 16 }), "squircle: the bulk finish, --finish bulk");

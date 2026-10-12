@@ -250,7 +250,8 @@ export function squircle(x, y, w, h, r) {
       ? `M ${fmtQ(x + r)} ${fmtQ(y)} H ${fmtQ(x + w - r)} A ${fmtQ(r)} ${fmtQ(r)} 0 0 1 ${fmtQ(x + w - r)} ${fmtQ(y + h)} H ${fmtQ(x + r)} A ${fmtQ(r)} ${fmtQ(r)} 0 0 1 ${fmtQ(x + r)} ${fmtQ(y)} Z`
       : `M ${fmtQ(x + w)} ${fmtQ(y + r)} V ${fmtQ(y + h - r)} A ${fmtQ(r)} ${fmtQ(r)} 0 0 1 ${fmtQ(x)} ${fmtQ(y + h - r)} V ${fmtQ(y + r)} A ${fmtQ(r)} ${fmtQ(r)} 0 0 1 ${fmtQ(x + w)} ${fmtQ(y + r)} Z`;
   }
-  const m = snapQ(0.293 * r), a = snapQ((r + 2 * m) / 2);
+  // at r = 3 the formula's m = 1 bends to a radius of 1.62, under the kit's own floor of 2: m = 0.75, a = 2.5
+  const m = r === 3 ? 0.75 : snapQ(0.293 * r), a = r === 3 ? 2.5 : snapQ((r + 2 * m) / 2);
   // corner C with in-direction u (along the side we arrive on) and out-direction v (along the side we leave on)
   const corner = ([cx, cy], [ux, uy], [vx, vy]) => {
     const P = (kx, ky) => `${fmtQ(cx + kx)} ${fmtQ(cy + ky)}`;
