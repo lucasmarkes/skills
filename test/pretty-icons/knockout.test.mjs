@@ -175,3 +175,15 @@ test("a contour is refused with check's line", () => {
   const contour = svg24b(`<path d="M 3 3 H 21 V 21 H 3 Z" fill-opacity=".4" stroke="currentColor" stroke-width="2" />\n  ${DIAMOND}`);
   assert.throws(() => knockout(contour, { name: "edit" }), (e) => e instanceof KnockoutError && e.message === "stroke  edit  path@2 stroke-linecap missing → round");
 });
+
+test("a curved accent leaves no zero-length segment in the cut", () => {
+  const src = svg24b(`<circle cx="12" cy="12" r="9" fill-opacity=".4" />\n  ${LINE("M7.5 21 Q12 15 20 4")}`);
+  const d = parse(knockout(src, { name: "edit" }).text).elements[0].attrs.d;
+  let cur = null;
+  for (const seg of d.match(/[MLCZ][^MLCZ]*/g)) {
+    const n = seg.slice(1).trim().split(/\s+/).filter(Boolean).map(Number);
+    if (seg[0] === "Z") continue;
+    if (seg[0] !== "M") assert.ok(!(cur && n.every((v, i) => v === cur[i % 2])), `zero-length ${seg.trim()} after ${cur}`);
+    cur = n.slice(-2);
+  }
+});

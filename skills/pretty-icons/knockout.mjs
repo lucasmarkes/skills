@@ -65,13 +65,18 @@ function pathD(path) {
   const S = path.segments;
   if (!S.length) return "";
   let d = `M ${f(S[0].point.x)} ${f(S[0].point.y)}`;
+  let cur = `${f(S[0].point.x)} ${f(S[0].point.y)}`;
   const n = S.length;
   for (let i = 0; i < n; i++) {
     if (i === n - 1 && !path.closed) break;
     const a = S[i], b = S[(i + 1) % n];
-    d += a.handleOut.isZero() && b.handleIn.isZero()
-      ? ` L ${f(b.point.x)} ${f(b.point.y)}`
-      : ` C ${f(a.point.x + a.handleOut.x)} ${f(a.point.y + a.handleOut.y)} ${f(b.point.x + b.handleIn.x)} ${f(b.point.y + b.handleIn.y)} ${f(b.point.x)} ${f(b.point.y)}`;
+    const end = `${f(b.point.x)} ${f(b.point.y)}`;
+    const curved = !(a.handleOut.isZero() && b.handleIn.isZero());
+    const c1 = `${f(a.point.x + a.handleOut.x)} ${f(a.point.y + a.handleOut.y)}`, c2 = `${f(b.point.x + b.handleIn.x)} ${f(b.point.y + b.handleIn.y)}`;
+    // a segment that goes nowhere at two decimals is dropped, not written
+    if (end === cur && (!curved || (c1 === cur && c2 === cur))) continue;
+    d += curved ? ` C ${c1} ${c2} ${end}` : ` L ${end}`;
+    cur = end;
   }
   return d + (path.closed ? " Z" : "");
 }
