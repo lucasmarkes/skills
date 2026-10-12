@@ -91,6 +91,7 @@ test("bulk: 24 only, pad 2, stroke 2, knockout 1.5, share band, squircle radii",
   const p = preset(24, "bulk");
   assert.equal(p.finish, "bulk");
   assert.equal(p.G, 24);
+  assert.equal(p.fill, 0.4);
   assert.equal(p.pad, 2);
   assert.equal(p.live, 20);
   assert.equal(p.step, 0.25);

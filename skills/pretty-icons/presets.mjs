@@ -113,7 +113,7 @@ export function preset(G, finish) {
     const b = BULK_PRESETS[G];
     if (!b) throw new Error(`no bulk preset for grid ${G}: bulk is 24`);
     return {
-      G, fill: FILL, live: G - 2 * b.pad, step: GRID_STEP, elements: 3, keylineTol: KEYLINE_TOL, gravityTol: GRAVITY_TOL,
+      G, fill: 0.4, live: G - 2 * b.pad, step: GRID_STEP, elements: 3, keylineTol: KEYLINE_TOL, gravityTol: GRAVITY_TOL,
       weightTol: WEIGHT_TOL, referenceTol: REFERENCE_TOL, centre: [G / 2, G / 2], ...b,
     };
   }
