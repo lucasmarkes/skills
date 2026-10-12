@@ -189,7 +189,7 @@ const bulkFolder = (t) => {
   const SQ = '<path d="M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z" fill-opacity=".4" />';
   writeFileSync(join(dir, "a.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 7 L 17 12 L 12 17 L 7 12 Z" />\n</svg>`, { name: "a" }).text);
   writeFileSync(join(dir, "b.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 7.5 L 16.5 12 L 12 16.5 L 7.5 12 Z" />\n</svg>`, { name: "b" }).text);
-  writeFileSync(join(dir, "c.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 7 L 17 12 L 12 17 L 7 12 Z" />\n  ${L("M 7 12 L 12 7")}\n</svg>`, { name: "c" }).text);
+  writeFileSync(join(dir, "c.svg"), knockout(`${root}\n  ${SQ}\n  <path d="M 12 7.5 L 16.5 12 L 12 16.5 L 7.5 12 Z" />\n  ${L("M 7.5 12 L 12 7.5")}\n</svg>`, { name: "c" }).text);
   return dir;
 };
 
