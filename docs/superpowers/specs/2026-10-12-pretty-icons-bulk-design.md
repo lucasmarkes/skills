@@ -4,7 +4,7 @@ Date: 2026-10-12 · Repo: `lucasmarkes/skills` · Skill: `skills/pretty-icons` �
 
 ## Why
 
-The skill draws two finishes: duotone, a thin stroke with a 20% tint, on 16 to 24; and filled, a line over toned bodies with shade, on 48. Both measure well and read as one set. Beside the set the person holds up as the bar (the bulk reference sheet), they look built, not made: thin, pale, polite. The bar is the opposite construction:
+The skill draws two finishes: duotone, a thin stroke with a 20% tint, on 16 to 24; and filled, a line over toned bodies with shade, on 48. Both measure well and read as one set. Beside the set the person holds up as the bar (a reference set of forty icons), they look built, not made: thin, pale, polite. The bar is the opposite construction:
 
 1. no contour at all: a body is a flat tone, an accent is a flat ink;
 2. heavy: the ink is about 2 on 24, with round ends;
