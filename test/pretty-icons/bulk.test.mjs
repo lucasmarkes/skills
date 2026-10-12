@@ -75,8 +75,8 @@ test("construction: a contour, a wrong opacity, an open unstroked path, no body,
 test("an accent's size: a filled accent no side under 2, a line no shorter than 3; eight commands across the accents", () => {
   assert.deepEqual(lines(svg24b(`${BODY24B}\n  <path d="M 1 1 H 7 V 2.5 H 1 Z" />`)), ["construction  edit  path@3 1.5 wide → a filled accent no side under 2"]);
   assert.deepEqual(lines(svg24b(`${BODY24B}\n  ${LINE("M 1 1 H 3.5")}`)), ["construction  edit  path@3 2.5 long → a line accent no shorter than 3"]);
-  const busy = svg24b(`${BODY24B}\n  ${LINE("M 6 8 H 10 V 12 H 14 V 16")}\n  ${LINE("M 14 6 H 18 V 10 H 20 V 14")}`);
-  assert.deepEqual(lines(busy).filter((l) => l.startsWith("count")), ["count  edit  accents 10 drawing commands → at most 8"]);
+  const busy = svg24b(`${BODY24B}\n  ${LINE("M 6 8 H 10 V 12 H 14 V 16")}\n  ${LINE("M 14 6 H 18 V 10 H 20 V 14 H 21")}`);
+  assert.deepEqual(lines(busy).filter((l) => l.startsWith("count")), ["count  edit  accents 9 drawing commands → at most 8"]);
 });
 
 test("a crossing without a cut names the file to cut; data-cut only on a body; a cut with no crossing is stale", () => {
@@ -114,4 +114,12 @@ test("the finish is read from the root; --finish overrides; a mixed folder votes
   assert.equal(setFinish([]), null);
   const asDuo = textChecks("a", svg24b(`${BODY24B}\n  ${LINE("M 2 2 H 5")}`), 24, "duotone").failures.map((f) => f.rule);
   assert.ok(asDuo.includes("stroke"));
+});
+
+test("count: moves are not drawing commands, so five short strokes in one accent are five, not ten", () => {
+  const strokes = [9, 11, 13, 15, 17].map((x) => `M ${x} 9 L ${x} 15`).join(" ");
+  const out = lines(svg24b(`${BODY24B}\n  ${LINE(strokes)}`));
+  assert.ok(!out.some((l) => l.startsWith("count")), out.join("\n"));
+  const nine = [8, 10, 12, 14, 16].map((x) => `M ${x} 9 L ${x} 15`).join(" ") + " L 8 9 L 8 15 L 9 9 L 9 15 L 10 9";
+  assert.ok(lines(svg24b(`${BODY24B}\n  ${LINE(nine)}`)).some((l) => l.startsWith("count  edit  accents 10 drawing commands")));
 });

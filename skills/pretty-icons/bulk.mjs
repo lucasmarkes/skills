@@ -10,7 +10,7 @@
  * uncut geometry in data-body (knockout.mjs writes both); crossings are judged
  * on the uncut geometry. A modifier is an accent for the crossing rule only.
  */
-import { num, isClosed, pathCommands, ROOT_FORBIDDEN } from "./svg.mjs";
+import { num, isClosed, pathCommands, moves, ROOT_FORBIDDEN } from "./svg.mjs";
 import { sampleParts, inside, bounds } from "./geometry.mjs";
 import { isModifier } from "./modifiers.mjs";
 
@@ -122,7 +122,7 @@ export function bulkChecks(icon, parsed, p, { folder } = {}) {
       if (side < MIN_SIDE - 1e-9) fail(failures, "construction", icon, `${el.at} ${side} wide`, `a filled accent no side under ${MIN_SIDE}`);
     }
   }
-  const drawn = base.reduce((t, el) => t + (el.tag === "path" ? pathCommands(el.attrs.d ?? "") : 1), 0);
+  const drawn = base.reduce((t, el) => t + (el.tag === "path" ? pathCommands(el.attrs.d ?? "") - moves(el.attrs.d ?? "") : 1), 0);
   if (drawn > ACCENT_COMMANDS) fail(failures, "count", icon, `accents ${drawn} drawing commands`, `at most ${ACCENT_COMMANDS}`);
   // crossings: every accent against each body's uncut geometry (any body tag; knockout.mjs turns a circle into a path)
   // A body at the wrong opacity has been reported already.
