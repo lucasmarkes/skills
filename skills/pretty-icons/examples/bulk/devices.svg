@@ -1,4 +1,4 @@
 <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
-  <path d="M 4.5 4 H 19.5 A 2.5 2.5 0 0 1 22 6.5 V 12 A 2.5 2.5 0 0 1 19.5 14.5 H 4.5 A 2.5 2.5 0 0 1 2 12 V 6.5 A 2.5 2.5 0 0 1 4.5 4 Z" fill-opacity=".4" />
-  <path d="M 12 14.5 V 19 M 7 19 H 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 4.5 4 H 19.5 A 2.5 2.5 0 0 1 22 6.5 V 11.5 A 2.5 2.5 0 0 1 19.5 14 H 4.5 A 2.5 2.5 0 0 1 2 11.5 V 6.5 A 2.5 2.5 0 0 1 4.5 4 Z" fill-opacity=".4" />
+  <path d="M 8.25 17 L 10.5 14 H 13.5 L 15.75 17 A 1.25 1.25 0 0 1 15.75 19.5 H 8.25 A 1.25 1.25 0 0 1 8.25 17 Z" />
 </svg>
