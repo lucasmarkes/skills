@@ -51,7 +51,7 @@ Every reader was a new sonnet agent that saw only its image. Per round the contr
 | 4 | f2c1981 | 41827 | 10 of 10 names; 2 fail by elimination (all, marks) | 9 of 10 defective | 1 named (connectivity): pass | B, ours (B = ours): fail |
 | 5 | 7bd4c1e | 63194 | 10 of 10 names; 2 fail by elimination (marks, all) | 9 of 10 defective | 1 named (security): pass | B, ours (B = ours): fail |
 
-The craft count is the icons with a defect from the prompt's list; the controller's pass lists were: round 1 all, empty, interfaces; round 2 all, interfaces; rounds 3 to 5 all alone, and round 4 machines as well.
+The craft count is the icons with a defect from the prompt's list; the controller's pass lists were: round 1 all, empty, interfaces; round 2 all, interfaces; round 3 all; round 4 machines; round 5 all.
 
 ### Round 1 (f48a855), seed 87206
 
@@ -66,12 +66,12 @@ Blind (verbatim):
 | 5 | marks | Bookmark ribbon on rounded tile |
 | 6 | data | Stacked database discs |
 | 7 | empty | Disc with diagonal slash |
-| 8 | coding | Code brackets on a tile |
+| 8 | coding | Code brackets `</>` on a tile |
 | 9 | security | Padlock |
 | 10 | all | Four dots in a 2x2 grid |
 
 - Competing numbers: no two numbers compete for one name. The nearest case is 1 and 2, which could both pass as machines or devices. The robot at 1 fits machines better, and 2 is left with devices.
-- Letters or digits: I read none inside any icon.
+- Letters or digits: I read none inside any icon. The `</>` in 8 is a symbol, not a letter, and it names the icon coding. The numbers 1 to 10 are only the captions under the icons.
 - Names given by elimination:
   - 2 (devices): this one is weak. The shape is ambiguous, and a mouse is only a loose fit for devices. I picked it mainly because machines, interfaces, marks and connectivity were taken by clearer icons.
   - 7 (empty): this one is also partly by elimination. A slashed disc reads as none or null, which fits empty, but nothing in it is distinctive.
@@ -108,10 +108,14 @@ Blind (verbatim):
 4: all, a 2x2 grid with one circle and three rounded squares.
 5: machines, a gear with a hub.
 6: interfaces, toggle switches or sliders.
-7: coding, a terminal prompt (>_) in a rounded box.
+7: coding, a terminal prompt (>_) in a rounded box. The ">" and "_" are symbols, not letters or digits.
 8: marks, a bookmark or ribbon with a checkmark.
 9: devices, a monitor or desktop display on a stand.
 10: security, a shield with a keyhole.
+
+"Competing names: none. The names that could be confused are 3 (empty, vs devices or machines), 8 (marks), and 6 (interfaces), but each has a distinct best fit."
+
+"Letters or digits: none are legible inside any icon. The only text is the 1-10 labels under the icons. Icon 7 has the ">_" prompt glyph, and I read no letter in it."
 
 "Names taken only by elimination: none strictly. Icon 3 (empty) is the weakest, since the open box has no unique empty-state cue and I partly reached it because the other names were already assigned. Icon 6 (interfaces) is a milder case, since toggles suggest settings and interfaces equally." Verdict: all ten match; fail: empty, interfaces (the second round read as toggles).
 
@@ -249,8 +253,8 @@ The cap of five rounds was reached with the set calibrated as it stands.
 - **The studio reader picked our set in rounds 2 to 5, under both coin sides.**
   - Round 1 picked the reference ("Consistent, tight, purposeful metaphors."). Rounds 2 and 3 (A = ours) and rounds 4 and 5 (B = ours) picked ours: "Cohesive, consistent shared style.", "Cohesive, consistent two-tone geometry.", "Consistent grid, shapes, weight.", "Consistent, cohesive, polished geometry."
   - The studio read never answered "both", so it fails as written. It is not a position bias, because the coin flipped and the pick followed our set. The read as written asks for "both"; a reader that sees one set as more consistent may never say it. That is for the person to judge.
-- **The craft read failed 9 of 10 in rounds 3, 4 and 5 (7 in round 1, 8 in round 2).** Only `all` passed in the last three rounds. The set passes every measured rule and still reads as defective: silhouettes ("confused silhouette": empty, marks, connectivity, devices), parts that float (the stand of devices), and uneven weight (data, interfaces). The measured rules do not catch these.
-- **Two names fail the blind read by elimination in each of rounds 4 and 5 (marks and all), and `all` and `marks` failed in round 3 or earlier too.** The marks tag and bookmark and the all grid are generic shapes: the reader names them only because the other eight names are taken. Rule 09 needs a more specific object for these two, and the bulk reference set itself does not give one; the ten names of the hairline set were chosen for the duotone finish.
+- **The craft read failed 9 of 10 in rounds 3, 4 and 5 (7 in round 1, 8 in round 2).** `all` passed in rounds 3 and 5, and `machines` in round 4. The set passes every measured rule and still reads as defective: silhouettes ("confused silhouette": empty, marks, connectivity, devices), parts that float (the stand of devices), and uneven weight (data, interfaces). The measured rules do not catch these.
+- **Two names fail the blind read by elimination in each of rounds 4 and 5 (marks and all).** The history: `all` was named partly by elimination in round 1, passed round 2, competed with `interfaces` in round 3 (not elimination), and failed by elimination in rounds 4 and 5; `marks` passed rounds 1 to 3 and first failed by elimination in round 4. The marks tag and bookmark and the all grid are generic shapes: the reader names them only because the other eight names are taken. Rule 09 needs a more specific object for these two, and the bulk reference set itself does not give one; the ten names of the hairline set were chosen for the duotone finish.
 - **The reference ink is calibrated on a set the craft read still faults.** `BULK_REFERENCE_INK[24]` = 111.6 is the median of this set; every later set is measured against it (weight within ±20% of the reference).
 - **The accent of connectivity mixes two finishes** (a full-ink stroked line and a full-ink disc). It keeps the accent at 3 elements.
 - **A fixture had to move, not a rule.** `sheet.test.mjs` fixture c failed the reference rule at 111.6 and was retuned.
@@ -458,4 +462,4 @@ Findings the kitchen drawer reported about the skill:
 
 Both trials **fail** against the spec's success 3. Each drawer's first `ok` was on check run 7, not 1 or 2, in both trials (notes runs 1 to 6 exit 1; kitchen runs 1 to 6 exit 1). The controller's blind read is 6 of 6, none by elimination, in both, so that clause passes.
 
-What the failures point at: weight (±15% of the median, ±20% of the reference 111.6) and gravity drove most of runs 1 to 6 in both trials; share and keyline came next. Neither drawer passed its own craft read (kitchen: whisk, toaster, cup and kettle named in round 5; its set read named whisk and toaster). The notes drawer's: search "handle detached" every round (the 1.5 band reads as a gap between a full handle and a .4 lens), inbox and upload "confused silhouette", chat "tail tiny". In the kitchen trial a whisk's several wires cannot be drawn at bulk (the knockout plus a share of at most 0.6), and the drawer's own reader failed the whisk. Candidates for a later change, for the person to judge: the weight band at bulk, which the first runs of both drawers broke by 20% to 40% on thin or on dense icons; a warning in the skill that icons resting on several thin inner lines (a whisk) do not fit bulk; and the handle gap of the 1.5 band.
+What the failures point at: weight (±15% of the median, ±20% of the reference 111.6) and gravity drove most of runs 1 to 6 in both trials; share and keyline came next. Neither drawer passed its own craft read (kitchen: whisk, toaster, cup and kettle named in round 5; its set read named whisk and toaster). The notes drawer's: search "handle detached" every round (the 1.5 band reads as a gap between a full handle and a .4 lens), inbox and upload "confused silhouette", chat "tail tiny". In the kitchen trial a whisk's several wires cannot be drawn at bulk (the knockout plus a share of at most 0.6), and the drawer's own reader failed the whisk. Candidates for a later change, for the person to judge: the weight band at bulk, which the first runs of both drawers broke by 15% to 47% on thin or on dense icons; a warning in the skill that icons resting on several thin inner lines (a whisk) do not fit bulk; and the handle gap of the 1.5 band.
