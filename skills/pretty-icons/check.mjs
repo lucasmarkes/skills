@@ -30,13 +30,14 @@
 import { readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { preset, radiiFor, FILL, GRIDS } from "./presets.mjs";
+import { preset, radiiFor, finishOf, FILL, GRIDS } from "./presets.mjs";
 import { parse, num, G as gridOf, ELEMENTS, pathNumbers, pathCommands, moves, isClosed } from "./svg.mjs";
 import { straightSides } from "./geometry.mjs";
 import { filledChecks } from "./filled.mjs";
 import { curveFailures, curveColumns, pixelNotes } from "./curve.mjs";
 import { modifierFailures, isModifier, isCut, isSplit } from "./modifiers.mjs";
 import { isShadow, shadowFailures } from "./shadow.mjs";
+import { bulkChecks, isKnockout, uncut } from "./bulk.mjs";
 
 export { pathCommands, isClosed };
 
@@ -74,7 +75,7 @@ function checkDash(failures, icon, where, v, stroke) {
   if (!m || Number(m[1]) < stroke || Number(m[2]) < stroke) fail(failures, "stroke", icon, `${where} stroke-dasharray ${v}`, `dash and gap ≥ ${stroke}`);
 }
 
-export function textChecks(icon, text, expectG) {
+export function textChecks(icon, text, expectG, finish) {
   const failures = [];
   const parsed = parse(text);
   const G = gridOf(parsed.attrs);
@@ -83,21 +84,33 @@ export function textChecks(icon, text, expectG) {
   if (G === null) fail(failures, "canvas", icon, `viewBox ${root.viewBox ?? "missing"}`, `0 0 ${expectG} ${expectG}`);
   else if (G !== expectG) fail(failures, "canvas", icon, `viewBox ${root.viewBox}`, `0 0 ${expectG} ${expectG}`);
   if (!GRIDS[expectG]) { fail(failures, "canvas", icon, `grid ${expectG}`, `one of ${Object.keys(GRIDS).join(", ")}`); return { G, failures, parsed }; }
-  const p = preset(expectG);
+  const want = GRIDS[expectG].finish === "filled" ? "filled" : finish ?? finishOf(root) ?? "duotone";
+  let p;
+  try { p = preset(expectG, want); } catch (e) { fail(failures, "canvas", icon, `finish ${want}`, e.message); return { G, failures, parsed }; }
+  const bulk = p.finish === "bulk";
 
   for (const e of parsed.errors) fail(failures, "elements", icon, e, `only ${ELEMENTS.join(", ")}, flat`);
+  // a root that declares the other finish: one line, not a rule-by-rule report of a file judged by the wrong finish
+  const declared = finishOf(root);
+  if (declared && p.finish !== "filled" && declared !== p.finish) {
+    fail(failures, "stroke", icon, `root finish ${declared}`, `${p.finish}, the set's`);
+    return { G, failures, parsed };
+  }
 
-  // stroke: the root carries it once; no element may set another width, cap, join or opacity
-  const sw = num(root, "stroke-width");
-  if (sw !== p.stroke) fail(failures, "stroke", icon, `stroke-width ${root["stroke-width"] ?? "missing"}`, `${p.stroke}`);
-  if (root["stroke-linecap"] !== "round") fail(failures, "stroke", icon, `stroke-linecap ${root["stroke-linecap"] ?? "missing"}`, "round");
-  if (root["stroke-linejoin"] !== "round") fail(failures, "stroke", icon, `stroke-linejoin ${root["stroke-linejoin"] ?? "missing"}`, "round");
-  for (const a of ROOT_FORBIDDEN) if (a in root) fail(failures, "stroke", icon, `root ${a}`, "not set");
-  if ("fill" in root && !isNone(root.fill)) fail(failures, "stroke", icon, `fill ${root.fill}`, "none");
-  if ("stroke-dasharray" in root) checkDash(failures, icon, "root", root["stroke-dasharray"], p.stroke);
+  if (!bulk) {
+    // stroke: the root carries it once; no element may set another width, cap, join or opacity
+    const sw = num(root, "stroke-width");
+    if (sw !== p.stroke) fail(failures, "stroke", icon, `stroke-width ${root["stroke-width"] ?? "missing"}`, `${p.stroke}`);
+    if (root["stroke-linecap"] !== "round") fail(failures, "stroke", icon, `stroke-linecap ${root["stroke-linecap"] ?? "missing"}`, "round");
+    if (root["stroke-linejoin"] !== "round") fail(failures, "stroke", icon, `stroke-linejoin ${root["stroke-linejoin"] ?? "missing"}`, "round");
+    for (const a of ROOT_FORBIDDEN) if (a in root) fail(failures, "stroke", icon, `root ${a}`, "not set");
+    if ("fill" in root && !isNone(root.fill)) fail(failures, "stroke", icon, `fill ${root.fill}`, "none");
+    if ("stroke-dasharray" in root) checkDash(failures, icon, "root", root["stroke-dasharray"], p.stroke);
+  }
   // the icon's own elements: a shadow copy is shadow.mjs's, judged by shadowFailures alone
   const own = parsed.elements.filter((el) => !isShadow(el));
   for (const el of own) {
+    if (bulk) break; // bulkChecks judges the paint
     const a = el.attrs, where = el.at;
     for (const k of FORBIDDEN_ATTRS) if (k in a && !(k === "stroke-opacity" && isModifier(el))) fail(failures, "stroke", icon, `${where} ${k}`, "not set");
     if ("stroke-width" in a && !p.weights.includes(num(a, "stroke-width"))) fail(failures, "stroke", icon, `${where} stroke-width ${a["stroke-width"]}`, p.finish === "filled" ? `not set: the root's ${p.stroke}, or ${p.contour} on a contour` : p.weights.length ? `the root's, or ${p.weights.join(" or ")}` : "the root's");
@@ -108,9 +121,10 @@ export function textChecks(icon, text, expectG) {
   // grid, radius and the per-path count, on every finish
   for (const el of own) {
     const a = el.attrs, where = el.at;
+    if (bulk && isKnockout(el)) continue; // a cut body: knockout.mjs wrote its d
     const nums = el.tag === "path" ? pathNumbers(a.d ?? "").map((n, i) => [`d[${i}]`, n]) : Object.entries(a).filter(([k]) => GEOMETRY.includes(k)).map(([k, v]) => [k, Number(v)]);
     for (const [k, n] of nums) if (!onGrid(n, p.step)) fail(failures, "grid", icon, `${where} ${k} ${n}`, `a multiple of ${p.step}`);
-    if (el.tag === "rect") {
+    if (el.tag === "rect" && !bulk) {
       const size = Math.min(num(a, "width"), num(a, "height"));
       const want = radiiFor(expectG, size), rx = num(a, "rx", 0);
       if (!want.includes(rx)) fail(failures, "radius", icon, `${where} rx ${rx}`, want.length > 1 ? `rx ${want.slice(0, 3).join(", ")} or ${want[3]}: cut, cased, moulded or a pill` : `rx ${want[0]}`);
@@ -123,6 +137,7 @@ export function textChecks(icon, text, expectG) {
   // the base, without its modifier: what the finish's rules and the count judge
   const base = { ...parsed, elements: own.filter((el) => !isModifier(el)) };
   if (p.finish === "filled") failures.push(...filledChecks(icon, base, expectG));
+  else if (bulk) failures.push(...bulkChecks(icon, { ...parsed, elements: own }, p, { folder: textChecks.folder }));
   else duotoneChecks(failures, icon, base, p);
 
   // a split body's contour is one element with its paint; any other cut stroke counts as the one it was
@@ -132,11 +147,12 @@ export function textChecks(icon, text, expectG) {
   // curves, after every other text rule; each path once, since a contour repeats its tone's
   const seen = new Set();
   for (const el of own) {
-    if (el.tag !== "path" || seen.has(el.attrs.d)) continue;
-    seen.add(el.attrs.d);
-    failures.push(...curveFailures(icon, el, p?.stroke));
+    const whole = bulk ? uncut(el) : el;
+    if (el.tag !== "path" || seen.has(whole.attrs.d)) continue;
+    seen.add(whole.attrs.d);
+    failures.push(...curveFailures(icon, whole, p?.stroke));
   }
-  failures.push(...modifierFailures(icon, parsed, expectG));
+  if (!bulk) failures.push(...modifierFailures(icon, parsed, expectG)); // bulk modifiers: bulkChecks for now
   failures.push(...shadowFailures(icon, parsed, expectG));
 
   return { G, failures, parsed };
@@ -182,6 +198,17 @@ function duotoneChecks(failures, icon, parsed, p) {
 }
 
 /** The set's grid: the one most files declare, so one odd file fails canvas rather than all the others. */
+/** The finish a set declares, by majority of roots; `forced` wins. */
+export function setFinish(set, forced) {
+  if (forced) return forced;
+  const votes = new Map();
+  for (const s of set) {
+    const f = finishOf(parse(s.text).attrs);
+    if (f) votes.set(f, (votes.get(f) ?? 0) + 1);
+  }
+  return [...votes.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+}
+
 export function setGrid(set, forced) {
   if (forced) return Number(forced);
   const votes = new Map();
@@ -192,26 +219,29 @@ export function setGrid(set, forced) {
 /** A missing measure.mjs, or a rasteriser that cannot be installed or loaded (raster.mjs's NO_RASTER): the measured rules are skipped, not failed. */
 const unmeasurable = (e) => e?.code === "ERR_MODULE_NOT_FOUND" || e?.code === "PRETTY_ICONS_NO_RASTER";
 
-export async function checkSet(folder, { grid, measure = true, loadMeasure = () => import("./measure.mjs") } = {}) {
+export async function checkSet(folder, { grid, finish, measure = true, loadMeasure = () => import("./measure.mjs") } = {}) {
   const set = readSet(folder);
   // nothing to measure, so nothing was left unmeasured
-  if (set.length === 0) return { failures: [{ rule: "set", icon: folder, got: "no .svg files", want: "at least one" }], measured: true, why: "", G: null, rows: [], notes: [] };
+  if (set.length === 0) return { failures: [{ rule: "set", icon: folder, got: "no .svg files", want: "at least one" }], measured: true, why: "", G: null, finish: null, rows: [], notes: [] };
   const G = setGrid(set, grid);
+  const F = GRIDS[G]?.finish === "filled" ? "filled" : setFinish(set, finish) ?? GRIDS[G]?.finish ?? "duotone";
+  textChecks.folder = folder;
   const failures = [];
   // An icon the text layer could not read (elements) or placed on another canvas is not measured:
   // its text line already says why, and a renderer would only throw on it or skew the median.
   const unreadable = new Set(), readable = [];
   for (const s of set) {
-    const { failures: f, parsed } = textChecks(s.name, s.text, G);
-    if (f.some((x) => x.rule === "elements" || x.rule === "canvas")) unreadable.add(s.name);
+    const { failures: f, parsed } = textChecks(s.name, s.text, G, F);
+    // a root of the other finish is reported once and, like an unreadable file, kept out of the medians
+    if (f.some((x) => x.rule === "elements" || x.rule === "canvas" || (x.rule === "stroke" && x.got.startsWith("root finish ")))) unreadable.add(s.name);
     else readable.push([s.name, parsed]);
     failures.push(...f);
   }
   // A grid with no preset has nothing to measure against; canvas has failed every icon.
-  if (!GRIDS[G]) return { G, failures, measured: true, why: "", rows: [], notes: [] };
+  if (!GRIDS[G]) return { G, finish: F, failures, measured: true, why: "", rows: [], notes: [] };
   // the shadow is the set's: every icon or none
   const shadowed = readable.filter(([, parsed]) => parsed.elements.some(isShadow)).length;
-  if (preset(G).finish === "filled" && shadowed && shadowed < readable.length) fail(failures, "shadow", "set", `${shadowed} of ${readable.length} shadowed`, "all or none (shadow.mjs --on|--off)");
+  if (F === "filled" && shadowed && shadowed < readable.length) fail(failures, "shadow", "set", `${shadowed} of ${readable.length} shadowed`, "all or none (shadow.mjs --on|--off)");
   const ownOf = (parsed) => ({ ...parsed, elements: parsed.elements.filter((el) => !isShadow(el)) });
   // notes never fail the set: they say what a person may want to look at
   const notes = readable.flatMap(([name, parsed]) => pixelNotes(name, ownOf(parsed), G));
@@ -220,24 +250,26 @@ export async function checkSet(folder, { grid, measure = true, loadMeasure = () 
   if (measure) {
     try {
       const { measuredChecks } = await loadMeasure();
-      const r = await measuredChecks(set.filter((s) => !unreadable.has(s.name)), G);
+      const r = await measuredChecks(set.filter((s) => !unreadable.has(s.name)), G, F);
       failures.push(...r.failures); rows = r.rows.map((row) => ({ ...row, ...columns.get(row.icon) })); measured = true;
     } catch (e) {
       if (!unmeasurable(e)) throw e;
       why = e.message;
     }
   }
-  return { G, failures, measured, why, rows, notes };
+  return { G, finish: F, failures, measured, why, rows, notes };
 }
 
 export async function main(argv) {
   const folder = argv.find((a) => !a.startsWith("--"));
   const grid = argv.find((a) => a.startsWith("--grid="))?.slice(7);
-  if (!folder) { console.error("usage: node check.mjs <folder> [--grid=16|20|24|48] [--print]"); process.exit(1); }
+  const finish = argv.find((a) => a.startsWith("--finish="))?.slice(9);
+  const usage = "usage: node check.mjs <folder> [--grid=16|20|24|48] [--finish=bulk|duotone] [--print]";
+  if (!folder || (finish !== undefined && !["bulk", "duotone"].includes(finish))) { console.error(usage); process.exit(1); }
   let isDir = false;
   try { isDir = statSync(folder).isDirectory(); } catch {}
   if (!isDir) { console.log(formatFailure({ rule: "set", icon: folder, got: "not a folder", want: "an existing folder" })); process.exit(1); }
-  const r = await checkSet(folder, { grid });
+  const r = await checkSet(folder, { grid, finish });
   if (argv.includes("--print")) { console.table(r.rows); }
   for (const f of r.failures) console.log(formatFailure(f));
   if (r.notes.length) { console.log("notes"); for (const n of r.notes) console.log(formatFailure(n)); }

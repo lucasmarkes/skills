@@ -328,3 +328,33 @@ test("diagonal: a set of one or two may hold one", async () => {
 test("diagonal: never upper-left to lower-right", async () => {
   assert.deepEqual(await diagonals([s16('<path d="M3 3L13 13" />')]), ["i0  upper-left to lower-right → lower-left to upper-right"]);
 });
+
+test("a bulk folder: the finish from the root, --finish=bulk on the CLI, the odd duotone file reported under stroke", async (t) => {
+  const dir = tmp(t);
+  const B = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">\n  <circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  <path d="M 2 2 H 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />\n</svg>';
+  const D = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">\n  <circle cx="12" cy="12" r="10" />\n</svg>';
+  for (const n of ["a", "b", "c"]) writeFileSync(join(dir, `${n}.svg`), B);
+  writeFileSync(join(dir, "d.svg"), D);
+  const r = await checkSet(dir, { measure: false });
+  assert.equal(r.G, 24);
+  assert.equal(r.finish, "bulk");
+  assert.deepEqual(of(r, "stroke"), ["d"]);
+  assert.deepEqual(r.failures.filter((f) => f.icon !== "d"), []);
+  const cli = spawnSync("node", [new URL("../../skills/pretty-icons/check.mjs", import.meta.url).pathname, dir, "--finish=duotone"], { encoding: "utf8" });
+  assert.ok(/stroke  a  /.test(cli.stdout), cli.stdout);
+  assert.ok(!/stroke  d  /.test(cli.stdout), cli.stdout);
+  const bad = spawnSync("node", [new URL("../../skills/pretty-icons/check.mjs", import.meta.url).pathname, dir, "--finish=flat"], { encoding: "utf8" });
+  assert.equal(bad.status, 1);
+  assert.ok(bad.stderr.includes("--finish=bulk|duotone"), bad.stderr);
+});
+
+test("a folder of one bulk root and nine duotone at 24: the majority finish, the odd file under stroke, no crash", async (t) => {
+  const dir = tmp(t);
+  const B = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">\n  <circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  <path d="M 2 2 H 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />\n</svg>';
+  const D = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">\n  <circle cx="12" cy="12" r="10" />\n</svg>';
+  writeFileSync(join(dir, "odd.svg"), B);
+  for (let i = 0; i < 9; i++) writeFileSync(join(dir, `d${i}.svg`), D);
+  const r = await checkSet(dir, { measure: false });
+  assert.equal(r.finish, "duotone");
+  assert.deepEqual(of(r, "stroke"), ["odd"]);
+});
