@@ -129,7 +129,7 @@ test("emit passes a modifier's attributes through: stroke-opacity becomes stroke
   const tsx = toReact([{ name: "q", text }]);
   assert.match(tsx, /strokeOpacity="0.6"/);
   assert.match(tsx, /data-modifier="badge:plus"/);
-  assert.match(tsx, /data-cut="split"/);
+  assert.doesNotMatch(tsx, /data-cut=/, "the knockout mark is stripped on emit");
 });
 
 test("CLI: parseArgs, --print, and a refusal on stderr", () => {

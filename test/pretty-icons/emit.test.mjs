@@ -1,11 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { banner, componentName, toReact, toSprite, toIndex, emit, withNs } from "../../skills/pretty-icons/emit.mjs";
 import { readSet } from "../../skills/pretty-icons/check.mjs";
+import { knockout } from "../../skills/pretty-icons/knockout.mjs";
 
 const fix = new URL("./fixtures/good-16/", import.meta.url).pathname;
 const cli = new URL("../../skills/pretty-icons/emit.mjs", import.meta.url).pathname;
@@ -168,4 +169,26 @@ test("jsx: every kebab attribute is camel-cased except data-* and aria-*; namesp
   assert.ok(!/stroke-miterlimit|shape-rendering|xml:space|xmlSpace|xmlns/.test(tsx), tsx);
   const wrapped = toReact(set, { wrapper: "svg" });
   assert.ok(wrapped.includes('shapeRendering="geometricPrecision"') && !wrapped.includes("shape-rendering"), wrapped);
+});
+
+test("a bulk icon emits with fillOpacity and without data-cut or data-body, in react, the sprite and the svg file", async (t) => {
+  const root = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">';
+  const SQ = '<path d="M 7 2 H 17 C 19.75 2 22 4.25 22 7 V 17 C 22 19.75 19.75 22 17 22 H 7 C 4.25 22 2 19.75 2 17 V 7 C 2 4.25 4.25 2 7 2 Z" fill-opacity=".4" />';
+  const cut = knockout(`${root}\n  ${SQ}\n  <path d="M 12 6 L 18 12 L 12 18 L 6 12 Z" />\n</svg>`, { name: "edit" }).text;
+  assert.ok(cut.includes('data-cut="knockout"') && cut.includes("data-body="));
+  const set = [{ name: "edit", text: cut }];
+  const tsx = toReact(set, {});
+  assert.ok(tsx.includes('fillOpacity=".4"'), tsx);
+  assert.ok(!/data-(cut|body)/.test(tsx), "no knockout mark in JSX");
+  assert.ok(tsx.includes('fill="currentColor"') && !tsx.includes("strokeWidth"), "the bulk root, no stroke");
+  const sprite = toSprite(set);
+  assert.ok(!/data-(cut|body)/.test(sprite) && sprite.includes('fill-opacity=".4"'));
+  const dir = mkdtempSync(join(tmpdir(), "pi-emit-")); t.after(() => rmSync(dir, { recursive: true, force: true }));
+  mkdirSync(join(dir, "src"), { recursive: true });
+  writeFileSync(join(dir, "src", "edit.svg"), cut);
+  // the set is one icon of one body and one accent, so weight has no median to fail against
+  const written = await emit(join(dir, "src"), { as: "svg", to: join(dir, "out") });
+  const file = readFileSync(join(dir, "out", "edit.svg"), "utf8");
+  assert.ok(!/data-(cut|body)/.test(file) && file.includes('fill-opacity=".4"') && file.includes("xmlns="), file);
+  assert.ok(written.some((p) => p.endsWith("index.ts")));
 });

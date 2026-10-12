@@ -60,7 +60,11 @@ function parseWrapper(wrapper) {
 const esc = (v) => v.replace(/&(?!(?:[a-z]\w*|#\d+|#x[\da-f]+);)/gi, "&amp;").replace(/"/g, "&quot;");
 const attrText = (attrs, rename = (k) => k) => Object.entries(attrs).map(([k, v]) => `${rename(k)}="${esc(v)}"`).join(" ");
 const jsxAttrs = (attrs) => attrText(attrs, jsxName);
-const inner = (s) => parse(s.text).elements.map((el) => `<${el.tag} ${jsxAttrs(el.attrs)} />`);
+// The knockout's marks are the drawer's and check.mjs's: data-cut names the cut, data-body keeps the uncut geometry.
+// Neither belongs in an app. Every other data-* stays, as it does today.
+const MARKS = ["data-cut", "data-body"];
+const stripMarks = (attrs) => Object.fromEntries(Object.entries(attrs).filter(([k]) => !MARKS.includes(k)));
+const inner = (s) => parse(s.text).elements.map((el) => `<${el.tag} ${jsxAttrs(stripMarks(el.attrs))} />`);
 const rootAttrs = (s, drop = []) => Object.fromEntries(Object.entries(parse(s.text).attrs).filter(([k]) => k !== "xmlns" && !k.startsWith("xmlns:") && !drop.includes(k)));
 // A JSX root takes no namespaced attribute (xmlns:xlink, xml:space): React sets the namespace itself.
 const jsxRootAttrs = (s) => Object.fromEntries(Object.entries(rootAttrs(s)).filter(([k]) => !k.includes(":")));
@@ -92,7 +96,7 @@ export function toReact(set, { wrapper, banner: head0 = BANNER } = {}) {
 }
 
 export function toSprite(set) {
-  const symbols = set.map((s) => `  <symbol id="${esc(s.name)}" ${attrText(rootAttrs(s, NOT_ON_SYMBOL))}>\n${parse(s.text).elements.map((el) => `    <${el.tag} ${attrText(el.attrs)} />`).join("\n")}\n  </symbol>`);
+  const symbols = set.map((s) => `  <symbol id="${esc(s.name)}" ${attrText(rootAttrs(s, NOT_ON_SYMBOL))}>\n${parse(s.text).elements.map((el) => `    <${el.tag} ${attrText(stripMarks(el.attrs))} />`).join("\n")}\n  </symbol>`);
   return `<svg xmlns="http://www.w3.org/2000/svg" style="display:none">\n${symbols.join("\n")}\n</svg>\n`;
 }
 
@@ -100,6 +104,9 @@ export function toIndex(set, { banner: head = BANNER } = {}) {
   const ids = identifiers(set, importName);
   return `${head}\n${set.map((s, i) => `import ${ids[i]} from "./${s.name}.svg";`).join("\n")}\n\nexport const ${EXPORT} = { ${ids.join(", ")} };\n`;
 }
+
+// The file as written, less the two marks; the regex matches an attribute written by knockout.mjs or modifiers.mjs (compose quotes with ").
+const stripText = (text) => text.replace(/\s+data-(cut|body)="[^"]*"/g, "");
 
 export async function emit(folder, { as, to, wrapper }) {
   if (!AS.includes(as)) throw new Error(`--as must be ${AS.join(", ")}, not "${as}"`);
@@ -111,7 +118,7 @@ export async function emit(folder, { as, to, wrapper }) {
   if (as === "svg") {
     const index = toIndex(set, { banner: head });
     mkdirSync(dest, { recursive: true });
-    const written = set.map((s) => { const p = join(dest, `${s.name}.svg`); writeFileSync(p, withNs(s.text)); return p; });
+    const written = set.map((s) => { const p = join(dest, `${s.name}.svg`); writeFileSync(p, withNs(stripText(s.text))); return p; });
     // The folder is the set's alone: an index.ts already there is replaced, and the caller says so.
     const idx = join(dest, "index.ts"), replaced = existsSync(idx);
     writeFileSync(idx, index); written.push(idx);
