@@ -331,7 +331,7 @@ test("diagonal: never upper-left to lower-right", async () => {
 
 test("a bulk folder: the finish from the root, --finish=bulk on the CLI, the odd duotone file reported under stroke", async (t) => {
   const dir = tmp(t);
-  const B = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">\n  <circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  <path d="M 2 2 H 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />\n</svg>';
+  const B = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">\n  <circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  <path d="M 2 2 H 5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />\n</svg>';
   const D = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">\n  <circle cx="12" cy="12" r="10" />\n</svg>';
   for (const n of ["a", "b", "c"]) writeFileSync(join(dir, `${n}.svg`), B);
   writeFileSync(join(dir, "d.svg"), D);
@@ -350,7 +350,7 @@ test("a bulk folder: the finish from the root, --finish=bulk on the CLI, the odd
 
 test("a folder of one bulk root and nine duotone at 24: the majority finish, the odd file under stroke, no crash", async (t) => {
   const dir = tmp(t);
-  const B = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">\n  <circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  <path d="M 2 2 H 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />\n</svg>';
+  const B = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">\n  <circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  <path d="M 2 2 H 5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />\n</svg>';
   const D = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">\n  <circle cx="12" cy="12" r="10" />\n</svg>';
   writeFileSync(join(dir, "odd.svg"), B);
   for (let i = 0; i < 9; i++) writeFileSync(join(dir, `d${i}.svg`), D);
@@ -365,11 +365,13 @@ test("bulk, measured: a cut icon passes gap, air, live and the band; share, the 
   const root = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">';
   const B = (inner) => `${root}\n  ${inner}\n</svg>`;
   const SQ = '<path d="M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z" fill-opacity=".4" />';
-  const L = (d) => `<path d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />`;
-  // three good icons: a diamond in a squircle, a line through a circle, a bar beside a circle
+  const L = (d) => `<path d="${d}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />`;
+  // three good icons: a diamond overprinted on a squircle, a line overprinted on a circle, a square stacked on a circle
   writeFileSync(join(dir, "a.svg"), knockout(B(`${SQ}\n  <path d="M 12 6 L 18 12 L 12 18 L 6 12 Z" />`), { name: "a" }).text);
-  writeFileSync(join(dir, "b.svg"), knockout(B(`<circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  ${L("M 4 12 H 20")}`), { name: "b" }).text);
-  writeFileSync(join(dir, "c.svg"), knockout(B(`<circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  ${L("M 7 9 H 17 M 7 15 H 17")}`), { name: "c" }).text);
+  writeFileSync(join(dir, "b.svg"), knockout(B(`<circle cx="12" cy="12" r="10" fill-opacity=".4" />\n  ${L("M 6 8 H 18 M 6 12 H 18 M 6 16 H 18")}`), { name: "b" }).text);
+  writeFileSync(join(dir, "c.svg"), knockout(B(`<circle cx="12" cy="11" r="9" fill-opacity=".4" />\n  <path d="M 9 14.5 H 15 V 20.5 H 9 Z" />`), { name: "c" }).text);
+  assert.ok(readFileSync(join(dir, "c.svg"), "utf8").includes('data-cut="knockout"'));
+  assert.ok(!readFileSync(join(dir, "a.svg"), "utf8").includes("data-cut"), "an overprint is not cut");
   const r = await checkSet(dir);
   assert.equal(r.finish, "bulk");
   assert.equal(r.measured, true);
@@ -377,15 +379,26 @@ test("bulk, measured: a cut icon passes gap, air, live and the band; share, the 
   assert.ok(r.rows.every((x) => typeof x["share%"] === "number" && x["share%"] > 25 && x["share%"] < 60), JSON.stringify(r.rows));
   // share: a body with a sliver of accent
   writeFileSync(join(dir, "d.svg"), B(`${SQ}\n  <path d="M 1 1 H 3 V 3 H 1 Z" />`));
-  // the band: a hand-cut hole 1 wide on the right of the accent
-  writeFileSync(join(dir, "e.svg"), B(`<path d="M 3 3 H 21 V 21 H 3 Z M 10 8.5 A 1.5 1.5 0 0 0 8.5 10 V 14 A 1.5 1.5 0 0 0 10 15.5 H 14 A 1 1.5 0 0 0 15 14 V 10 A 1 1.5 0 0 0 14 8.5 Z" fill-opacity=".4" data-cut="knockout" data-body="M 3 3 H 21 V 21 H 3 Z" />\n  <path d="M 10 10 H 14 V 14 H 10 Z" />`));
-  // gap: two line accents 1 apart, edge to edge (centrelines 3 apart, 2 wide); the body sits clear of them
-  writeFileSync(join(dir, "f.svg"), B(`<circle cx="12" cy="14" r="8" fill-opacity=".4" />\n  ${L("M 1 1 H 4")}\n  ${L("M 1 4 H 4")}`));
+  // the stack's gap: a hand cut 1.5 wide on the left of the square in front, where knockout.mjs leaves 0.75
+  writeFileSync(join(dir, "e.svg"), B(`<path d="M 3 3 H 21 V 9.25 H 12.5 V 14.75 H 21 V 21 H 3 Z" fill-opacity=".4" data-cut="knockout" data-body="M 3 3 H 21 V 21 H 3 Z" />\n  <path d="M 14 10 H 22 V 14 H 14 Z" />`));
+  // gap: two line accents 1 apart, edge to edge (centrelines 2.75 apart, 1.75 wide); the body sits clear of them
+  writeFileSync(join(dir, "f.svg"), B(`<circle cx="12" cy="14" r="8" fill-opacity=".4" />\n  ${L("M 1 1 H 4")}\n  ${L("M 1 3.75 H 4")}`));
   const r2 = await checkSet(dir);
   const got = (icon, rule) => r2.failures.filter((f) => f.icon === icon && f.rule === rule).map((f) => `${f.got} → ${f.want}`);
   assert.deepEqual(got("d", "share"), ["accent 0.03 of the ink → 0.25 to 0.6"]);
-  assert.match(got("e", "knockout")[0], /^paper 1(\.\d+)? wide at 14(\.\d+)?, 1\d(\.\d+)? → 1\.5: re-run knockout\.mjs$/);
+  assert.match(got("e", "stack")[0], /^paper 1\.\d+ wide at 1[23](\.\d+)?, \d+(\.\d+)? → 0\.75: re-run knockout\.mjs$/);
   assert.deepEqual(got("f", "gap"), ["path@3 to path@4 1 apart → ≥ 1.5 apart, or crossing"]);
-  assert.deepEqual(got("f", "air"), ["paper 1.1 wide at 2.5, 2.5 → ≥ 1.5 apart, or touching"]);
   assert.deepEqual(got("a", "air"), []);
+  assert.deepEqual(got("c", "air"), [], "a stacked pair is at the gap, not the air");
+});
+
+test("bulk fixtures: a wallet, cards and charts pass; the cards with the black in front fail on the biggest piece", async () => {
+  const good = await checkSet(fix("bulk-finance"));
+  assert.equal(good.finish, "bulk");
+  assert.equal(good.measured, true);
+  assert.deepEqual(good.failures.map((f) => `${f.rule} ${f.icon} ${f.got}`), []);
+  assert.deepEqual(good.rows.map((x) => x.icon).sort(), ["cards", "charts", "wallet"]);
+  const bad = await checkSet(fix("bulk-black-front"));
+  const share = bad.failures.filter((f) => f.rule === "share").map((f) => `${f.got} → ${f.want}`);
+  assert.ok(share.some((l) => /^path@3 area \d+ → under the largest body's \d+: the gray body is the biggest piece$/.test(l)), share.join("\n"));
 });
