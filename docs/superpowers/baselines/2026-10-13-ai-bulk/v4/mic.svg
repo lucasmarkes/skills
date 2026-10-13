@@ -1,0 +1,5 @@
+<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <path d="M 9.25 2 H 12.25 C 12.75 2 13.5 2 14.25 2.75 C 15 3.5 15 4.25 15 4.75 V 14.25 C 15 14.75 15 15.5 14.25 16.25 C 13.5 17 12.75 17 12.25 17 H 9.25 C 8.75 17 8 17 7.25 16.25 C 6.5 15.5 6.5 14.75 6.5 14.25 V 4.75 C 6.5 4.25 6.5 3.5 7.25 2.75 C 8 2 8.75 2 9.25 2 Z" fill-opacity=".4" />
+  <path d="M3 12.25A7.75 7.75 0 0 0 18.5 12.25M10.75 20V21" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M19.25 2C19.5 3.25 20.75 4.5 22 4.75C20.75 5 19.5 6.25 19.25 7.5C19 6.25 17.75 5 16.5 4.75C17.75 4.5 19 3.25 19.25 2Z" />
+</svg>

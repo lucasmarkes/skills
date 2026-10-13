@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <path d="M6.5 4 H17.5 A4 4 0 0 1 21.5 8 V16 A4 4 0 0 1 17.5 20 H6.5 A4 4 0 0 1 2.5 16 V8 A4 4 0 0 1 6.5 4 Z" fill-opacity=".4"/>
+  <path d="M7 9.25 L9.75 12 L7 14.75 M12.25 14.75 H16.25" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
