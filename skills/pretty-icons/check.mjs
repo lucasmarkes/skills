@@ -26,6 +26,10 @@
  * Measured rules, from pixels: live, keyline, weight, gravity, gap. An icon that
  * fails canvas or elements is not measured, and stays out of the set's median;
  * gap also holds the subpaths of one path apart.
+ *
+ * `--from=<bulk-folder>`: the folder is translate.mjs's work from that bulk set. Each icon must be
+ * byte for byte the translation of its bulk namesake (translate); canvas, elements, stroke and palette
+ * still hold. The drawing itself was judged at bulk: what it carries over is one note, and nothing is measured.
  */
 import { readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
@@ -38,6 +42,7 @@ import { curveFailures, curveColumns, pixelNotes } from "./curve.mjs";
 import { modifierFailures, isModifier, isCut, isSplit } from "./modifiers.mjs";
 import { isShadow, shadowFailures } from "./shadow.mjs";
 import { bulkChecks, isKnockout, uncut } from "./bulk.mjs";
+import { translate, TranslateError, FINISHES } from "./translate.mjs";
 
 export { pathCommands, isClosed };
 
@@ -217,13 +222,42 @@ export function setGrid(set, forced) {
 /** A missing measure.mjs, or a rasteriser that cannot be installed or loaded (raster.mjs's NO_RASTER): the measured rules are skipped, not failed. */
 const unmeasurable = (e) => e?.code === "ERR_MODULE_NOT_FOUND" || e?.code === "PRETTY_ICONS_NO_RASTER";
 
-export async function checkSet(folder, { grid, finish, measure = true, loadMeasure = () => import("./measure.mjs") } = {}) {
+// what a translation answers for itself; every other finding is the bulk drawing's
+const TRANSLATED = ["canvas", "elements", "stroke", "palette"];
+
+/** A set translate.mjs made from a bulk folder: each icon its namesake's translation, byte for byte. */
+function checkTranslated(set, folder, from, G, F) {
+  const failures = [], held = new Map();
+  const done = { G, finish: F, failures, measured: true, why: "", rows: [], notes: [] };
+  if (!FINISHES.includes(F)) { fail(failures, "translate", "set", `finish ${F}`, `${FINISHES.join(" or ")}: what translate.mjs makes`); return done; }
+  const source = new Map(readSet(from).map((s) => [s.name, s.text]));
+  const redo = `node translate.mjs ${from} --to ${F} --out ${folder}`;
+  for (const s of set) {
+    for (const x of textChecks(s.name, s.text, G, F).failures) {
+      if (TRANSLATED.includes(x.rule)) failures.push(x);
+      else held.set(x.rule, (held.get(x.rule) ?? 0) + 1);
+    }
+    if (!source.has(s.name)) { fail(failures, "translate", s.name, "no bulk source", `${s.name}.svg in ${from}`); continue; }
+    let want;
+    try { want = translate(source.get(s.name), F, { name: s.name }); } catch (e) {
+      if (!(e instanceof TranslateError)) throw e;
+      fail(failures, "translate", s.name, e.message, "a bulk source translate.mjs reads");
+      continue;
+    }
+    if (want !== s.text) fail(failures, "translate", s.name, "not its bulk source's translation", `${redo}: change the drawing at bulk, never here`);
+  }
+  if (held.size) done.notes.push({ rule: "inherited", icon: "set", got: [...held].map(([r, n]) => `${r} ${n}`).join(", "), want: `the drawing's, judged at bulk: node check.mjs ${from}` });
+  return done;
+}
+
+export async function checkSet(folder, { grid, finish, from, measure = true, loadMeasure = () => import("./measure.mjs") } = {}) {
   const set = readSet(folder);
   // nothing to measure, so nothing was left unmeasured
   if (set.length === 0) return { failures: [{ rule: "set", icon: folder, got: "no .svg files", want: "at least one" }], measured: true, why: "", G: null, finish: null, rows: [], notes: [] };
   const G = setGrid(set, grid);
   const F = GRIDS[G]?.finish === "filled" ? "filled" : setFinish(set, finish) ?? GRIDS[G]?.finish ?? "duotone";
   textChecks.folder = folder;
+  if (from) return checkTranslated(set, folder, from, G, F);
   const failures = [];
   // An icon the text layer could not read (elements) or placed on another canvas is not measured:
   // its text line already says why, and a renderer would only throw on it or skew the median.
@@ -262,12 +296,14 @@ export async function main(argv) {
   const folder = argv.find((a) => !a.startsWith("--"));
   const grid = argv.find((a) => a.startsWith("--grid="))?.slice(7);
   const finish = argv.find((a) => a.startsWith("--finish="))?.slice(9);
-  const usage = "usage: node check.mjs <folder> [--grid=16|20|24|48] [--finish=bulk|duotone] [--print]";
-  if (!folder || (finish !== undefined && !["bulk", "duotone"].includes(finish))) { console.error(usage); process.exit(1); }
-  let isDir = false;
-  try { isDir = statSync(folder).isDirectory(); } catch {}
-  if (!isDir) { console.log(formatFailure({ rule: "set", icon: folder, got: "not a folder", want: "an existing folder" })); process.exit(1); }
-  const r = await checkSet(folder, { grid, finish });
+  const from = argv.find((a) => a.startsWith("--from="))?.slice(7);
+  const usage = "usage: node check.mjs <folder> [--grid=16|20|24|48] [--finish=bulk|duotone] [--from=<bulk-folder>] [--print]";
+  if (!folder || (finish !== undefined && !["bulk", "duotone"].includes(finish)) || from === "") { console.error(usage); process.exit(1); }
+  const isDir = (f) => { try { return statSync(f).isDirectory(); } catch { return false; } };
+  for (const f of [folder, from].filter((x) => x !== undefined)) {
+    if (!isDir(f)) { console.log(formatFailure({ rule: "set", icon: f, got: "not a folder", want: "an existing folder" })); process.exit(1); }
+  }
+  const r = await checkSet(folder, { grid, finish, from });
   if (argv.includes("--print")) { console.table(r.rows); }
   for (const f of r.failures) console.log(formatFailure(f));
   if (r.notes.length) { console.log("notes"); for (const n of r.notes) console.log(formatFailure(n)); }
