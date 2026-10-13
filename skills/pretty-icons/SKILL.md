@@ -42,6 +42,8 @@ The kit is the normal way to draw a curved body; a hand-written path is the exce
 
 A state (add, off, locked, new) is the base icon plus `node <skill-dir>/modifiers.mjs pretty-icons/<name>.svg --add <kind>`, run once the base passes (rule 09).
 
+Another finish of a set already drawn at bulk is translated, never redrawn: `node <skill-dir>/translate.mjs pretty-icons/ --to duotone|filled --out <folder>`. The bulk drawing is the source; the translation keeps its composition in every finish, where a redraw drifts toward what passes the check. Check the result with `node <skill-dir>/check.mjs <folder> --from=pretty-icons/`: each icon must be its source's translation byte for byte, and what the drawing carries over is one `inherited` note, judged at bulk. To change a translated icon, change the bulk one and translate again.
+
 ## 4. Check
 
 1. `node <skill-dir>/check.mjs pretty-icons/`. Fix each line by its rule until it prints `ok`; a `join` line is mended by step 3's item 2 (repair). The first run installs `@resvg/resvg-js` into a cache (`PRETTY_ICONS_CACHE` moves it).
@@ -104,6 +106,7 @@ Edit only that icon's `.svg`. Run steps 4 and 5 for the set.
 | drawing an object at its true proportions, a can 29 tall | `rules-filled.md` 02: write the keyline's box first, and name the element that reaches each side |
 | lifting a body whose box already fills the live area | `rules-filled.md` 06: the mass is the area; give the light end area, shorten the heavy end |
 | ending a stem near a leaf's curve | `rules-filled.md` 08: on an anchor, or on through the body, drawn before its tone |
+| redrawing a bulk set in duotone or filled, or editing a translated icon | step 3: `translate.mjs --to <finish>` from the bulk set, `check.mjs --from=<bulk>`; change the drawing at bulk |
 | cutting a stack by hand, or moving a piece after the cut | `rules-bulk.md` 08: `knockout.mjs` writes every cut; run it again after any edit |
 | a `rect` at bulk | `rules-bulk.md` 07: `shapes.mjs squircle --finish bulk`, radius 4 or 2.75, or a pill |
 | a `share` out of the band, or black bigger than the gray | `rules-bulk.md` 11: a larger accent for a pale icon, a larger body for a dark one; the gray body is the biggest piece |
