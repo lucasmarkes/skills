@@ -442,7 +442,7 @@ export const USAGE = [
   "  wedge     --angle 15..120",
   "  scoop     --depth 0..1 --side top|right|bottom|left --rx N",
   "  blob      --anchors \"x,y[,t][,c] …\" (absolute anchors; c a cusp, t the handle length)",
-  "  squircle  --w N --h N [--r N] (bulk only: 5 when the short side is 12 or more, 3 below, or a pill)",
+  "  squircle  --w N --h N [--r N] (bulk only: 4 when the short side is 12 or more, 2.75 from 6 to 12, a pill below 6)",
   "  ring      --r N --hole N (the filled finish only: a body with a hole, five elements)",
 ].join("\n");
 

@@ -85,8 +85,8 @@ test("a body sits an inset inside its keyline", () => {
   assert.deepEqual(body(48, "circle"), { tag: "circle", cx: 24, cy: 24, r: 19 });
 });
 
-test("bulk: 24 only, pad 2, stroke 2, knockout 1.5, share band, squircle radii", async () => {
-  const { BULK_PRESETS, KNOCKOUT_TOL } = await import("../../skills/pretty-icons/presets.mjs");
+test("bulk: 24 only, pad 2, stroke 1.75, stack 0.75, air 1.5, share band, squircle radii", async () => {
+  const { BULK_PRESETS, STACK_TOL } = await import("../../skills/pretty-icons/presets.mjs");
   assert.deepEqual(Object.keys(BULK_PRESETS).map(Number), [24]);
   const p = preset(24, "bulk");
   assert.equal(p.finish, "bulk");
@@ -95,17 +95,19 @@ test("bulk: 24 only, pad 2, stroke 2, knockout 1.5, share band, squircle radii",
   assert.equal(p.pad, 2);
   assert.equal(p.live, 20);
   assert.equal(p.step, 0.25);
-  assert.equal(p.stroke, 2);
-  assert.deepEqual(p.weights, [2]);
-  assert.equal(p.knockout, 1.5);
+  assert.equal(p.stroke, 1.75);
+  assert.deepEqual(p.weights, [1.75]);
+  assert.equal(p.stack, 0.75);
+  assert.equal(p.knockout, undefined, "no paper halo at bulk");
   assert.equal(p.gap, 1.5);
   assert.deepEqual(p.share, [0.25, 0.6]);
-  assert.deepEqual(p.radius, [5, 3]);
+  assert.deepEqual(p.radius, [4, 2.75]);
   assert.equal(p.radiusAt, 12);
+  assert.equal(p.pillUnder, 6);
   assert.equal(p.elements, 3);
   assert.equal(p.commands, 14);
   assert.deepEqual(p.keylines, { circle: [20, 20], square: [18, 18], portrait: [16, 20], landscape: [20, 16] });
-  assert.equal(KNOCKOUT_TOL, 0.25);
+  assert.equal(STACK_TOL, 0.25);
   assert.throws(() => preset(16, "bulk"), /no bulk preset for grid 16: bulk is 24/);
   assert.throws(() => preset(48, "bulk"), /no bulk preset for grid 48: bulk is 24/);
   assert.throws(() => preset(24, "filled"), /no filled preset for grid 24/);
@@ -127,18 +129,22 @@ test("bulk bodies: inset 1, a circle of 10, squircles for the rest, reference in
   const { BULK_REFERENCE_INK, squircle } = await import("../../skills/pretty-icons/presets.mjs");
   assert.equal(inset(24, "bulk"), 1);
   assert.equal(inset(24), 0.75);
-  assert.equal(radiusFor(24, 12, "bulk"), 5);
-  assert.equal(radiusFor(24, 11.75, "bulk"), 3);
+  assert.equal(radiusFor(24, 12, "bulk"), 4);
+  assert.equal(radiusFor(24, 11.75, "bulk"), 2.75);
+  assert.equal(radiusFor(24, 6, "bulk"), 2.75);
+  assert.equal(radiusFor(24, 5.5, "bulk"), 2.75, "below 6, a pill: half the short side");
+  assert.equal(radiusFor(24, 2, "bulk"), 1);
   assert.equal(radiusFor(24, 8), 2);
   assert.deepEqual(body(24, "circle", "bulk"), { tag: "circle", cx: 12, cy: 12, r: 10 });
   const sq = body(24, "square", "bulk");
   assert.equal(sq.tag, "path");
-  assert.equal(sq.d, squircle(3, 3, 18, 18, 5));
-  assert.equal(body(24, "portrait", "bulk").d, squircle(4, 2, 16, 20, 5));
-  assert.equal(body(24, "landscape", "bulk").d, squircle(2, 4, 20, 16, 5));
+  assert.equal(sq.d, squircle(3, 3, 18, 18, 4));
+  assert.equal(body(24, "portrait", "bulk").d, squircle(4, 2, 16, 20, 4));
+  assert.equal(body(24, "landscape", "bulk").d, squircle(2, 4, 20, 16, 4));
   assert.equal(bodySvg(24, "circle", "bulk"), '<circle cx="12" cy="12" r="10" fill-opacity=".4" />');
-  assert.equal(bodySvg(24, "square", "bulk"), `<path d="${squircle(3, 3, 18, 18, 5)}" fill-opacity=".4" />`);
-  assert.equal(typeof BULK_REFERENCE_INK[24], "number");
+  assert.equal(bodySvg(24, "square", "bulk"), `<path d="${squircle(3, 3, 18, 18, 4)}" fill-opacity=".4" />`);
+  // the reference is the median ink of examples/bulk
+  assert.equal(BULK_REFERENCE_INK[24], 125.9);
   assert.equal(referenceInk(24, "bulk"), BULK_REFERENCE_INK[24]);
   assert.equal(referenceInk(24), 152.6);
 });

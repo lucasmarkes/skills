@@ -278,13 +278,13 @@ test("the soft bodies at the filled finish: tone, shade and contour, passing its
   }
 });
 
-test("squircle: a primitive on 24 at bulk, 5 or 3 by the short side, a pill at --r half the short side", () => {
+test("squircle: a primitive on 24 at bulk, 4 or 2.75 by the short side, a pill at --r half the short side", () => {
   const s = shape("squircle", { w: 18, h: 18, at: [12, 12], grid: 24, finish: "bulk" });
-  assert.equal(s.d, "M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z");
+  assert.equal(s.d, "M 7 3 H 17 C 17.75 3 18.5 3 19.75 4.25 C 21 5.5 21 6.25 21 7 V 17 C 21 17.75 21 18.5 19.75 19.75 C 18.5 21 17.75 21 17 21 H 7 C 6.25 21 5.5 21 4.25 19.75 C 3 18.5 3 17.75 3 17 V 7 C 3 6.25 3 5.5 4.25 4.25 C 5.5 3 6.25 3 7 3 Z");
   assert.equal(s.P, null);
   assert.ok(onGrid(s.d));
   assert.deepEqual(clean(s.d), []);
-  assert.ok(shape("squircle", { w: 8, h: 8, at: [8, 8], grid: 24, finish: "bulk" }).d.includes("C 9.5 4 10.5 4 11.25 4.75"));
+  assert.ok(shape("squircle", { w: 8, h: 8, at: [8, 8], grid: 24, finish: "bulk" }).d.startsWith("M 6.75 4 H 9.25 C 9.75 4 10.5 4 11.25 4.75"), "2.75 below 12");
   for (const n of [8, 11]) assert.deepEqual(clean(shape("squircle", { w: n, h: n, at: [12, 12], grid: 24, finish: "bulk" }).d), [], `${n}x${n} squircle`);
   assert.equal(shape("squircle", { w: 20, h: 8, at: [12, 12], r: 4, grid: 24, finish: "bulk" }).d, "M 6 8 H 18 A 4 4 0 0 1 18 16 H 6 A 4 4 0 0 1 6 8 Z");
   refused(() => shape("squircle", { w: 18, h: 18, at: [12, 12], r: 10, grid: 24, finish: "bulk" }), "--r 10: at most 9");

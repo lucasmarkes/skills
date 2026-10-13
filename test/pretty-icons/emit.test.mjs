@@ -173,8 +173,10 @@ test("jsx: every kebab attribute is camel-cased except data-* and aria-*; namesp
 
 test("a bulk icon emits with fillOpacity and without data-cut or data-body, in react, the sprite and the svg file", async (t) => {
   const root = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">';
-  const SQ = '<path d="M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z" fill-opacity=".4" />';
-  const cut = knockout(`${root}\n  ${SQ}\n  <path d="M 12 7.5 L 16.5 12 L 12 16.5 L 7.5 12 Z" />\n</svg>`, { name: "edit" }).text;
+  // examples/bulk/devices uncut: a monitor body, a phone stacked in front of it
+  const SQ = '<path d="M 6 4 H 18 C 18.75 4 19.5 4 20.75 5.25 C 22 6.5 22 7.25 22 8 V 12 C 22 12.75 22 13.5 20.75 14.75 C 19.5 16 18.75 16 18 16 H 6 C 5.25 16 4.5 16 3.25 14.75 C 2 13.5 2 12.75 2 12 V 8 C 2 7.25 2 6.5 3.25 5.25 C 4.5 4 5.25 4 6 4 Z" fill-opacity=".4" />';
+  const PHONE = '<path d="M 11.25 11 H 12.75 C 13.25 11 14 11 14.75 11.75 C 15.5 12.5 15.5 13.25 15.5 13.75 V 17.25 C 15.5 17.75 15.5 18.5 14.75 19.25 C 14 20 13.25 20 12.75 20 H 11.25 C 10.75 20 10 20 9.25 19.25 C 8.5 18.5 8.5 17.75 8.5 17.25 V 13.75 C 8.5 13.25 8.5 12.5 9.25 11.75 C 10 11 10.75 11 11.25 11 Z" />';
+  const cut = knockout(`${root}\n  ${SQ}\n  ${PHONE}\n</svg>`, { name: "edit" }).text;
   assert.ok(cut.includes('data-cut="knockout"') && cut.includes("data-body="));
   const set = [{ name: "edit", text: cut }];
   const tsx = toReact(set, {});
@@ -195,8 +197,10 @@ test("a bulk icon emits with fillOpacity and without data-cut or data-body, in r
 
 test("the svg file loses the knockout marks written with single quotes too", async (t) => {
   const root = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">';
-  const SQ = '<path d="M 8 3 H 16 C 17 3 18 3 19.5 4.5 C 21 6 21 7 21 8 V 16 C 21 17 21 18 19.5 19.5 C 18 21 17 21 16 21 H 8 C 7 21 6 21 4.5 19.5 C 3 18 3 17 3 16 V 8 C 3 7 3 6 4.5 4.5 C 6 3 7 3 8 3 Z" fill-opacity=".4" />';
-  const cut = knockout(`${root}\n  ${SQ}\n  <path d="M 12 7.5 L 16.5 12 L 12 16.5 L 7.5 12 Z" />\n</svg>`, { name: "edit" }).text;
+  // examples/bulk/devices uncut: a monitor body, a phone stacked in front of it
+  const SQ = '<path d="M 6 4 H 18 C 18.75 4 19.5 4 20.75 5.25 C 22 6.5 22 7.25 22 8 V 12 C 22 12.75 22 13.5 20.75 14.75 C 19.5 16 18.75 16 18 16 H 6 C 5.25 16 4.5 16 3.25 14.75 C 2 13.5 2 12.75 2 12 V 8 C 2 7.25 2 6.5 3.25 5.25 C 4.5 4 5.25 4 6 4 Z" fill-opacity=".4" />';
+  const PHONE = '<path d="M 11.25 11 H 12.75 C 13.25 11 14 11 14.75 11.75 C 15.5 12.5 15.5 13.25 15.5 13.75 V 17.25 C 15.5 17.75 15.5 18.5 14.75 19.25 C 14 20 13.25 20 12.75 20 H 11.25 C 10.75 20 10 20 9.25 19.25 C 8.5 18.5 8.5 17.75 8.5 17.25 V 13.75 C 8.5 13.25 8.5 12.5 9.25 11.75 C 10 11 10.75 11 11.25 11 Z" />';
+  const cut = knockout(`${root}\n  ${SQ}\n  ${PHONE}\n</svg>`, { name: "edit" }).text;
   const single = cut.replace(/data-(cut|body)="([^"]*)"/g, "data-$1='$2'");
   assert.ok(single.includes("data-cut='knockout'") && single.includes("data-body='"));
   const dir = mkdtempSync(join(tmpdir(), "pi-emit-")); t.after(() => rmSync(dir, { recursive: true, force: true }));

@@ -211,9 +211,9 @@ test("cut: a run whose every piece is dropped leaves no bare move", () => {
 
 const svg24b = (b) => `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">\n  ${b}\n</svg>`;
 const CIRCLE24B = '<circle cx="12" cy="12" r="10" fill-opacity=".4" />';
-const LINE24B = (d) => `<path d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />`;
+const LINE24B = (d) => `<path d="${d}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />`;
 
-test("at bulk: placement with pad 2, a halo of the box plus the knockout, the five kinds, the glyph as a full accent", async () => {
+test("at bulk: placement with pad 2, a halo of the box plus the air a line keeps, the five kinds, the glyph as a full accent at 1.75", async () => {
   const { KINDS_BULK } = await import("../../skills/pretty-icons/modifiers.mjs");
   assert.deepEqual(KINDS_BULK, ["badge:plus", "badge:minus", "badge:check", "badge:x", "dot"]);
   assert.deepEqual(placement(24, "badge:plus", "br", "bulk"), { c: [18, 18], half: 4 });
@@ -221,12 +221,12 @@ test("at bulk: placement with pad 2, a halo of the box plus the knockout, the fi
   assert.equal(halo(24, "dot", "br", "bulk").r, 2.25 + 1.5);
   assert.equal(halo(24, "badge:plus", "br", "bulk").r, 4 + 1.5);
   const [plus] = glyph(24, "badge:plus", { finish: "bulk" });
-  assert.deepEqual(plus, { tag: "path", attrs: { d: "M15 18H21M18 15V21", fill: "none", stroke: "currentColor", "stroke-width": "2", "stroke-linecap": "round", "stroke-linejoin": "round", "data-modifier": "badge:plus" } });
+  assert.deepEqual(plus, { tag: "path", attrs: { d: "M15 18H21M18 15V21", fill: "none", stroke: "currentColor", "stroke-width": "1.75", "stroke-linecap": "round", "stroke-linejoin": "round", "data-modifier": "badge:plus" } });
   assert.deepEqual(glyph(24, "dot", { finish: "bulk" }), [{ tag: "circle", attrs: { cx: "19.75", cy: "19.75", r: "2.25", "data-modifier": "dot" } }]);
   assert.deepEqual(glyph(24, "badge:check", { finish: "bulk" })[0].attrs.d, "M15 18L17 20L21 16");
 });
 
-test("addModifier at bulk cuts the body the badge crosses and writes a full accent; check passes on the result", async () => {
+test("addModifier at bulk: the badge partly over the body stacks, so the body is cut; check passes on the result", async () => {
   const src = svg24b(`${CIRCLE24B}\n  ${LINE24B("M 8 9 H 16")}`);
   const out = await addModifier(src, "badge:plus", { name: "edit" });
   const p = parse(out);
@@ -240,7 +240,22 @@ test("addModifier at bulk cuts the body the badge crosses and writes a full acce
   assert.deepEqual(textChecks("edit", out, 24).failures, []);
   const dot = await addModifier(src, "dot", { name: "edit", corner: "tr" });
   assert.equal(parse(dot).elements[2].tag, "circle");
+  assert.equal(parse(dot).elements[0].attrs["data-cut"], "knockout");
   assert.deepEqual(textChecks("edit", dot, 24).failures, []);
+  // the gap the stack leaves is 0.75: the body's cut runs 0.75 outside the dot
+  const { band } = await import("../../skills/pretty-icons/raster.mjs");
+  const { compose } = await import("../../skills/pretty-icons/svg.mjs");
+  const d = parse(dot), plain = (el) => { const { "fill-opacity": _, "data-cut": __, "data-body": ___, "data-modifier": ____, ...a } = el.attrs; return { ...el, attrs: a }; };
+  const r = (els) => compose(d.attrs, els.map(plain));
+  const body = d.elements[0];
+  assert.deepEqual(await band(r([body]), r([{ ...body, attrs: { ...body.attrs, d: body.attrs["data-body"] } }]), r([d.elements[2]]), 24, 0.75, 0.25), []);
+});
+
+test("addModifier at bulk: a dot clear of the body is drawn as it is, nothing cut", async () => {
+  const src = svg24b(`<circle cx="11" cy="13" r="8" fill-opacity=".4" />\n  ${LINE24B("M 8 12 H 14")}`);
+  const out = await addModifier(src, "dot", { name: "edit", corner: "tr" });
+  assert.ok(!out.includes("data-cut"), out);
+  assert.equal(parse(out).elements[0].tag, "circle");
 });
 
 test("at bulk, slash, lock and arrow refuse in one line; a badge whose halo covers an accent refuses", async () => {

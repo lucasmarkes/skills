@@ -68,7 +68,7 @@ export function placement(G, kind, corner = "br", finish) {
  * Negative inside. A badge, an arrow, a lock and a dot clear a circle; a slash clears a band along itself.
  */
 export function halo(G, kind, corner = "br", finish) {
-  const p = preset(G, finish), clear = p.finish === "bulk" ? p.knockout : 1.5 * baseStroke(G, finish);
+  const p = preset(G, finish), clear = p.finish === "bulk" ? p.gap : 1.5 * baseStroke(G, finish);
   if (kind === "slash") {
     const [a, b] = slashEnds(G), r = ownStroke(G, finish) / 2 + clear, ab = sub(b, a), L2 = ab[0] ** 2 + ab[1] ** 2;
     return { r, inside: (q) => { const t = Math.max(0, Math.min(1, ((q[0] - a[0]) * ab[0] + (q[1] - a[1]) * ab[1]) / L2)); return len(sub(q, lerp(a, b, t))) - r; } };
@@ -339,8 +339,8 @@ export async function addModifier(text, kind, { corner = "br", solid = false, na
   const finish = finishOf(parsed.attrs) ?? undefined, p = preset(G, finish), bulk = p.finish === "bulk";
   if (bulk && !KINDS_BULK.includes(kind)) refuse(BULK_REFUSAL(kind));
   const { textChecks } = await import("./check.mjs");
-  // at bulk an uncut body is the very thing this command cuts (for the glyph and the accents alike)
-  const before = textChecks(name, text, G, finish).failures.filter((f) => !(bulk && f.rule === "knockout"));
+  // at bulk a missing or stale cut is the very thing this command cuts (knockout.mjs runs on the result)
+  const before = textChecks(name, text, G, finish).failures.filter((f) => !(bulk && f.rule === "stack" && /knockout\.mjs/.test(f.want)));
   if (before.length) refuse(`it fails check before the modifier; fix it first:\n${before.map((f) => `${f.rule}  ${f.icon}  ${f.got} → ${f.want}`).join("\n")}`);
   if (parsed.elements.some(isModifier)) refuse("it has a modifier already: one per icon");
   if (parsed.elements.some(isShadow)) refuse("it has a shadow: take it off with shadow.mjs --off, add the modifier, put it back with --on");
@@ -380,38 +380,30 @@ export async function addModifier(text, kind, { corner = "br", solid = false, na
   return result;
 }
 
-/** The bulk finish: the badge or dot is a full accent, and each body it crosses is cut by cutBody. */
+/**
+ * The bulk finish: the badge or dot is a later solid, drawn last. Where it lies partly over a body or a
+ * filled accent it stacks (knockout.mjs cuts the one behind by the gap); inside a body it overprints.
+ * A line accent must lie clear of its halo: a solid over a line is refused.
+ */
 async function addBulk(parsed, G, kind, { corner, name, finish, p, textChecks }) {
-  const { cutBody, KnockoutError } = await import("./knockout.mjs");
-  const { classify, isKnockout } = await import("./bulk.mjs");
-  const { paper } = await import("./raster.mjs");
-  const g = glyph(G, kind, { corner, finish })[0];
-  g.at = `${g.tag}@${parsed.elements.length + 2}`;
-  const H = halo(G, kind, corner, finish), P = paper();
-  const { bodies, accents } = classify(parsed), out = [];
-  for (const el of accents) {
-    // an accent must lie clear of the halo, or the badge would cover it
+  const { knockout, KnockoutError } = await import("./knockout.mjs");
+  const { classify } = await import("./bulk.mjs");
+  const H = halo(G, kind, corner, finish);
+  const { lines } = classify(parsed);
+  for (const el of lines) {
     let q;
-    try { q = sampleParts(el.tag === "path" ? el : { ...el, tag: "path", attrs: { ...el.attrs, d: asPath(el) } }, 0.05).flat(); } catch { continue; }
+    try { q = sampleParts(el, 0.05).flat(); } catch { continue; }
     if (Math.min(...q.map(H.inside)) < -0.1) refuse(`${el.at} lies under the ${kind}'s halo: try another --corner, or move the accent`);
   }
-  for (const el of parsed.elements) {
-    if (!bodies.includes(el)) { out.push(el); continue; }
-    let d, crossed;
-    try { ({ d, crossed } = cutBody(el, [g, ...accents], p.knockout, P, name)); }
-    catch (e) { if (e instanceof KnockoutError) refuse(e.message); throw e; }
-    if (!crossed.length) { out.push(el); continue; }
-    const src = isKnockout(el) && el.attrs["data-body"] ? { ...el, attrs: { ...el.attrs, d: el.attrs["data-body"] } } : el;
-    const { d: _d, "data-cut": _c, "data-body": _b, cx, cy, r, ...rest } = src.attrs;
-    out.push({ tag: "path", attrs: { d, ...rest, "data-cut": "knockout", "data-body": src.tag === "circle" ? asPath(src) : src.attrs.d } });
-  }
-  const { at: _at, ...gl } = g;
-  out.push(gl);
-  const result = compose(parsed.attrs, out).replace(/ \/><(?!\/svg>)/g, " />\n  <").replace(/^(<svg[^>]*>)/, "$1\n  ").replace(/<\/svg>$/, "\n</svg>\n");
+  const out = [...parsed.elements, ...glyph(G, kind, { corner, finish })];
+  const drawn = compose(parsed.attrs, out).replace(/ \/><(?!\/svg>)/g, " />\n  <").replace(/^(<svg[^>]*>)/, "$1\n  ").replace(/<\/svg>$/, "\n</svg>\n");
+  let result;
+  try { result = knockout(drawn, { name }).text; }
+  catch (e) { if (e instanceof KnockoutError) refuse(e.message); throw e; }
   const failures = textChecks(name, result, G, finish).failures;
   if (!failures.length) {
     const { measuredChecks } = await import("./measure.mjs"), { NO_RASTER } = await import("./raster.mjs");
-    try { failures.push(...(await measuredChecks([{ name, text: result }], G, finish)).failures.filter((f) => ["gap", "live", "knockout"].includes(f.rule))); }
+    try { failures.push(...(await measuredChecks([{ name, text: result }], G, finish)).failures.filter((f) => ["gap", "live", "stack"].includes(f.rule))); }
     catch (e) { if (e?.code !== NO_RASTER) throw e; }
   }
   if (failures.length) refuse(`the result would fail check:\n${failures.map((f) => `${f.rule}  ${f.icon}  ${f.got} → ${f.want}`).join("\n")}\ntry another --corner or another kind`);
@@ -459,11 +451,12 @@ export function modifierFailures(icon, parsed, G) {
   const H = halo(G, kind, corner, finish), rootStroke = parsed.attrs.stroke;
   for (const el of parsed.elements) {
     if (isModifier(el) || isShadow(el)) continue;
-    if (bulk ? el.attrs["data-cut"] === "knockout" : isNone(el.attrs.stroke ?? rootStroke)) continue;
+    // at bulk only a line must clear it: a body or a filled accent stacks behind the modifier, or carries it
+    if (bulk ? el.attrs.stroke === undefined || isNone(el.attrs.stroke) : isNone(el.attrs.stroke ?? rootStroke)) continue;
     let q;
     try { q = sampleParts(el, 0.05).flat(); } catch { continue; }
     const worst = Math.min(...q.map(H.inside));
-    if (worst < -0.1) f(`${el.at} ${fmt(-worst)} inside ${kind}'s halo`, bulk ? "clear of it: add the modifier with modifiers.mjs, which cuts the body" : "clear of it: add the modifier with modifiers.mjs, which cuts the stroke");
+    if (worst < -0.1) f(`${el.at} ${fmt(-worst)} inside ${kind}'s halo`, bulk ? "clear of it: a line is never under the modifier; move it, or another --corner" : "clear of it: add the modifier with modifiers.mjs, which cuts the stroke");
   }
   return out;
 }

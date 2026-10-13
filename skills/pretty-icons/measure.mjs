@@ -15,14 +15,14 @@
  * Gap and air may both name one pair of parallel lines.
  * diagonal: the base's ink axes; an elongated icon at 45° rising to the right counts, a set holds at most max(1, round(0.3 × N)), and one falling to the right is refused.
  */
-import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE, COUNTER, DIAGONAL, SHADOW, KNOCKOUT_TOL } from "./presets.mjs";
+import { preset, TOUCH, FORMATS, referenceInk, AIR, LOOSE, COUNTER, DIAGONAL, SHADOW, STACK_TOL } from "./presets.mjs";
 import { measure, shares, resvg, air, elongation, band, NO_RASTER } from "./raster.mjs";
 import { parse, compose, num, geometryKey } from "./svg.mjs";
 import { isModifier } from "./modifiers.mjs";
 import { isShadow } from "./shadow.mjs";
 import { sampleParts, minDistance, interiorParts, subpaths } from "./geometry.mjs";
 import { objectOf, linesOf, classify } from "./filled.mjs";
-import { classify as bulkClassify, crosses, isKnockout, uncut } from "./bulk.mjs";
+import { classify as bulkClassify, relations, isKnockout, uncut } from "./bulk.mjs";
 
 // `+ 0` turns -0 into 0, so a centred icon prints 0, not -0.
 const r2 = (n) => Math.round(n * 100) / 100 + 0;
@@ -93,12 +93,13 @@ export async function measuredChecks(set, G, finish) {
       // a path with a detail and an outside part keeps the outside part
       const innerParts = new Map();
       for (const { el, i } of inner) innerParts.set(el.at, (innerParts.get(el.at) ?? new Set()).add(i));
-      // at bulk a crossing accent and its cut body are the band's, not gap's or air's; air sees every body full
-      const crossing = new Set();
-      if (bulk) for (const b of c.bodies) for (const a of c.accents) if (crosses(a, b)) crossing.add(`${a.at}|${b.at}`);
+      // at bulk an overlapping pair (a stack or an overprint) is depth's, not gap's or air's: air sees every
+      // element uncut and full, less the lines and accents that overprint, so a stack's gap is not paper
+      const rel = bulk ? relations(els.filter((el) => el.tag !== "rect")) : [];
       const full = (list) => list.map((el) => { const { "fill-opacity": _, "data-cut": __, "data-body": ___, ...a } = el.attrs; return { ...el, attrs: a }; });
+      const over = new Set(rel.filter((r) => r.how === "overprint").map((r) => r.front));
       const outside = bulk
-        ? full(els.filter((el) => !c.accents.includes(el) || ![...crossing].some((k) => k.startsWith(`${el.at}|`))))
+        ? full(els.filter((el) => !over.has(el)).map(uncut))
         : els.flatMap((el) => {
           const drop = innerParts.get(el.at);
           if (!drop) return [el];
@@ -108,24 +109,27 @@ export async function measuredChecks(set, G, finish) {
       const narrow = await air(compose(parsed.attrs, outside), G, bulk ? p.gap / AIR : p.stroke);
       // a detail and its body (and the body's contour, the same geometry) are loose's, not gap's: keyed by the detail's subpath
       const skip = new Set();
-      if (bulk) for (const k of crossing) { const [a, b] = k.split("|"); skip.add(`${a}|${b}`); skip.add(`${b}|${a}`); }
+      if (bulk) for (const r of rel) { skip.add(`${r.behind.at}|${r.front.at}`); skip.add(`${r.front.at}|${r.behind.at}`); }
       else for (const { el, i, body } of inner) for (const x of els) if (geometryKey(x) === geometryKey(body)) skip.add(`${el.at}#${i}|${x.at}`);
-      // the band, on every cut body: the cut, its uncut geometry, and the accents that cross it, each rendered full
+      // the stack's gap, on every cut element: the cut, its uncut geometry, and the solids in front of it, each rendered full
       const bands = [];
-      if (bulk) for (const b of c.bodies.filter(isKnockout)) {
-        const under = c.accents.filter((a) => crossing.has(`${a.at}|${b.at}`));
-        if (!under.length) continue; // bulkChecks reports a stale cut
-        bands.push(...(await band(compose(parsed.attrs, full([b])), compose(parsed.attrs, full([uncut(b)])), compose(parsed.attrs, full(under)), G, p.knockout, KNOCKOUT_TOL)));
+      if (bulk) for (const b of els.filter(isKnockout)) {
+        const fronts = rel.filter((r) => r.how === "stack" && r.behind === b).map((r) => uncut(r.front));
+        if (!fronts.length) continue; // bulkChecks reports a stale cut
+        bands.push(...(await band(compose(parsed.attrs, full([b])), compose(parsed.attrs, full([uncut(b)])), compose(parsed.attrs, full(fronts)), G, p.stack, STACK_TOL)));
       }
+      // the biggest piece: each element's painted area, alone and full, after any cut
+      const areas = [];
+      if (bulk) for (const el of els) if (el.tag !== "rect") areas.push({ el, body: c.bodies.includes(el), area: (await measure(compose(parsed.attrs, full([el])), G)).ink });
       const bodyAt = bulk ? new Set(c.bodies.map((b) => b.at)) : new Set();
-      measures.push({ ...s, els, parts, details, paint, m, modified, share, accentInk, rootW, inner, skip, narrow, e, shadowed, bands, bodyAt });
+      measures.push({ ...s, els, parts, details, paint, m, modified, share, accentInk, rootW, inner, skip, narrow, e, shadowed, bands, bodyAt, areas });
     } catch (e) {
       if (e?.code === NO_RASTER) throw e;
       fail(failures, "elements", s.name, String(e?.message ?? e).split("\n")[0], "a file check can measure");
     }
   }
 
-  for (const { name, els, parts, details, paint, m, modified, share, accentInk, rootW, inner, skip, narrow, shadowed, bands, bodyAt } of measures) {
+  for (const { name, els, parts, details, paint, m, modified, share, accentInk, rootW, inner, skip, narrow, shadowed, bands, bodyAt, areas } of measures) {
     const { box, mass, ink, live } = m;
     // an empty icon has no box or mass to judge; count already reports it
     const inked = live.w > 0;
@@ -168,7 +172,7 @@ export async function measuredChecks(set, G, finish) {
       if (paint.has(els[i].at)) continue;
       for (let j = i + 1; j < els.length; j++) if (!paint.has(els[j].at)) for (const [A, a] of side(i, j)) for (const [B, b] of side(j, i)) gap(A, B, a, b);
       const sub = parts[i];
-      if (sub.length > 1 && !bodyAt.has(els[i].at)) for (let a = 0; a < sub.length; a++) for (let b = a + 1; b < sub.length; b++) gap(sub[a], sub[b], `${els[i].at}[${a}]`, `${els[i].at}[${b}]`);
+      if (sub.length > 1 && !bodyAt.has(els[i].at) && !(bulk && isKnockout(els[i]))) for (let a = 0; a < sub.length; a++) for (let b = a + 1; b < sub.length; b++) gap(sub[a], sub[b], `${els[i].at}[${a}]`, `${els[i].at}[${b}]`);
     }
     // air: paper narrower than AIR strokes between inks that do not touch, or a counter under COUNTER
     for (const a of narrow) {
@@ -179,8 +183,11 @@ export async function measuredChecks(set, G, finish) {
     if (bulk && ink > 0) {
       const sh = accentInk / ink;
       if (sh < p.share[0] || sh > p.share[1]) fail(failures, "share", name, `accent ${sh.toFixed(2)} of the ink`, `${p.share[0]} to ${p.share[1]}`);
+      // the body is the biggest piece: no accent, alone, paints more than the largest body
+      const biggest = Math.max(0, ...areas.filter((x) => x.body).map((x) => x.area));
+      if (biggest > 0) for (const x of areas) if (!x.body && x.area > biggest + 1e-9) fail(failures, "share", name, `${x.el.at} area ${Math.round(x.area)}`, `under the largest body's ${Math.round(biggest)}: the gray body is the biggest piece`);
     }
-    for (const b of bands) fail(failures, "knockout", name, `paper ${b.width} wide at ${b.at[0]}, ${b.at[1]}`, `${p.knockout}: re-run knockout.mjs`);
+    for (const b of bands) fail(failures, "stack", name, `paper ${b.width} wide at ${b.at[0]}, ${b.at[1]}`, `${p.stack}: re-run knockout.mjs`);
     rows.push({ icon: name, x0: r2(box.x0), y0: r2(box.y0), w: r2(box.w), h: r2(box.h), keyline: fits ? k.format : "—", ink: r2(ink), dx: r2(dx), dy: r2(dy), ...(share ? { "line%": share.paint ? Math.round((1000 * share.dark) / share.paint) / 10 : 0 } : {}), ...(bulk && ink > 0 ? { "share%": Math.round((1000 * accentInk) / ink) / 10 } : {}) });
   }
 

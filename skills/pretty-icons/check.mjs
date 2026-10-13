@@ -119,7 +119,7 @@ export function textChecks(icon, text, expectG, finish) {
   // grid, radius and the per-path count, on every finish
   for (const el of own) {
     const a = el.attrs, where = el.at;
-    if (bulk && isKnockout(el)) continue; // a cut body: knockout.mjs wrote its d
+    if (bulk && isKnockout(el)) continue; // a cut element: knockout.mjs wrote its d
     const nums = el.tag === "path" ? pathNumbers(a.d ?? "").map((n, i) => [`d[${i}]`, n]) : Object.entries(a).filter(([k]) => GEOMETRY.includes(k)).map(([k, v]) => [k, Number(v)]);
     for (const [k, n] of nums) if (!onGrid(n, p.step)) fail(failures, "grid", icon, `${where} ${k} ${n}`, `a multiple of ${p.step}`);
     if (el.tag === "rect" && !bulk) {

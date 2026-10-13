@@ -38,27 +38,31 @@ export const GRIDS = { ...PRESETS, ...FILLED_PRESETS };
 
 /**
  * The bulk finish, on grid 24 only: a filled line-and-body set. Keylines are ink sizes
- * (a filled body has no stroke), bodies are squircles at 40% opacity, accents are knocked
- * out of them by `knockout`. Share is accent ink over whole ink.
+ * (a filled body has no stroke), bodies are squircles at 40% opacity. Document order is depth:
+ * an accent lying on a body overprints it (no cut); a later solid overlapping an earlier one
+ * stacks, the one behind cut by the front's outline grown by `stack`. Share is accent ink over whole ink.
+ * Measured on a reference set of forty icons: line accents 1.75 wide, a stack gap about 0.75.
  */
 export const BULK_PRESETS = {
   24: {
     finish: "bulk",
-    stroke: 2,
-    weights: [2],
+    stroke: 1.75,
+    weights: [1.75],
     pad: 2,
-    knockout: 1.5,
+    stack: 0.75,
     gap: 1.5,
     share: [0.25, 0.6],
-    radius: [5, 3],
+    // the squircle's radius by its short side: 4 from 12, 2.75 from `pillUnder` to 12, a pill below
+    radius: [4, 2.75],
     radiusAt: 12,
+    pillUnder: 6,
     commands: 14,
     keylines: { circle: [20, 20], square: [18, 18], portrait: [16, 20], landscape: [20, 16] },
   },
 };
-/** How far a measured knockout band may sit from `knockout`, in grid units. */
-export const KNOCKOUT_TOL = 0.25;
-export const BULK_REFERENCE_INK = { 24: 111.6 };
+/** How far a measured stack gap may sit from `stack`, in grid units. */
+export const STACK_TOL = 0.25;
+export const BULK_REFERENCE_INK = { 24: 125.9 };
 
 /** The finish a root declares: bulk is fill="currentColor" with no stroke, duotone is fill="none" stroke="currentColor". */
 export function finishOf(root) {
@@ -131,14 +135,14 @@ export function preset(G, finish) {
 /** The radius a shape of this size (its smaller side) takes on this grid; at the filled finish, a cased one's. */
 export function radiusFor(G, size, finish) {
   const p = preset(G, finish);
-  if (p.finish === "bulk") return size >= p.radiusAt ? p.radius[0] : p.radius[1];
+  if (p.finish === "bulk") return size >= p.radiusAt ? p.radius[0] : size >= p.pillUnder ? p.radius[1] : size / 2;
   return radiiFor(G, size, finish)[p.finish === "filled" ? 1 : 0];
 }
 
 /** Every radius a shape of this size may take: the duotone's one; the filled finish's cut, cased, moulded and pill. */
 export function radiiFor(G, size, finish) {
   const p = preset(G, finish);
-  if (p.finish === "bulk") return [radiusFor(G, size, finish), size / 2];
+  if (p.finish === "bulk") return [...new Set([radiusFor(G, size, finish), size / 2])];
   if (p.finish !== "filled") return [size >= p.radiusAt ? p.radius[0] : p.radius[1]];
   const step = size >= 16 ? 0 : size >= 8 ? 1 : 2;
   return [RADII.cut[step], RADII.cased[step], RADII.moulded[step], size / 2];
