@@ -219,7 +219,9 @@ export async function mount( canvas, { pieceUrl, piece, theme = 'dark', mode = '
 		: smoothstep( 0.01, 0.12, lum ).mul( float( 1 ).sub( smoothstep( 0.25, 0.6, lum ) ) ); // grain in the darks only
 	// outside the tile the frame is exactly the page colour (tone mapping would turn white into grey),
 	// so the video disappears into the page under screen / multiply blending
-	const tileMask = float( 1 ).sub( smoothstep( 0.0, 0.006, tileSDF ) );
+	// reveal = 1 lifts the page colour so validate can see light that leaks past the tile
+	const reveal = uniform( 0 );
+	const tileMask = max( float( 1 ).sub( smoothstep( 0.0, 0.006, tileSDF ) ), reveal );
 	const pageColor = vec3( ...new THREE.Color( T.page ).convertLinearToSRGB().toArray() );
 	const final = ldr.rgb.add( n.mul( float( 0.035 ) ).mul( grainMask ) );
 	pipeline.outputNode = vec4( mix( pageColor, final, tileMask ), 1 );
@@ -274,6 +276,7 @@ export async function mount( canvas, { pieceUrl, piece, theme = 'dark', mode = '
 	}
 
 	let running = false;
+	const silhouette = new THREE.MeshBasicMaterial( { color: 0xffffff } );
 
 	return {
 		scene: spec,
@@ -292,6 +295,35 @@ export async function mount( canvas, { pieceUrl, piece, theme = 'dark', mode = '
 			// the current frame until the browser presents it
 			await nextFrame();
 			present( frame );
+
+		},
+		// for validate, at an exact phase (1 is the frame after the last): 'frame' as drawn with grain seed 0,
+		// 'reveal' without the page colour outside the tile, 'silhouette' the hero's solid mass in white on
+		// black (tile and transparent parts hidden). Leaves it on the canvas like renderFrame.
+		async measureFrame( phase, kind = 'frame' ) {
+
+			guard( () => setTime( phase ) );
+			await nextFrame();
+			if ( kind !== 'silhouette' ) {
+
+				reveal.value = kind === 'reveal' ? 1 : 0;
+				present( 0 );
+				reveal.value = 0;
+				return;
+
+			}
+
+			const hidden = [ tile.mesh ];
+			hero.mesh.traverse( o => { if ( o.isMesh && [ o.material ].flat().some( m => m.transparent ) ) hidden.push( o ); } );
+			const was = hidden.map( o => o.visible );
+			const background = scene.background;
+			hidden.forEach( o => { o.visible = false; } );
+			scene.background = new THREE.Color( 0x000000 );
+			scene.overrideMaterial = silhouette;
+			renderer.render( scene, camera );
+			scene.overrideMaterial = null;
+			scene.background = background;
+			hidden.forEach( ( o, i ) => { o.visible = was[ i ]; } );
 
 		},
 		start() {
