@@ -1,0 +1,32 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>specimen</title>
+<style>html, body { margin: 0; background: #000; } canvas { display: block; }</style>
+<canvas></canvas>
+<script type="module">
+// The page render, sheet and validate load a piece into: ?piece=<url>&theme=dark|light&mode=rt|pt&size=<px>&denoise=1
+const q = new URLSearchParams(location.search);
+const canvas = document.querySelector("canvas");
+const ready = (async () => {
+  const { mount } = await import("./specimen.js");
+  const stage = await mount(canvas, {
+    pieceUrl: new URL(q.get("piece"), location.href).href,
+    theme: q.get("theme") || "dark",
+    mode: q.get("mode") || "rt",
+    size: Number(q.get("size")) || 768,
+    denoise: q.get("denoise") === "1",
+    weightsUrl: new URL("./weights.tza", location.href).href,
+  });
+  window.__stage = stage;
+  return { name: q.get("piece").split("/").pop().replace(/\.specimen\.js$/, ""), duration: stage.duration, frames: stage.frames };
+})();
+ready.catch(() => {});
+window.__specimen = {
+  ready,
+  async frame(n, samples = 32) {
+    await ready;
+    await window.__stage.renderFrame(n, samples);
+    return canvas.toDataURL("image/png");
+  },
+};
+</script>
