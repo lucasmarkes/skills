@@ -6,6 +6,7 @@ import * as THREE from 'three/webgpu';
 export const TAU = Math.PI * 2;
 export const bump = ( x, c, w ) => Math.exp( - Math.pow( ( x - c ) / w, 2 ) );
 export const smoothstep = THREE.MathUtils.smoothstep;
+const PIGMENT = 1.6; // emission level that reads as the full hue on white
 
 // mulberry32: a repeatable random stream
 export function seeded( seed ) {
@@ -66,8 +67,10 @@ export function bevelExtrude( shape, { depth = 0.16, bevel = 0.06, segments = 12
 
 }
 
-// canvas texture redrawn by fn(u, v) → [r, g, b] in 0..1; returns { tex, draw }
-export function proceduralTexture( W, H ) {
+// canvas texture redrawn by fn(u, v) → [r, g, b] in 0..1; returns { tex, draw }. pigment (the light
+// theme) turns emission into colour on white: dark → white, glow → the glow's hue, so it shows on
+// ceramic where added light cannot (the surface is already white). The material takes it as `map`.
+export function proceduralTexture( W, H, { pigment = false } = {} ) {
 
 	const c = document.createElement( 'canvas' );
 	c.width = W; c.height = H;
@@ -76,12 +79,20 @@ export function proceduralTexture( W, H ) {
 	const tex = new THREE.CanvasTexture( c );
 	tex.flipY = false;
 	tex.colorSpace = THREE.SRGBColorSpace;
+	tex.userData.specimen = pigment ? 'pigment' : 'emission';
 
 	function draw( fn ) {
 
 		for ( let j = 0; j < H; j ++ ) for ( let i = 0; i < W; i ++ ) {
 
-			const [ r, g, b ] = fn( ( i + 0.5 ) / W, ( j + 0.5 ) / H ); // flipY false: row j ↔ v
+			let [ r, g, b ] = fn( ( i + 0.5 ) / W, ( j + 0.5 ) / H ); // flipY false: row j ↔ v
+			if ( pigment ) {
+
+				const m = Math.max( r, g, b, 1e-6 ), k = Math.min( 1, m * PIGMENT );
+				r = 1 - k * ( 1 - r / m ); g = 1 - k * ( 1 - g / m ); b = 1 - k * ( 1 - b / m );
+
+			}
+
 			const o = ( j * W + i ) * 4;
 			img.data[ o ] = Math.min( 255, Math.max( 0, 255 * r ) );
 			img.data[ o + 1 ] = Math.min( 255, Math.max( 0, 255 * g ) );

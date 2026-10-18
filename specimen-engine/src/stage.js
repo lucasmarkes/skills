@@ -79,7 +79,7 @@ export async function mount( canvas, { pieceUrl, piece, theme = 'dark', mode = '
 	renderer.setPixelRatio( pixelRatio );
 	renderer.setSize( size, size, false );
 	renderer.toneMapping = THREE.NeutralToneMapping; // keeps the accent saturated (AgX washes it out)
-	renderer.toneMappingExposure = 1.0;
+	renderer.toneMappingExposure = T.exposure;
 	await renderer.init();
 	THREE.RectAreaLightNode.setLTC( RectAreaLightTexturesLib.init() );
 
@@ -106,7 +106,7 @@ export async function mount( canvas, { pieceUrl, piece, theme = 'dark', mode = '
 		texture( w, h ) {
 
 			if ( ++ textures > 1 ) throw new Error( 'ctx.texture() can be called once per object: the path tracer holds one dynamic texture per object' );
-			return H.proceduralTexture( w, h );
+			return H.proceduralTexture( w, h, { pigment: theme === 'light' } );
 
 		},
 		gradient: H.gradient,

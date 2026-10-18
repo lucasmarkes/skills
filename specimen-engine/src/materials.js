@@ -9,6 +9,14 @@ const COLOUR_KEYS = [ 'color', 'emissive', 'sheenColor', 'specularColor', 'atten
 function physical( base, o, roleName ) {
 
 	for ( const k of COLOUR_KEYS ) if ( k in o ) throw new Error( `mat.${ roleName }(): "${ k }" is set by the theme; a piece never picks colours` );
+	// the light theme's dynamic texture is pigment: it colours the surface instead of emitting
+	if ( o.emissiveMap?.userData.specimen === 'pigment' ) {
+
+		const { emissiveMap, ...rest } = o;
+		return new THREE.MeshPhysicalMaterial( { ...base, ...rest, map: emissiveMap, emissive: '#000000' } );
+
+	}
+
 	const m = new THREE.MeshPhysicalMaterial( { ...base, ...o } );
 	// a map that emits carries its own colour, so the emissive term is white under it
 	if ( o.emissiveMap ) m.emissive.set( '#ffffff' );
@@ -33,7 +41,7 @@ export function createMaterials( theme, glow ) {
 
 	const roles = {
 		body: ( o = {} ) => scaleEmission( physical( L
-			? { color: '#f2f1ef', roughness: Math.max( o.roughness ?? 0.25, 0.35 ), metalness: 0, clearcoat: 1, clearcoatRoughness: 0.05 }
+			? { color: '#ebeae7', roughness: Math.max( o.roughness ?? 0.25, 0.35 ), metalness: 0, clearcoat: 1, clearcoatRoughness: 0.05 }
 			: { color: '#0b0b0c', roughness: 0.25, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.04 },
 		L ? { ...o, roughness: Math.max( o.roughness ?? 0.25, 0.35 ) } : o, 'body' ), L ? 0.5 : 1 ),
 		chrome: ( o = {} ) => physical( { color: L ? '#c8c8c8' : '#b8b8b8', roughness: 0.16, metalness: 1 }, o, 'chrome' ),

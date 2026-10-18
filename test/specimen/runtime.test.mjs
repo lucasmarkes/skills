@@ -36,7 +36,7 @@ test("every material role exists in both themes", { skip }, async () => {
   for (const theme of ["dark", "light"])
     assert.deepEqual(Object.keys(roles[theme]).sort(), ["body", "chrome", "glass", "glow", "inlay", "light"]);
   assert.equal(roles.dark.body, "0b0b0c");
-  assert.equal(roles.light.body, "f2f1ef");
+  assert.equal(roles.light.body, "ebeae7");
   assert.equal(roles.dark.chrome, "b8b8b8");
   assert.equal(roles.light.chrome, "c8c8c8");
 });
