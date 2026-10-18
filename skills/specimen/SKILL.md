@@ -99,11 +99,23 @@ export function object( ctx ) {
 | `geo.bevelExtrude(shape, { depth, bevel, segments, curveSegments })` | a shape extruded with soft rounded edges, centred on z = 0 |
 | `geo.lathe(profile, segments)` | a profile of `[x, y]` pairs revolved around +Y |
 | `geo.planarUV(geometry, w, h)` | uv 0..1 across `[-w, w] × [-h, h]`, for the dynamic texture |
-| `texture(w, h)` | the one dynamic texture: `{ tex, draw(fn(u, v) → [r, g, b]) }`. Pass `tex` as `emissiveMap` to a role and call `draw` in `update`. A second call throws: the path tracer holds one dynamic texture per object |
+| `texture(w, h)` | the one dynamic texture: `{ tex, draw(fn(u, v) → [r, g, b]) }`. Pass `tex` as `emissiveMap` to a role and call `draw` in `update`. A second call throws: the path tracer holds one dynamic texture per object. Details below |
 | `gradient(stops, { srgb })` | a static vertical gradient, stops `[t, css colour]` from top (0) to bottom (1); for flames and trails |
 | `accent`, `glow` | the two colours as `THREE.Color`, for the texture's `draw` |
 | `theme` | `'dark'` or `'light'`, read only; a last resort |
-| `TAU`, `bump(x, c, w)`, `smoothstep(x, a, b)` | animation helpers |
+| `TAU`, `bump(x, c, w)`, `smoothstep(x, a, b)` | animation helpers: `bump` is a gaussian `exp(-((x − c) / w)²)`, 1 at `c` and near 0 past `2w` (never exactly 0); `smoothstep` rises 0 → 1 between `a` and `b` |
+
+### Space and size
+
+The tile is 2 × 2 units, centred on the origin, facing the camera (+x right, +y up, +z towards the camera). The safe box is 1.16 units square (58% of the tile), centred at y = +0.04. Build the object about 1.0–1.3 units wide and at most ~1.6 tall, centred on its own origin, at `z ≈ 0.45`: the examples are this size at `fit.scale` 0.8–0.9.
+
+`scene.fit` wraps the object in a group: `scale` multiplies it about the world origin (it does not re-centre), and `x`, `y` move it in world units (`y: -0.08` is 4% of the tile down). Nothing centres the object for you: if it sits off centre on the sheet, centre its geometry first (`geometry.center()`, or move the parts inside a group), then tune `fit`.
+
+Thickness that reads at 64 px: tubes and rods of radius 0.12 or more, bevels of 0.05 or more. The key light is a soft box above and to the right, so a negative `rotation.y` (around −0.3, which turns the object's right side towards the camera) catches it on the bevels.
+
+### The dynamic texture
+
+`draw(fn)` calls `fn(u, v)` once per texel, with `u` and `v` in 0..1 across the texture (`v = 0` is its first row), and the texture is read through the mesh's own UVs. Extrusions and flat shapes need `geo.planarUV(geometry, w, h)`, which maps `v = 0` to the bottom (y = −h) and `u = 0` to the left. A lathe, a tube or a sphere already has UVs (a `TubeGeometry`'s `u` runs along its path). Return linear colour in 0..1: values are clamped, and `emissiveIntensity` (the bolt uses 3) scales them. Use `glow.r * k, glow.g * k, glow.b * k` with `k` in 0..1, and keep a dark base (`k ≈ 0`) where the body should stay black. `texture(256, 16)` is enough for a band along a path, `128 × 128` for a face: `draw` runs on the CPU every frame.
 
 ### Material roles
 
@@ -115,10 +127,12 @@ Every material comes from `mat.*`. Never construct one (`new THREE.MeshStandardM
 | `mat.chrome(o)` | chrome | chrome | rings, bands, hinges, the shackle |
 | `mat.glass(o)` | dark glass | clear glass over a white core | dies, lenses, screens |
 | `mat.inlay(o)` | black a step lighter | pearl grey | raised details on the body |
-| `mat.glow(k, o)` | emission in the glow colour | the glow as surface colour, faint emission | badges, keyholes, the lit part |
+| `mat.glow(k, o)` | emission in the glow colour | the glow as surface colour, faint emission | badges, keyholes, a tip bead: one small lit part, never the mass |
 | `mat.light(k, o)` | warm white glow | warm, faint glow | windows, portholes, flames |
 
-`o` overrides physical values only: `roughness`, `clearcoat`, `side`, `transparent`, `depthWrite`, `emissiveMap`, `alphaMap`, `emissiveIntensity`. Passing a colour (`color`, `emissive`, …) throws: the theme picks colours. A dynamic texture on `emissiveMap` emits in dark and becomes pigment on white ceramic in light, so the same `draw` works in both.
+`o` overrides physical values only: `roughness`, `clearcoat`, `side`, `transparent`, `depthWrite`, `emissiveMap`, `alphaMap`, `emissiveIntensity`. Passing a colour (`color`, `emissive`, …) throws: the theme picks colours. A dynamic texture on `emissiveMap` emits in dark and becomes pigment on white ceramic in light, so the same `draw` works in both. A `mat.glow` part is the one place the accent shows as a surface in the light theme, which is why it stays small: a badge, a bead, a keyhole.
+
+`validate.mjs` reads the source as text, so even a comment with `…Material(` in it fails `materials`.
 
 ### The craft rules
 
@@ -133,10 +147,12 @@ Every material comes from `mat.*`. Never construct one (`new THREE.MeshStandardM
 ## 4. Sheet → read → fix
 
 ```
-node <skill>/sheet.mjs <name>.specimen.js --guide --out <name>-sheet.png
+node <skill>/sheet.mjs <piece...> [--frames 0,60,120,180] [--guide] [--pt] [--out sheet.png]
 ```
 
-It renders raster frames 0, 60, 120 and 180 in a dark and a light row, with `--guide` drawing the 58% safe box in violet. Read the PNG. Check: the silhouette reads, the mass sits in the box in every frame, the light row reads as well as the dark one (glow visible on white, nothing grey and muddy), the motion is visible across the frames. Fix and repeat until it would sit beside the examples. Add `--pt` once for a path traced still per theme (a minute or so) before the full render. You can pass several pieces to compare one with an example.
+It renders raster frames 0, 60, 120 and 180 (or `--frames`) as 256 px cells, a dark row and a light row per piece, with `--guide` drawing the 58% safe box in violet. `--pt` adds a fifth cell to each row: frame 0 path traced and denoised. Each run takes about a minute; `--pt` and every extra piece add to it. Pass an example after your piece to compare them row by row.
+
+Read the PNG. Check: the silhouette reads, the mass sits in the box in every frame, the light row reads as well as the dark one (glow visible on white, nothing grey and muddy), the motion is visible across the frames. Fix and repeat until it would sit beside the examples. Run `--pt` at least once before the full render: the raster cells are brighter than the final, and a black part that reads in raster can sink into the dark tile once path traced. To inspect a detail at 256 px, sheet a throwaway copy with a larger `fit.scale` in the scratch directory, never in the person's project.
 
 ## 5. Validate
 
@@ -151,7 +167,7 @@ It prints each failed rule with its reason and a number, and exits 1 on any fail
 | `contract` | no `scene` or `object` export; `accent` not a hex colour; `duration` outside 4–12; `object()` throws or returns no `mesh` |
 | `materials` | a `…Material(` constructor in the source |
 | `seam` | raster phase 0 against phase 1 differs by more than 0.5 on average (0–255) |
-| `fit` | the solid mass (the middle 90% of a hero-only silhouette, flames and halos excluded) leaves the safe box by more than 3% of the tile, or the whole silhouette comes within 4% of the tile edge, on frames at 0, ¼, ½ and ¾ of the loop |
+| `fit` | the solid mass (the middle 90% of the object's silhouette, with transparent meshes such as flames and halos left out; opaque `mat.glow` parts count) leaves the safe box by more than 3% of the tile, or the whole silhouette comes within 4% of the tile edge, on frames at 0, ¼, ½ and ¾ of the loop |
 | `light-in-tile` | anything outside the tile is more than 2/255 brighter than the page |
 | `one-texture` | `texture()` called twice |
 

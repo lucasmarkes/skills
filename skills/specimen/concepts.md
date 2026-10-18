@@ -29,7 +29,7 @@ What makes an object read:
 | Compute, infrastructure, AI | chip, server blade, cube | pulses across the die, LEDs blink |
 | Storage, databases | stacked cylinder discs, a drawer | a disc lifts, the drawer slides |
 | Email, messaging | envelope, speech bubble | a light passes over the flap, dots pulse |
-| Webhooks, integrations, APIs | plug and socket, a hook, linked rings | the plug seats, a pulse crosses the link |
+| Webhooks, integrations, APIs | a J-hook with a chrome eye and a curled tip, plug and socket, linked rings | a charge runs eye → tip and the tip lights, the plug seats, a pulse crosses the link |
 | Analytics, metrics | bar blocks, a dial | a bar rises, the needle swings |
 | Search | magnifier | the lens glints as it tilts |
 | Payments, billing | card, coin | the card turns, the coin spins a half turn and back |
@@ -47,4 +47,7 @@ Prefer the literal object. An abstract shape that "means" a concept needs a capt
 - **Light leaked outside the tile.** The rocket's flame and the glow under the tile spilled past the tile edge, so the video showed a grey halo against the page. The runtime now composites everything outside the tile to the exact page colour, and `validate.mjs` fails a piece whose light shows outside the tile before compositing.
 - **Recolouring for the light theme.** Mapping dark colours to light ones after rendering left glass and textured objects dark and made emissive detail vanish on white. That is why pieces ask for roles (`mat.body`, …) and never pick colours, and why the dynamic texture becomes pigment in the light theme.
 - **Glow on white.** Added light does nothing on a surface that is already white. In the light theme glow shows as colour (pigment), and the accent pool is softer (`tint`).
+- **The hook read as a U.** A bent tube alone looked like a horseshoe. A chrome eye at the top and a tip that curls back in made it a hook: the parts that name an object are often small, so give them chrome or light.
+- **A black tube sank into the dark tile.** Thin black parts read in the raster sheet and nearly vanished path traced. Keep black masses chunky (tube radius 0.12 or more), let chrome or a lit band trace them, and check the dark `--pt` cell before the render.
+- **A tube's end looked cut.** `TubeGeometry` is open at both ends. Cap each end with a sphere of the same radius at the end point, or hide the join under a chrome collar.
 - **Raster light strips.** The tile's accent lights showed as thin hard strips on glossy objects in raster. The raster stage keeps the object on environment light only; the path tracer gets the full rig.
