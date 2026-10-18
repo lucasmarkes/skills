@@ -28,5 +28,12 @@ window.__specimen = {
     await window.__stage.renderFrame(n, samples);
     return canvas.toDataURL("image/png");
   },
+  // a PNG frame as a JPEG at side px: the poster
+  async jpeg(png, side, quality = 0.85) {
+    const img = new Image(); img.src = png; await img.decode();
+    const c = document.createElement("canvas"); c.width = c.height = side;
+    const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(img, 0, 0, side, side);
+    return c.toDataURL("image/jpeg", quality);
+  },
 };
 </script>
