@@ -12,8 +12,8 @@ const EXAMPLES = join(here, "..", "..", "skills", "specimen", "examples");
 const skip = (!CHROME && "Chrome not found") || (!FFMPEG && "ffmpeg not found");
 
 // The examples on the piece API, rendered dark in raster, against frames of ~/3d-icon-lab (v1).
-// The proof the API lost nothing.
-for (const name of ["rocket"]) test(`${name} matches the lab in dark`, { skip }, async () => {
+// The proof the API lost nothing. Chip is checked by eye: its die was tinted black in the lab, glass here.
+for (const name of ["rocket", "bolt", "bell", "lock"]) test(`${name} matches the lab in dark`, { skip }, async () => {
   const dir = mkdtempSync(join(realpathSync(tmpdir()), "specimen-parity-"));
   const s = await open(join(EXAMPLES, `${name}.specimen.js`), { size: 512 });
   try {

@@ -4,7 +4,8 @@
 <style>html, body { margin: 0; background: #000; } canvas { display: block; }</style>
 <canvas></canvas>
 <script type="module">
-// The page render, sheet and validate load a piece into: ?piece=<url>&theme=dark|light&mode=rt|pt&size=<px>&denoise=1
+// The page render, sheet and validate load a piece into: ?piece=<url>&theme=dark|light&mode=rt|pt&size=<px>&denoise=1&guide=1
+// guide=1 draws the safe area on each frame: the box every piece's solid mass should fit in
 const q = new URLSearchParams(location.search);
 const canvas = document.querySelector("canvas");
 const ready = (async () => {
@@ -26,7 +27,15 @@ window.__specimen = {
   async frame(n, samples = 32) {
     await ready;
     await window.__stage.renderFrame(n, samples);
-    return canvas.toDataURL("image/png");
+    if (q.get("guide") !== "1") return canvas.toDataURL("image/png");
+    // 58% of the tile, centred 2% of the tile above the middle
+    const c = document.createElement("canvas"); c.width = canvas.width; c.height = canvas.height;
+    const x = c.getContext("2d"), W = c.width, t = window.__stage.internals.tileHalf;
+    const side = t * 0.58 * W;
+    x.drawImage(canvas, 0, 0);
+    x.strokeStyle = "#8b5cf6"; x.lineWidth = Math.max(1, W / 256);
+    x.strokeRect((W - side) / 2, (W - side) / 2 - 0.02 * t * W, side, side);
+    return c.toDataURL("image/png");
   },
   // a PNG frame as a JPEG at side px: the poster
   async jpeg(png, side, quality = 0.85) {
@@ -34,6 +43,18 @@ window.__specimen = {
     const c = document.createElement("canvas"); c.width = c.height = side;
     const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(img, 0, 0, side, side);
     return c.toDataURL("image/jpeg", quality);
+  },
+  // rows of PNG data URLs into one grid of cell px squares (null leaves a cell empty)
+  async sheet(rows, cell) {
+    const c = document.createElement("canvas");
+    c.width = cell * Math.max(...rows.map((r) => r.length)); c.height = cell * rows.length;
+    const x = c.getContext("2d"); x.imageSmoothingQuality = "high";
+    for (const [j, row] of rows.entries()) for (const [i, src] of row.entries()) {
+      if (!src) continue;
+      const img = new Image(); img.src = src; await img.decode();
+      x.drawImage(img, i * cell, j * cell, cell, cell);
+    }
+    return c.toDataURL("image/png");
   },
 };
 </script>
