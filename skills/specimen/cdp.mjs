@@ -54,9 +54,20 @@ function locate(mounts, url) {
 }
 
 const live = new Set(); // browsers to reap if the process ends without closing them
-function reap() { for (const b of live) b.kill(); }
+const dirs = new Set(); // temp dirs to remove then (render's frames)
+function reap() {
+  for (const b of live) b.kill();
+  for (const d of dirs) rmSync(d, { recursive: true, force: true });
+}
 process.on("exit", reap);
-for (const sig of ["SIGINT", "SIGTERM"]) process.once(sig, () => { reap(); process.exit(130); });
+for (const [sig, code] of [["SIGINT", 130], ["SIGTERM", 143]]) process.once(sig, () => { reap(); process.exit(code); });
+
+/** A temp dir removed on exit or Ctrl-C if the caller never gets to; returns a function that removes it now. */
+export function tempDir(prefix) {
+  const d = mkdtempSync(join(tmpdir(), prefix));
+  dirs.add(d);
+  return Object.assign(() => { dirs.delete(d); rmSync(d, { recursive: true, force: true }); }, { path: d });
+}
 
 /** Headless Chrome with WebGPU on; resolves once its DevTools socket is open. */
 export async function launch({ chrome = findChrome(), gpu = true } = {}) {

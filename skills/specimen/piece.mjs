@@ -1,11 +1,17 @@
 // Reads a piece in Node before Chrome starts: the name, the syntax (with its line) and the contract.
 import { execFileSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdtempSync, rmSync } from "node:fs";
+import { copyFileSync, existsSync, mkdtempSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const SUFFIX = ".specimen.js";
+
+/** True when the script at meta (import.meta.url) is the one node was asked to run, also through a symlink or a path with spaces. */
+export function isMain(meta) {
+  if (!process.argv[1]) return false;
+  try { return realpathSync(process.argv[1]) === fileURLToPath(meta); } catch { return false; }
+}
 
 /** "rocket" from ".../rocket.specimen.js"; throws for any other file name. */
 export function pieceName(file) {

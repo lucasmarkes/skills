@@ -4,11 +4,11 @@
 //
 //   node render.mjs <piece> [--themes dark,light] [--out <dir>] [--size 768] [--samples 32] [--live] [--video] [--frames 0,60]
 import { execFile, execFileSync } from "node:child_process";
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { copyFileSync, mkdirSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { contract, loadPiece, pieceName } from "./piece.mjs";
+import { contract, isMain, loadPiece, pieceName } from "./piece.mjs";
+import { tempDir } from "./cdp.mjs";
 import { RUNTIME, requireChrome, session } from "./session.mjs";
 
 export const FPS = 30;
@@ -47,7 +47,7 @@ export function snippet({ name, themes, prefix, video = true, live = false }) {
     parts.push([`<video autoplay muted loop playsinline poster="${at(`${name}-${first}-poster.jpg`)}">`, ...lines, `</video>`].join("\n"));
   }
   if (live) parts.push([
-    `<specimen-icon src="${at(`${name}.specimen.js`)}" poster="${at(`${name}-${first}-poster.jpg`)}"${themes.length === 1 ? ` theme="${first}"` : ""}></specimen-icon>`,
+    `<specimen-icon src="${at(`${name}.specimen.js`)}" poster="${at(`${name}-${first}-poster.jpg`)}"${themes.length === 1 ? ` theme="${first}"` : ` poster-light="${at(`${name}-light-poster.jpg`)}"`}></specimen-icon>`,
     `<script type="module" src="${at("specimen.js")}"></script>`,
   ].join("\n"));
   return parts.join("\n\n");
@@ -71,7 +71,7 @@ export async function render({ piece, themes = THEMES, out, size = 768, samples 
   const files = [];
   const keep = (path) => files.push({ path, bytes: statSync(path).size });
   const s = await session(p.file, { chrome });
-  const work = mkdtempSync(join(tmpdir(), "specimen-frames-"));
+  const temp = tempDir("specimen-frames-"), work = temp.path;
   try {
     for (const theme of themes) {
       const stage = await s.open({ theme, mode: "pt", size, denoise: true });
@@ -104,14 +104,14 @@ export async function render({ piece, themes = THEMES, out, size = 768, samples 
     }
   } finally {
     await s.close();
-    rmSync(work, { recursive: true, force: true });
+    temp();
   }
 
   const html = snippet({ name: p.name, themes, prefix: `/${basename(out)}`, video, live });
   return { files, snippet: html };
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname)) {
+if (isMain(import.meta.url)) {
   const { values: o, positionals } = parseArgs({ allowPositionals: true, options: {
     themes: { type: "string", default: THEMES.join(",") }, out: { type: "string" },
     size: { type: "string", default: "768" }, samples: { type: "string", default: "32" },

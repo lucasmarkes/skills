@@ -7,7 +7,7 @@
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { contract, loadPiece } from "./piece.mjs";
+import { contract, isMain, loadPiece } from "./piece.mjs";
 import { requireChrome, session } from "./session.mjs";
 
 const CELL = 256;
@@ -56,7 +56,7 @@ export async function sheet({ pieces, frames = [0, 60, 120, 180], pt = false, gu
   return out;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname)) {
+if (isMain(import.meta.url)) {
   const { values: o, positionals } = parseArgs({ allowPositionals: true, options: {
     frames: { type: "string" }, pt: { type: "boolean", default: false }, guide: { type: "boolean", default: false },
     out: { type: "string", default: "sheet.png" },

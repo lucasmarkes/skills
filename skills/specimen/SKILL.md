@@ -150,7 +150,7 @@ Every material comes from `mat.*`. Never construct one (`new THREE.MeshStandardM
 node <skill>/sheet.mjs <piece...> [--frames 0,60,120,180] [--guide] [--pt] [--out sheet.png]
 ```
 
-It renders raster frames 0, 60, 120 and 180 (or `--frames`) as 256 px cells, a dark row and a light row per piece, with `--guide` drawing the 58% safe box in violet. `--pt` adds a fifth cell to each row: frame 0 path traced and denoised. Each run takes about a minute; `--pt` and every extra piece add to it. Pass an example after your piece to compare them row by row.
+It renders raster frames 0, 60, 120 and 180 (or `--frames`) as 256 px cells, a dark row and a light row per piece, with `--guide` drawing the 58% safe box in violet. `--pt` adds a fifth cell to each row: frame 0 path traced and denoised. A raster run takes a few seconds per piece; `--pt` adds about half a minute per piece. Pass an example after your piece to compare them row by row.
 
 Read the PNG. Check: the silhouette reads, the mass sits in the box in every frame, the light row reads as well as the dark one (glow visible on white, nothing grey and muddy), the motion is visible across the frames. Fix and repeat until it would sit beside the examples. Run `--pt` at least once before the full render: the raster cells are brighter than the final, and a black part that reads in raster can sink into the dark tile once path traced. To inspect a detail at 256 px, sheet a throwaway copy with a larger `fit.scale` in the scratch directory, never in the person's project.
 
@@ -173,7 +173,7 @@ It prints each failed rule with its reason and a number, and exits 1 on any fail
 
 ## 6. Render and hand over
 
-Announce the time before you start: about 4 s a frame on a recent Mac, so an 8 s loop (240 frames) is about 17 minutes per theme, about 35 for both. Live alone renders only the two posters, a minute or so.
+Announce the time before you start: about 4 s a frame on a recent Mac, so an 8 s loop (240 frames) is about 17 minutes per theme, about 35 for both. Live alone renders only the two posters, a minute or so. A video render outlasts any foreground command timeout, so run it in the background and watch its progress lines (`30/240 · 666 s left`, every 30 frames) until it prints the files; never run it in the foreground, where a timeout kills it halfway.
 
 ```
 node <skill>/render.mjs <name>.specimen.js --out public/icons            # video, both themes
@@ -215,11 +215,11 @@ For a site with a `[data-theme]` toggle, give two videos and the CSS that picks 
 Live:
 
 ```html
-<specimen-icon src="/icons/webhook.specimen.js" poster="/icons/webhook-dark-poster.jpg"></specimen-icon>
+<specimen-icon src="/icons/webhook.specimen.js" poster="/icons/webhook-dark-poster.jpg" poster-light="/icons/webhook-light-poster.jpg"></specimen-icon>
 <script type="module" src="/icons/specimen.js"></script>
 ```
 
-`<specimen-icon>` follows `prefers-color-scheme` unless it has `theme="dark|light"` (set it from the toggle on a `[data-theme]` site), pauses off screen, and keeps the poster when WebGPU is missing or reduced motion is set. Size it with CSS `width` (it stays square; 160 px by default).
+`<specimen-icon>` follows `prefers-color-scheme` unless it has `theme="dark|light"` (set it from the toggle on a `[data-theme]` site), pauses off screen, and keeps the poster when WebGPU is missing or reduced motion is set: `poster-light` in the light theme, `poster` otherwise. Size it with CSS `width` (it stays square; 160 px by default).
 
 Outside the tile every frame is exactly the page colour (black or white). On a section of another colour, blend it in: `mix-blend-mode: screen` for dark, `multiply` for light.
 

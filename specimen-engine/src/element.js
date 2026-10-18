@@ -1,7 +1,7 @@
 import { mount } from './stage.js';
 
-// <specimen-icon src="rocket.specimen.js" poster="rocket-dark-poster.jpg" theme?="dark|light">
-// Shows the poster first, then runs the raster stage over it when WebGPU is there and motion is welcome.
+// <specimen-icon src="rocket.specimen.js" poster="rocket-dark-poster.jpg" poster-light?="rocket-light-poster.jpg" theme?="dark|light">
+// Shows the poster for its theme first (poster-light in light, when given), then runs the raster stage over it when WebGPU is there and motion is welcome.
 // Without a theme attribute it follows prefers-color-scheme live. Stops off screen, disposes on removal,
 // and on any mount error keeps the poster and logs once.
 
@@ -15,7 +15,7 @@ img, canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: 
 
 export class SpecimenIcon extends HTMLElement {
 
-	static observedAttributes = [ 'src', 'poster', 'theme' ];
+	static observedAttributes = [ 'src', 'poster', 'poster-light', 'theme' ];
 
 	#img;
 	#stage = null;
@@ -25,7 +25,7 @@ export class SpecimenIcon extends HTMLElement {
 	#logged = false;
 	#observer = null;
 	#remount = () => this.#mount();
-	#follow = () => { if ( ! this.hasAttribute( 'theme' ) ) this.#mount(); };
+	#follow = () => { if ( this.hasAttribute( 'theme' ) ) return; this.#syncPoster(); this.#mount(); };
 
 	constructor() {
 
@@ -85,14 +85,14 @@ export class SpecimenIcon extends HTMLElement {
 
 	attributeChangedCallback( name ) {
 
-		if ( name === 'poster' ) this.#syncPoster();
-		else if ( this.isConnected ) this.#mount();
+		if ( name === 'poster' || name === 'poster-light' || name === 'theme' ) this.#syncPoster();
+		if ( name !== 'poster' && name !== 'poster-light' && this.isConnected ) this.#mount();
 
 	}
 
 	#syncPoster() {
 
-		const p = this.getAttribute( 'poster' );
+		const p = ( this.theme === 'light' && this.getAttribute( 'poster-light' ) ) || this.getAttribute( 'poster' );
 		if ( p ) this.#img.src = p; else this.#img.removeAttribute( 'src' );
 
 	}

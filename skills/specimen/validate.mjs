@@ -4,9 +4,8 @@
 //
 //   node validate.mjs <piece>      prints each failed rule with its reason and a number; exit 1 on any
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { contract, loadPiece } from "./piece.mjs";
+import { contract, isMain, loadPiece } from "./piece.mjs";
 import { requireChrome, session } from "./session.mjs";
 
 const SIZE = 256;
@@ -53,7 +52,7 @@ export async function validate(piece) {
   return { ok: failures.length === 0, failures };
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname)) {
+if (isMain(import.meta.url)) {
   const { positionals } = parseArgs({ allowPositionals: true, options: {} });
   if (positionals.length !== 1) { console.error("usage: node validate.mjs <name>.specimen.js"); process.exit(2); }
   try {

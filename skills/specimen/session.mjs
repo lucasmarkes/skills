@@ -5,8 +5,12 @@ import { findChrome, launch, serve, withRetry } from "./cdp.mjs";
 
 export const RUNTIME = join(dirname(fileURLToPath(import.meta.url)), "runtime");
 
-const timeout = (p, ms, what) => Promise.race([p, new Promise((_, fail) => setTimeout(() =>
-  fail(Object.assign(new Error(`${what} did not answer within ${ms / 1000} s`), { code: "BOOT_TIMEOUT" })), ms))]);
+// the timer is cleared once p settles, so a finished script exits right away
+const timeout = (p, ms, what) => {
+  let timer;
+  return Promise.race([p, new Promise((_, fail) => { timer = setTimeout(() =>
+    fail(Object.assign(new Error(`${what} did not answer within ${ms / 1000} s`), { code: "BOOT_TIMEOUT" })), ms); })]).finally(() => clearTimeout(timer));
+};
 
 /** Chrome check up front, so a missing browser is named before any work. */
 export function requireChrome() {

@@ -63,7 +63,7 @@ test("render --live copies the runtime and the piece", { skip }, async () => {
   try {
     const r = await render({ piece: join(FIXTURES, "cube.specimen.js"), out, live: true, size: 128, samples: 1, log: () => {} });
     assert.deepEqual(readdirSync(out).sort(), ["cube-dark-poster.jpg", "cube-light-poster.jpg", "cube.specimen.js", "specimen.js"]);
-    assert.match(r.snippet, /<specimen-icon src="\/[^"]+\/cube\.specimen\.js" poster="[^"]+cube-dark-poster\.jpg"><\/specimen-icon>/);
+    assert.match(r.snippet, /<specimen-icon src="\/[^"]+\/cube\.specimen\.js" poster="[^"]+cube-dark-poster\.jpg" poster-light="[^"]+cube-light-poster\.jpg"><\/specimen-icon>/);
     assert.doesNotMatch(r.snippet, /<video/);
   } finally { rmSync(out, { recursive: true, force: true }); }
 });
@@ -72,5 +72,12 @@ test("delivery both prints the video and the live snippet", async () => {
   const { snippet } = await import("../../skills/specimen/render.mjs");
   const s = snippet({ name: "bolt", themes: ["dark", "light"], prefix: "/icons", video: true, live: true });
   assert.match(s, /<video[^>]+poster="\/icons\/bolt-dark-poster\.jpg"/);
-  assert.match(s, /<specimen-icon src="\/icons\/bolt\.specimen\.js" poster="\/icons\/bolt-dark-poster\.jpg"><\/specimen-icon>\n<script type="module" src="\/icons\/specimen\.js"><\/script>/);
+  assert.match(s, /<specimen-icon src="\/icons\/bolt\.specimen\.js" poster="\/icons\/bolt-dark-poster\.jpg" poster-light="\/icons\/bolt-light-poster\.jpg"><\/specimen-icon>\n<script type="module" src="\/icons\/specimen\.js"><\/script>/);
 });
+
+test("a light page shows the light poster when the stage cannot run", { skip }, () => live({ inject: "delete Navigator.prototype.gpu;", features: { "prefers-color-scheme": "light" } }, async (page) => {
+  await page.evaluate(state);
+  assert.match(await page.evaluate(`${EL}.shadowRoot.querySelector("img").src`), /cube-light-poster\.jpg$/);
+  await page.send("Emulation.setEmulatedMedia", media({ "prefers-color-scheme": "dark" }));
+  assert.equal(await until(page, `${EL}.shadowRoot.querySelector("img").src.endsWith("/cube-poster.jpg")`), true);
+}));
