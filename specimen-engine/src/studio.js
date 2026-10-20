@@ -41,6 +41,11 @@ export function createStudioEnvironment( accent, { fakeAccentBounce = 0, accentF
 		makeBox( new THREE.Vector3( - 0.8, 0.6, 0.4 ), - 0.4, 1.1, 0.8, 0.7, '#ffffff', 0.8 ),
 		// very faint front fill so the black surfaces keep some shape
 		makeBox( new THREE.Vector3( 0, 0.2, 1 ), 0, 1.2, 0.6, 0.6, '#ffffff', 0.25 ),
+		// two thin hard-edged strips, as in product photography: they draw crisp lines of light along
+		// bevels and edges instead of broad sheens. A tall one behind-left (rim streak on the left edges)
+		makeBox( new THREE.Vector3( - 0.9, 0.15, - 0.45 ), 0.08, 0.035, 0.9, 0.02, '#ffffff', key * 1.3 ),
+		// and a long one overhead in front (a sharp line along every top edge facing the camera)
+		makeBox( new THREE.Vector3( 0.15, 0.85, 0.55 ), - 0.15, 1.0, 0.03, 0.02, '#ffffff', key * 0.7 ),
 	];
 
 	// soft purple glow straight below the sphere: the sphere's glossy underside mirrors it as a smooth

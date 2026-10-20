@@ -17,7 +17,7 @@ export function object( { THREE, mat, geo, TAU, smoothstep } ) {
 		depth: D, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.05, bevelSegments: 12, curveSegments: 32,
 	} );
 	bodyGeo.translate( 0, 0, - D / 2 );
-	const body = new THREE.Mesh( bodyGeo, mat.body() );
+	const body = new THREE.Mesh( bodyGeo, mat.body( { finish: 'brushed', finishRepeat: 5 } ) );
 	const front = D / 2 + 0.06;
 
 	// keyhole: round head + tapered slot, inset into a chrome ring on the front face

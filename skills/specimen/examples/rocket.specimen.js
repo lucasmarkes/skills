@@ -13,7 +13,7 @@ export function object( { THREE, mat, geo, gradient, glow, TAU } ) {
 
 	const R = 0.21;
 	const black = mat.body( { roughness: 0.22 } );
-	const chrome = mat.chrome();
+	const chrome = mat.chrome( { finish: 'brushed', finishRepeat: 4 } );
 
 	// body: ogive nose blending into a slightly tapered tail, revolved around +Y
 	const prof = [];

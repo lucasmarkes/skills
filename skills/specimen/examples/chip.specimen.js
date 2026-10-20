@@ -15,14 +15,14 @@ export function object( { THREE, mat, geo, texture, glow, TAU } ) {
 	const ext = { depth: T, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 8, curveSegments: 24 };
 	const bodyGeo = new THREE.ExtrudeGeometry( geo.roundedRect( new THREE.Shape(), B, B, 0.09 ), ext );
 	bodyGeo.translate( 0, 0, - T / 2 );
-	const body = new THREE.Mesh( bodyGeo, mat.body( { roughness: 0.3 } ) );
+	const body = new THREE.Mesh( bodyGeo, mat.body( { finish: 'speckle', finishRepeat: 4 } ) );
 	const top = T / 2 + 0.03;
 
 	// raised frame around the die
 	const d = 0.23;
 	const frameShape = geo.roundedRect( new THREE.Shape(), d + 0.05, d + 0.05, 0.06 );
 	frameShape.holes.push( geo.roundedRect( new THREE.Path(), d, d, 0.035 ) );
-	const frame = new THREE.Mesh( new THREE.ExtrudeGeometry( frameShape, { ...ext, depth: 0.02, bevelThickness: 0.012, bevelSize: 0.01, bevelSegments: 4 } ), mat.body() );
+	const frame = new THREE.Mesh( new THREE.ExtrudeGeometry( frameShape, { ...ext, depth: 0.02, bevelThickness: 0.012, bevelSize: 0.01, bevelSegments: 4 } ), mat.body( { finish: 'brushed', finishRepeat: 8 } ) );
 	frame.position.z = top;
 
 	// die: glossy dark glass with the pulse texture as emission

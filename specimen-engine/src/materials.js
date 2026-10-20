@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import { finish } from './finishes.js';
 
 // Semantic materials. A piece asks for a role and the theme answers with the colour and finish, so
 // one piece reads in both themes: remapping colours after the fact left glass and textured objects
@@ -8,6 +9,8 @@ const COLOUR_KEYS = [ 'color', 'emissive', 'sheenColor', 'specularColor', 'atten
 
 function physical( base, o, roleName ) {
 
+	// a finish sits between the role's values and the piece's own overrides
+	if ( 'finish' in o || 'finishRepeat' in o ) { const { finish: f, finishRepeat, ...rest } = o; base = { ...base, ...finish( f, finishRepeat ) }; o = rest; }
 	for ( const k of COLOUR_KEYS ) if ( k in o ) throw new Error( `mat.${ roleName }(): "${ k }" is set by the theme; a piece never picks colours` );
 	// the light theme's dynamic texture is pigment: it colours the surface instead of emitting
 	if ( o.emissiveMap?.userData.specimen === 'pigment' ) {

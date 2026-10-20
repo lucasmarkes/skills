@@ -30,10 +30,10 @@ export function object( { THREE, mat, geo, TAU, bump, smoothstep } ) {
 	// inner wall (crown → lip), lip roll (inside → outside), outer wall (lip → crown)
 	const inner = prof.slice( 0, 60 ).map( p => new THREE.Vector2( Math.max( p.x - 0.05, 0.0005 ), p.y ) ).reverse();
 	const outline = [ ...inner, ...lip.slice().reverse(), ...prof ];
-	const body = new THREE.Mesh( geo.lathe( outline, 128 ), mat.body( { side: THREE.DoubleSide } ) );
+	const body = new THREE.Mesh( geo.lathe( outline, 128 ), mat.body( { side: THREE.DoubleSide, finish: 'speckle', finishRepeat: 3 } ) );
 
 	// crown loop
-	const loop = new THREE.Mesh( new THREE.TorusGeometry( 0.065, 0.022, 16, 48 ), mat.body() );
+	const loop = new THREE.Mesh( new THREE.TorusGeometry( 0.065, 0.022, 16, 48 ), mat.body( { finish: 'brushed', finishRepeat: 4 } ) );
 	loop.position.y = 0.06;
 
 	// clapper: chrome ball on a short rod, hangs from the inside of the crown

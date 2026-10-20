@@ -22,7 +22,7 @@ export function object( { THREE, mat, geo, texture, glow, TAU, bump, smoothstep 
 	geo.planarUV( g, 0.4 * S, 0.7 * S );
 
 	const charge = texture( 64, 256 );
-	const bolt = new THREE.Mesh( g, mat.body( { emissiveMap: charge.tex, emissiveIntensity: 3 } ) );
+	const bolt = new THREE.Mesh( g, mat.body( { emissiveMap: charge.tex, emissiveIntensity: 3, finish: 'gloss' } ) );
 
 	const mesh = new THREE.Group();
 	mesh.add( bolt );

@@ -53,10 +53,16 @@ Both themes are rendered unless the person asks for one. Also ask where the file
 
 Read `concepts.md`. Offer two or three concepts, one line each:
 
-> **Name.** The object · what moves · where the accent lives.
+> **Name.** The object · what moves · where the accent lives · the finishes.
 
 Example:
-> **Bolt.** A thick soft-bevelled lightning bolt · a charge of light runs down through it twice per loop and pools in the tip · the charge and the pool under the tile, in yellow.
+> **Bolt.** A thick soft-bevelled lightning bolt · a charge of light runs down through it twice per loop and pools in the tip · the charge and the pool under the tile · gloss body.
+
+Then suggest two or three palettes for the accent, the one colour the icon carries, and let the person pick or name their own:
+
+> **Palette.** Cyan `#22d3ee` (a cool, technical read) · amber `#f59e0b` (warm, an alert) · neutral `#a1a1aa` (no colour at all: the object reads by its finishes alone).
+
+The colour is the person's call: their brand, their section, their grid. Suggest from the product area (security reads cool, alerts warm, a monochrome grid neutral) and from the icons already beside it on the page; never pick one silently. The palette sets `scene.accent` and, if they want a different emission, `scene.glow`.
 
 Wait for the person to pick. Skip this only when they arrived with the object and the motion already chosen. If there is nobody to ask, take the concept with the clearest silhouette and say which one you took.
 
@@ -130,7 +136,21 @@ Every material comes from `mat.*`. Never construct one (`new THREE.MeshStandardM
 | `mat.glow(k, o)` | emission in the glow colour | the glow as surface colour, faint emission | badges, keyholes, a tip bead: one small lit part, never the mass |
 | `mat.light(k, o)` | warm white glow | warm, faint glow | windows, portholes, flames |
 
-`o` overrides physical values only: `roughness`, `clearcoat`, `side`, `transparent`, `depthWrite`, `emissiveMap`, `alphaMap`, `emissiveIntensity`. Passing a colour (`color`, `emissive`, …) throws: the theme picks colours. A dynamic texture on `emissiveMap` emits in dark and becomes pigment on white ceramic in light, so the same `draw` works in both. A `mat.glow` part is the one place the accent shows as a surface in the light theme, which is why it stays small: a badge, a bead, a keyhole.
+`o` overrides physical values only: `finish`, `finishRepeat`, `roughness`, `metalness`, `clearcoat`, `normalMap`, `side`, `transparent`, `depthWrite`, `emissiveMap`, `alphaMap`, `emissiveIntensity`. Passing a colour (`color`, `emissive`, …) throws: the theme picks colours. A dynamic texture on `emissiveMap` emits in dark and becomes pigment on white ceramic in light, so the same `draw` works in both. A `mat.glow` part is the one place the accent shows as a surface in the light theme, which is why it stays small: a badge, a bead, a keyhole.
+
+### Finishes
+
+Every role takes a surface finish: `mat.body({ finish: 'brushed', finishRepeat: 5 })`. The finish sets the physical values (and, for the textured ones, a fine static map) and keeps the role's colour, so it works in both themes. Values the piece passes itself still win over the finish.
+
+| Finish | What the light does on it | Good on |
+|---|---|---|
+| `gloss` | a mirror under clearcoat: sharp reflections of the studio strips | bodies that should read as lacquer |
+| `matte` | no reflection, only soft form shading | skirts, cores, parts that must sit back |
+| `brushed` | metal with fine lines: the highlight stretches into a streak across them | plates, frames, collars, a lock's body |
+| `perforated` | metal with a grid of round holes, each catching its own glint | grilles, keycap plates, speaker faces |
+| `speckle` | a rough field with sparse bright glints, like stone or sparkle paint | caps, keytops, a bell's body |
+
+`finishRepeat` is how many tiles per UV unit (default 10). Extrusions have UVs in scene units, so the pitch is the same at any size; lathes and tubes run 0..1, so they want a smaller number (3–5). A fine finish reads as a material; a coarse one reads as a print (brushed lines too wide looked like wood grain).
 
 `validate.mjs` reads the source as text, so even a comment with `…Material(` in it fails `materials`.
 
@@ -138,6 +158,7 @@ Every material comes from `mat.*`. Never construct one (`new THREE.MeshStandardM
 
 - **One object, one idea.** No second object, no props, no text.
 - **Silhouette first.** It reads at 64 px or it doesn't read.
+- **Polished light on every icon.** The studio has broad soft boxes and two thin hard strips: the strips draw crisp lines of light along bevels and edges. Give the icon at least two finishes so those lines change character across it (a gloss top over a matte skirt, a brushed frame around a speckled body). The icon should read by how its surfaces take the light, not only by its outline.
 - **The accent only as light.** The body stays black (dark) or white (light). The accent appears as glow, as the pool under the tile and on the rim. Never paint a surface the accent colour.
 - **Fit in the 58% box.** The solid mass sits in the safe area, centred a touch above the middle, and never comes within 4% of the tile edge. Use `scene.fit`, not the object's own position, to place it.
 - **Loop without a jump.** Every term of `update` is a function of `phase · TAU` with integer harmonics, or a `smoothstep` envelope that is 0 at both ends of the loop. Phase 1 must look exactly like phase 0.
@@ -186,24 +207,24 @@ node <skill>/render.mjs <name>.specimen.js --out public/icons --live --video   #
 Hand over the files and the snippet, then ask whether the site follows the OS theme or has a toggle (`[data-theme]`). The printed video snippet follows the OS:
 
 ```html
-<video autoplay muted loop playsinline poster="/icons/webhook-dark-poster.jpg">
-  <source src="/icons/webhook-light.webm" type="video/webm" media="(prefers-color-scheme: light)">
-  <source src="/icons/webhook-light.mp4" type="video/mp4" media="(prefers-color-scheme: light)">
-  <source src="/icons/webhook-dark.webm" type="video/webm">
-  <source src="/icons/webhook-dark.mp4" type="video/mp4">
+<video autoplay muted loop playsinline poster="/icons/bolt-dark-poster.jpg">
+  <source src="/icons/bolt-light.webm" type="video/webm" media="(prefers-color-scheme: light)">
+  <source src="/icons/bolt-light.mp4" type="video/mp4" media="(prefers-color-scheme: light)">
+  <source src="/icons/bolt-dark.webm" type="video/webm">
+  <source src="/icons/bolt-dark.mp4" type="video/mp4">
 </video>
 ```
 
 For a site with a `[data-theme]` toggle, give two videos and the CSS that picks one:
 
 ```html
-<video class="specimen-dark" autoplay muted loop playsinline poster="/icons/webhook-dark-poster.jpg">
-  <source src="/icons/webhook-dark.webm" type="video/webm">
-  <source src="/icons/webhook-dark.mp4" type="video/mp4">
+<video class="specimen-dark" autoplay muted loop playsinline poster="/icons/bolt-dark-poster.jpg">
+  <source src="/icons/bolt-dark.webm" type="video/webm">
+  <source src="/icons/bolt-dark.mp4" type="video/mp4">
 </video>
-<video class="specimen-light" autoplay muted loop playsinline poster="/icons/webhook-light-poster.jpg">
-  <source src="/icons/webhook-light.webm" type="video/webm">
-  <source src="/icons/webhook-light.mp4" type="video/mp4">
+<video class="specimen-light" autoplay muted loop playsinline poster="/icons/bolt-light-poster.jpg">
+  <source src="/icons/bolt-light.webm" type="video/webm">
+  <source src="/icons/bolt-light.mp4" type="video/mp4">
 </video>
 <style>
   .specimen-light { display: none; }
@@ -215,7 +236,7 @@ For a site with a `[data-theme]` toggle, give two videos and the CSS that picks 
 Live:
 
 ```html
-<specimen-icon src="/icons/webhook.specimen.js" poster="/icons/webhook-dark-poster.jpg" poster-light="/icons/webhook-light-poster.jpg"></specimen-icon>
+<specimen-icon src="/icons/bolt.specimen.js" poster="/icons/bolt-dark-poster.jpg" poster-light="/icons/bolt-light-poster.jpg"></specimen-icon>
 <script type="module" src="/icons/specimen.js"></script>
 ```
 
@@ -230,6 +251,9 @@ Outside the tile every frame is exactly the page colour (black or white). On a s
 - **`examples/bell.specimen.js`** — a lathed bell that rings twice per loop, a chrome clapper lagging behind; a `mat.glow` badge that pops when it rings.
 - **`examples/lock.specimen.js`** — a padlock whose chrome shackle lifts and swings open once per loop while the keyhole lights; `fit.y` keeps the lifted shackle off the top.
 - **`examples/chip.specimen.js`** — a chip with chrome pins on every side; a `mat.glass` die where square pulses of light, drawn through the dynamic texture, ripple outward twice per loop.
+- **`examples/cube.specimen.js`** — a colourless puzzle cube: 26 cubies, every sticker a different finish of the same black (white in light), layers that snap a quarter turn four times per loop and close solved. The neutral palette: it reads by finishes alone.
+- **`examples/key.specimen.js`** — a keyboard keycap on a perforated chrome plate, a speckled top over a matte skirt, a lit return-arrow legend; it presses twice per loop with a bounce while the light under it flares.
+- **`examples/gears.specimen.js`** — two meshed chrome gears, the large one with lightening holes, that tick one tooth at a time four times per loop while the hub flares. Rotating parts with symmetric geometry keep plain chrome: a textured finish would turn with them and break the loop.
 
 ## 8. Never
 
