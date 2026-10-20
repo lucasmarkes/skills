@@ -85,8 +85,9 @@ export function object( { THREE, mat, geo, smoothstep } ) {
 		puzzle.add( c );
 
 	}
-	// a dark core so the seams show depth, not the tile behind
-	puzzle.add( new THREE.Mesh( new THREE.BoxGeometry( 3 * P - 0.04, 3 * P - 0.04, 3 * P - 0.04 ), mat.body( { roughness: 0.9, clearcoat: 0 } ) ) );
+	// a core that fills only the empty centre, so the seams show depth, not the tile behind; a bigger one
+	// reached into the outer layers and its corners stood still out of every turn like a ghost layer
+	puzzle.add( new THREE.Mesh( new THREE.BoxGeometry( P, P, P ), mat.body( { roughness: 0.9, clearcoat: 0 } ) ) );
 
 	const mesh = new THREE.Group();
 	mesh.add( puzzle );
