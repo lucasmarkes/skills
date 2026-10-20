@@ -86,7 +86,7 @@ export async function mount( canvas, { pieceUrl, piece, theme = 'dark', mode = '
 	// --- scene ---
 	const scene = new THREE.Scene();
 	scene.background = new THREE.Color( T.page );
-	scene.environment = createStudioEnvironment( spec.accent, { fakeAccentBounce: mode === 'rt' ? TINT : 0, accentFloor: ( spec.lights?.floor ?? 0 ) * TINT, ambient: T.ambient, key: T.key } );
+	scene.environment = createStudioEnvironment( spec.accent, { fakeAccentBounce: mode === 'rt' ? TINT : 0, accentFloor: ( spec.lights?.floor ?? 0 ) * TINT, ambient: T.ambient, key: T.key, strips: spec.lights?.strips ?? 1 } );
 
 	const camera = new THREE.PerspectiveCamera( 14, 1, 1, 100 );
 	camera.position.set( 0, 0, 10.4 );

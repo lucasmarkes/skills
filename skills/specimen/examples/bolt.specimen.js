@@ -6,6 +6,9 @@ export const scene = {
 	glow: '#fde047',
 	duration: 8,
 	fit: { scale: 0.8 },
+	// the thin studio strips swept through the inner bevels as the bolt turns and flickered there as a
+	// sub-pixel line; the key light alone still traces the edges
+	lights: { strips: 0 },
 };
 
 export function object( { THREE, mat, geo, texture, glow, TAU, bump, smoothstep } ) {

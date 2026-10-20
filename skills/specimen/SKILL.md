@@ -86,7 +86,7 @@ export const scene = {
 	glow: '#7dd3fc',                // optional: the colour of its emission; default is the accent a step lighter
 	duration: 8,                    // seconds, 4–12; the loop must not jump
 	fit: { scale: 0.9, x: 0, y: 0 },// optical fit into the 58% safe area (section 4)
-	lights: { tint: 0.45 },         // optional: accent, rim, under, underFill, floor, tint
+	lights: { tint: 0.45 },         // optional: accent, rim, under, underFill, floor, tint, strips
 };
 
 export function object( ctx ) {
@@ -151,6 +151,8 @@ Every role takes a surface finish: `mat.body({ finish: 'brushed', finishRepeat: 
 | `speckle` | a rough field with sparse bright glints, like stone or sparkle paint | caps, keytops, a bell's body |
 
 `finishRepeat` is how many tiles per UV unit (default 10). Extrusions have UVs in scene units, so the pitch is the same at any size; lathes and tubes run 0..1, so they want a smaller number (3–5). A fine finish reads as a material; a coarse one reads as a print (brushed lines too wide looked like wood grain).
+
+The two thin strips that draw those crisp lines can be scaled with `scene.lights.strips` (0–1, default 1). Turn them down when a fine bevel sweeps through one as the object turns: the reflection is thinner than a pixel and flickers on and off across frames. The bolt uses `strips: 0`.
 
 `validate.mjs` reads the source as text, so even a comment with `…Material(` in it fails `materials`.
 
