@@ -1,0 +1,14 @@
+{
+  "name": "specimen-engine",
+  "private": true,
+  "type": "module",
+  "description": "Source of skills/specimen/runtime/specimen.js. Maintainer only: the skill never installs this.",
+  "scripts": { "build": "node build-runtime.mjs" },
+  "dependencies": {
+    "oidn-web": "0.5.0",
+    "three": "0.186.1",
+    "three-gpu-pathtracer": "0.0.27",
+    "three-mesh-bvh": "0.9.16"
+  },
+  "devDependencies": { "esbuild": "0.25.10" }
+}

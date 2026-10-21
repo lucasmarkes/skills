@@ -1,0 +1,102 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>specimen</title>
+<style>html, body { margin: 0; background: #000; } canvas { display: block; }</style>
+<canvas></canvas>
+<script type="module">
+// The page render, sheet and validate load a piece into: ?piece=<url>&theme=dark|light&mode=rt|pt&size=<px>&denoise=1&guide=1
+// guide=1 draws the safe area on each frame: the box every piece's solid mass should fit in
+const q = new URLSearchParams(location.search);
+const canvas = document.querySelector("canvas");
+const ready = (async () => {
+  const { mount } = await import("./specimen.js");
+  const stage = await mount(canvas, {
+    pieceUrl: new URL(q.get("piece"), location.href).href,
+    theme: q.get("theme") || "dark",
+    mode: q.get("mode") || "rt",
+    size: Number(q.get("size")) || 768,
+    denoise: q.get("denoise") === "1",
+    weightsUrl: new URL("./weights.tza", location.href).href,
+  });
+  window.__stage = stage;
+  return { name: q.get("piece").split("/").pop().replace(/\.specimen\.js$/, ""), duration: stage.duration, frames: stage.frames };
+})();
+ready.catch(() => {});
+window.__specimen = {
+  ready,
+  async frame(n, samples = 32) {
+    await ready;
+    await window.__stage.renderFrame(n, samples);
+    if (q.get("guide") !== "1") return canvas.toDataURL("image/png");
+    // 58% of the tile, centred 2% of the tile above the middle
+    const c = document.createElement("canvas"); c.width = canvas.width; c.height = canvas.height;
+    const x = c.getContext("2d"), W = c.width, t = window.__stage.internals.tileHalf;
+    const side = t * 0.58 * W;
+    x.drawImage(canvas, 0, 0);
+    x.strokeStyle = "#8b5cf6"; x.lineWidth = Math.max(1, W / 256);
+    x.strokeRect((W - side) / 2, (W - side) / 2 - 0.02 * t * W, side, side);
+    return c.toDataURL("image/png");
+  },
+  // what validate measures, at 256 px raster: seam = mean |RGB| difference between phase 0 and phase 1;
+  // fit per sampled frame = the hero's solid mass against the safe box (over, in tiles) and the tile
+  // edge (edgeGap, in tiles); outsideMax = the brightest pixel outside the tile over the page colour (0–255)
+  async measure(at) {
+    const { frames } = await ready;
+    const st = window.__stage, W = canvas.width, t = st.internals.tileHalf, r = t * 0.4;
+    at ??= [0, 1, 2, 3].map((k) => Math.round(k * frames / 4));
+    const x = new OffscreenCanvas(W, W).getContext("2d", { willReadFrequently: true });
+    const grab = async (phase, kind) => { await st.measureFrame(phase, kind); x.clearRect(0, 0, W, W); x.drawImage(canvas, 0, 0); return x.getImageData(0, 0, W, W).data; };
+    const TRIM = 0.05;
+    const lum = (d, i) => 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+    const a = await grab(0, "frame"), b = await grab(1, "frame");
+    let sum = 0;
+    for (let i = 0; i < a.length; i += 4) sum += Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]);
+    const seam = sum / (W * W * 3), page = lum(a, 0);
+    // tile and safe box in px: the tile spans t·W, the box 58% of it, 2% of the tile above the middle
+    const T = t * W, S = 0.58 * T, sx = (W - S) / 2, sy = (W - S) / 2 - 0.02 * T, tx = (W - T) / 2;
+    const fit = [];
+    let outsideMax = 0;
+    for (const f of at) {
+      const phase = f / frames;
+      const m = await grab(phase, "silhouette");
+      const cols = new Float64Array(W), rows = new Float64Array(W);
+      let x0 = W, y0 = W, x1 = -1, y1 = -1, n = 0;
+      for (let y = 0; y < W; y++) for (let xx = 0; xx < W; xx++) if (m[(y * W + xx) * 4 + 1] > 127) { x0 = Math.min(x0, xx); x1 = Math.max(x1, xx + 1); y0 = Math.min(y0, y); y1 = Math.max(y1, y + 1); cols[xx]++; rows[y]++; n++; }
+      if (x1 < 0) { fit.push({ frame: f, inSafe: true, over: 0, edgeGap: 0.5, empty: true }); continue; }
+      // the solid mass: the span holding the middle 90% of the pixels on each axis, so a bolt's tips or
+      // a fin's point may cross the box while the body sits in it; the edge gap uses the whole silhouette
+      const span = (h) => { let a = 0, b = W, c = 0; for (let i = 0; i < W; i++) { c += h[i]; if (c < n * TRIM) a = i + 1; if (c <= n * (1 - TRIM)) b = i + 1; } return [a, b]; };
+      const [mx0, mx1] = span(cols), [my0, my1] = span(rows);
+      const over = Math.max(0, sx - mx0, mx1 - (sx + S), sy - my0, my1 - (sy + S)) / T;
+      const edgeGap = Math.min(x0 - tx, tx + T - x1, y0 - tx, tx + T - y1) / T;
+      fit.push({ frame: f, inSafe: over <= 0.03, over, edgeGap, box: [x0, y0, x1, y1], mass: [mx0, my0, mx1, my1] });
+      const o = await grab(phase, "reveal");
+      for (let y = 0; y < W; y++) for (let xx = 0; xx < W; xx++) {
+        const px = Math.abs((xx + 0.5) / W * 2 - 1) - (t - r), py = Math.abs((y + 0.5) / W * 2 - 1) - (t - r);
+        if (Math.hypot(Math.max(px, 0), Math.max(py, 0)) - r < 0.03) continue; // the tile and its edge
+        outsideMax = Math.max(outsideMax, lum(o, (y * W + xx) * 4) - page);
+      }
+    }
+    return { seam, fit, outsideMax };
+  },
+  // a PNG frame as a JPEG at side px: the poster
+  async jpeg(png, side, quality = 0.85) {
+    const img = new Image(); img.src = png; await img.decode();
+    const c = document.createElement("canvas"); c.width = c.height = side;
+    const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(img, 0, 0, side, side);
+    return c.toDataURL("image/jpeg", quality);
+  },
+  // rows of PNG data URLs into one grid of cell px squares (null leaves a cell empty)
+  async sheet(rows, cell) {
+    const c = document.createElement("canvas");
+    c.width = cell * Math.max(...rows.map((r) => r.length)); c.height = cell * rows.length;
+    const x = c.getContext("2d"); x.imageSmoothingQuality = "high";
+    for (const [j, row] of rows.entries()) for (const [i, src] of row.entries()) {
+      if (!src) continue;
+      const img = new Image(); img.src = src; await img.decode();
+      x.drawImage(img, i * cell, j * cell, cell, cell);
+    }
+    return c.toDataURL("image/png");
+  },
+};
+</script>
