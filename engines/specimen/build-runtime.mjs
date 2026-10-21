@@ -7,7 +7,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const runtime = join(here, "..", "skills", "specimen", "runtime");
+const runtime = join(here, "..", "..", "skills", "specimen", "runtime");
 const out = join(runtime, "specimen.js");
 const meta = join(tmpdir(), `specimen-meta-${process.pid}.json`);
 execFileSync(join(here, "node_modules", ".bin", "esbuild"), [
