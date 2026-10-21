@@ -2,6 +2,14 @@
 
 Skills for coding agents, each one a command away.
 
+## Install
+
+```bash
+npx skills add lucasmarkes/skills
+```
+
+Add `--skill specimen` to install just that one.
+
 ## Skills
 
 | Skill | What it does |

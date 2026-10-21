@@ -31,6 +31,7 @@ specimen/
   runtime/          fixed — never edited
     specimen.js     the bundle: three (WebGPU), the path tracer, the denoiser, the stage, <specimen-icon>
     weights.tza     the denoiser's weights
+    THIRD_PARTY_NOTICES.md  the bundled packages' and the weights' licences; --live ships it as specimen.js.LICENSE.txt
     page.html       the page render, sheet and validate load a piece into
   examples/         the reference pieces (section 7)
 ```
@@ -44,7 +45,7 @@ The scripts run with plain `node` (22 or newer) and use only Node built-ins. The
 Ask this first, in one message, before any concept:
 
 > **Video** (default) — path traced, `<name>-dark.webm/.mp4` and `<name>-light.webm/.mp4` with a poster each, and a `<video>` snippet. The best look, a few hundred KB per theme, plays everywhere.
-> **Live** — `specimen.js` and the piece copied into their static folder, a poster per theme, and a `<specimen-icon>` snippet. It is raster, not path traced: softer reflections, no denoiser. Say so plainly. It needs WebGPU and falls back to the poster without it or with reduced motion.
+> **Live** — `specimen.js` (with its licence file) and the piece copied into their static folder, a poster per theme, and a `<specimen-icon>` snippet. It is raster, not path traced: softer reflections, no denoiser. Say so plainly. It needs WebGPU and falls back to the poster without it or with reduced motion.
 > **Both** — video by default, live on top only where they turn it on.
 
 Both themes are rendered unless the person asks for one. Also ask where the files go; if they don't say, put them beside the piece. If there is nobody to ask, take video, both themes, beside the piece, and say so.

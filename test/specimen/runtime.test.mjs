@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CHROME, FIXTURES, open, pixel } from "./harness.mjs";
 
@@ -61,4 +62,12 @@ test("a piece with a syntax error fails fast", { skip }, async () => {
 test("no WebGPU is named", { skip }, async () => {
   await withPiece("cube", { inject: "delete Navigator.prototype.gpu" }, (page) =>
     assert.rejects(page.evaluate("__specimen.ready"), /WebGPU is not available in this Chrome \(navigator\.gpu missing\)/));
+});
+
+test("the runtime ships a licence notice for every package in the bundle and for the weights", () => {
+  const notices = readFileSync(join("skills", "specimen", "runtime", "THIRD_PARTY_NOTICES.md"), "utf8");
+  for (const name of ["three", "three-gpu-pathtracer", "three-mesh-bvh", "oidn-web", "@petamoriken/float16"]) {
+    assert.match(notices, new RegExp(`^## ${name.replace("/", "\\/")} \\S+ \\(MIT\\)\\n\\n\`\`\`\\n(The )?MIT License`, "m"), name);
+  }
+  assert.match(notices, /rt_hdr_alb_nrm \(Apache-2\.0\)/);
 });

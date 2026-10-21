@@ -62,7 +62,7 @@ test("render --live copies the runtime and the piece", { skip }, async () => {
   const out = mkdtempSync(join(realpathSync(tmpdir()), "live-test-"));
   try {
     const r = await render({ piece: join(FIXTURES, "cube.specimen.js"), out, live: true, size: 128, samples: 1, log: () => {} });
-    assert.deepEqual(readdirSync(out).sort(), ["cube-dark-poster.jpg", "cube-light-poster.jpg", "cube.specimen.js", "specimen.js"]);
+    assert.deepEqual(readdirSync(out).sort(), ["cube-dark-poster.jpg", "cube-light-poster.jpg", "cube.specimen.js", "specimen.js", "specimen.js.LICENSE.txt"]);
     assert.match(r.snippet, /<specimen-icon src="\/[^"]+\/cube\.specimen\.js" poster="[^"]+cube-dark-poster\.jpg" poster-light="[^"]+cube-light-poster\.jpg"><\/specimen-icon>/);
     assert.doesNotMatch(r.snippet, /<video/);
   } finally { rmSync(out, { recursive: true, force: true }); }

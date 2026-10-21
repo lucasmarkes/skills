@@ -98,7 +98,7 @@ export async function render({ piece, themes = THEMES, out, size = 768, samples 
       }
     }
     if (live && !frames) {
-      for (const [from, to] of [[join(RUNTIME, "specimen.js"), "specimen.js"], [p.file, `${p.name}.specimen.js`]]) {
+      for (const [from, to] of [[join(RUNTIME, "specimen.js"), "specimen.js"], [join(RUNTIME, "THIRD_PARTY_NOTICES.md"), "specimen.js.LICENSE.txt"], [p.file, `${p.name}.specimen.js`]]) {
         copyFileSync(from, join(out, to)); keep(join(out, to));
       }
     }
