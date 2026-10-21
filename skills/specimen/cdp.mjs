@@ -55,9 +55,11 @@ function locate(mounts, url) {
 
 const live = new Set(); // browsers to reap if the process ends without closing them
 const dirs = new Set(); // temp dirs to remove then (render's frames)
+// Chrome's helpers keep writing to the profile for a moment after SIGKILL, so removal retries on ENOTEMPTY.
+const rm = (d) => rmSync(d, { recursive: true, force: true, maxRetries: 20, retryDelay: 50 });
 function reap() {
-  for (const b of live) b.kill();
-  for (const d of dirs) rmSync(d, { recursive: true, force: true });
+  for (const b of live) try { b.kill(); } catch { /* the rest still gets cleaned */ }
+  for (const d of dirs) try { rm(d); } catch { /* likewise */ }
 }
 process.on("exit", reap);
 for (const [sig, code] of [["SIGINT", 130], ["SIGTERM", 143]]) process.once(sig, () => { reap(); process.exit(code); });
@@ -66,7 +68,7 @@ for (const [sig, code] of [["SIGINT", 130], ["SIGTERM", 143]]) process.once(sig,
 export function tempDir(prefix) {
   const d = mkdtempSync(join(tmpdir(), prefix));
   dirs.add(d);
-  return Object.assign(() => { dirs.delete(d); rmSync(d, { recursive: true, force: true }); }, { path: d });
+  return Object.assign(() => { dirs.delete(d); rm(d); }, { path: d });
 }
 
 /** Headless Chrome with WebGPU on; resolves once its DevTools socket is open. */
@@ -84,7 +86,7 @@ export async function launch({ chrome = findChrome(), gpu = true } = {}) {
   const gone = new Promise((ok) => proc.once("exit", () => { exited = true; ok(); }));
   const kill = () => {
     if (!exited) try { proc.kill("SIGKILL"); } catch { /* already gone */ }
-    rmSync(profile, { recursive: true, force: true });
+    rm(profile);
   };
   const handle = { kill };
   live.add(handle);
