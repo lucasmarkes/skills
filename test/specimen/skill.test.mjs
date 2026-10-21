@@ -46,3 +46,14 @@ test("README lists specimen", () => {
 test("SKILL.md tells the agent to run the full render in the background", () => {
   assert.match(md, /run it in the background/i);
 });
+
+test("SKILL.md picks --size from the shown width, and every row of its table holds", async () => {
+  const { outSide } = await import("../../skills/specimen/render.mjs");
+  const rows = [...md.matchAll(/^\| up to (\d+) \| (\d+) \| (\d+) px \|/gm)].map((m) => m.slice(1).map(Number));
+  assert.ok(rows.length >= 3, "the size table");
+  for (const [css, size, side] of rows) {
+    assert.equal(side, outSide(size), `--size ${size} makes a ${outSide(size)} px video`);
+    assert.ok(side >= 2 * css, `${side} px covers ${css} CSS px at 2×`);
+  }
+  assert.ok(rows.some(([, size]) => size === 768), "the default is a row");
+});
