@@ -13,8 +13,8 @@ import { RUNTIME, requireChrome, session } from "./session.mjs";
 
 export const FPS = 30;
 const THEMES = ["dark", "light"];
-// the 768 px render is supersampled down to 640 px, as in the approved lab encodes
-const outSide = (size) => 2 * Math.round((size * 5) / 12);
+// the render is supersampled down to 5/6 (768 → 640), as in the approved lab encodes
+export const outSide = (size) => 2 * Math.round((size * 5) / 12);
 
 function requireFfmpeg() {
   try { execFileSync("ffmpeg", ["-version"], { stdio: "ignore" }); } catch {
@@ -29,7 +29,7 @@ const BT709 = "scale=out_color_matrix=bt709,format=yuv420p,setparams=colorspace=
 
 async function encode(frames, base, side) {
   const input = ["-framerate", String(FPS), "-i", join(frames, "f%04d.png"), "-vf", `scale=${side}:${side}:flags=lanczos,${BT709}`, "-an"];
-  await ffmpeg([...input, "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "34", "-row-mt", "1", `${base}.webm`]);
+  await ffmpeg([...input, "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "28", "-row-mt", "1", `${base}.webm`]);
   await ffmpeg([...input, "-c:v", "libx264", "-crf", "22", "-preset", "slow", "-movflags", "+faststart", `${base}.mp4`]);
 }
 

@@ -50,6 +50,18 @@ Ask this first, in one message, before any concept:
 
 Both themes are rendered unless the person asks for one. Also ask where the files go; if they don't say, put them beside the piece. If there is nobody to ask, take video, both themes, beside the piece, and say so.
 
+### Size
+
+Render at the size the icon is shown at: a video stretched past its pixels goes soft at the edges, and no encode setting gets them back. Find the width first in the project, in the CSS or component the icon goes into, at its widest breakpoint. Ask only when you can't tell, in the same message as the delivery:
+
+| shown at (CSS px) | `--size` | video | per theme |
+|---|---|---|---|
+| up to 160 | 384 | 320 px | ~4 min |
+| up to 320 | 768 | 640 px | ~17 min |
+| up to 480 | 1152 | 960 px | ~36 min |
+
+The video has to be at least twice the CSS width for retina screens, and it comes out at 5/6 of `--size`: take the first row that covers the width. Wider than 480: `--size` is 2.4 × the width rounded up to a multiple of 12, and the time grows with its square. For live, the size only sets the posters. If there is nobody to ask and nothing to read, take 768 and say so.
+
 ## 1. Concept
 
 Read `concepts.md`. Offer two or three concepts, one line each:
@@ -197,10 +209,10 @@ It prints each failed rule with its reason and a number, and exits 1 on any fail
 
 ## 6. Render and hand over
 
-Announce the time before you start: about 4 s a frame on a recent Mac, so an 8 s loop (240 frames) is about 17 minutes per theme, about 35 for both. Live alone renders only the two posters, a minute or so. A video render outlasts any foreground command timeout, so run it in the background and watch its progress lines (`30/240 · 666 s left`, every 30 frames) until it prints the files; never run it in the foreground, where a timeout kills it halfway.
+Announce the time before you start, from the size table in §0: at `--size 768` it is about 4 s a frame on a recent Mac, so an 8 s loop (240 frames) is about 17 minutes per theme, about 35 for both. Live alone renders only the two posters, a minute or so. A video render outlasts any foreground command timeout, so run it in the background and watch its progress lines (`30/240 · 666 s left`, every 30 frames) until it prints the files; never run it in the foreground, where a timeout kills it halfway.
 
 ```
-node <skill>/render.mjs <name>.specimen.js --out public/icons            # video, both themes
+node <skill>/render.mjs <name>.specimen.js --out public/icons --size 768            # video, both themes
 node <skill>/render.mjs <name>.specimen.js --out public/icons --live     # live
 node <skill>/render.mjs <name>.specimen.js --out public/icons --live --video   # both
 ```
