@@ -40,7 +40,7 @@ test("SKILL.md asks for the delivery first and says live is raster", () => {
 });
 
 test("README lists specimen", () => {
-  assert.match(read("README.md"), /^\| `specimen` \| A glossy 3D icon on a soft tile, lit like a display piece and looping, in dark and light, shipped as video or live with nothing to install\. \|$/m);
+  assert.match(read("README.md"), /^- \*\*\[specimen\]\(\.\/skills\/specimen\/SKILL\.md\)\*\*: A glossy 3D icon on a soft tile/m);
 });
 
 test("SKILL.md tells the agent to run the full render in the background", () => {
