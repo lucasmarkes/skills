@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-head"><rect width="24" height="24" fill="#fff"/><path d="M5.25 12.25 H5.5 A2.5 2.5 0 0 1 8 14.75 V18.5 A2.5 2.5 0 0 1 5.5 21 H5.25 A2.5 2.5 0 0 1 2.75 18.5 V14.75 A2.5 2.5 0 0 1 5.25 12.25 Z M18.5 12.25 H18.75 A2.5 2.5 0 0 1 21.25 14.75 V18.5 A2.5 2.5 0 0 1 18.75 21 H18.5 A2.5 2.5 0 0 1 16 18.5 V14.75 A2.5 2.5 0 0 1 18.5 12.25 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M4.5 15 V12 A7.5 7.5 0 0 1 19.5 12 V15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" mask="url(#m-head)"/>
+  <path d="M5.25 12.25 H5.5 A2.5 2.5 0 0 1 8 14.75 V18.5 A2.5 2.5 0 0 1 5.5 21 H5.25 A2.5 2.5 0 0 1 2.75 18.5 V14.75 A2.5 2.5 0 0 1 5.25 12.25 Z M18.5 12.25 H18.75 A2.5 2.5 0 0 1 21.25 14.75 V18.5 A2.5 2.5 0 0 1 18.75 21 H18.5 A2.5 2.5 0 0 1 16 18.5 V14.75 A2.5 2.5 0 0 1 18.5 12.25 Z" fill-opacity=".4"/>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-credit-card-0"><rect width="24" height="24" fill="#fff"/><path d="M5.5 8 H15.5 A3 3 0 0 1 18.5 11 V17 A3 3 0 0 1 15.5 20 H5.5 A3 3 0 0 1 2.5 17 V11 A3 3 0 0 1 5.5 8 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M8.5 3.5 H18.5 A3 3 0 0 1 21.5 6.5 V12 A3 3 0 0 1 18.5 15 H8.5 A3 3 0 0 1 5.5 12 V6.5 A3 3 0 0 1 8.5 3.5 Z" mask="url(#m-credit-card-0)"/>
+  <path d="M5.5 8 H15.5 A3 3 0 0 1 18.5 11 V17 A3 3 0 0 1 15.5 20 H5.5 A3 3 0 0 1 2.5 17 V11 A3 3 0 0 1 5.5 8 Z" fill-opacity=".4"/>
+  <path d="M6.25 16.25 H9.25" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

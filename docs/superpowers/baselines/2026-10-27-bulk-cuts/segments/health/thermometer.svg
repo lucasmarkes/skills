@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-thermometer-0"><rect width="24" height="24" fill="#fff"/><path d="M6.75 17.25 A3.75 3.75 0 1 0 14.25 17.25 A3.75 3.75 0 1 0 6.75 17.25 Z" fill="#000" stroke="#000" stroke-width="1.75" stroke-linejoin="round"/></mask></defs>
+  <path d="M10.5 2.5 L10.5 2.5 A2.5 2.5 0 0 1 13 5 L13 14 A2.5 2.5 0 0 1 10.5 16.5 L10.5 16.5 A2.5 2.5 0 0 1 8 14 L8 5 A2.5 2.5 0 0 1 10.5 2.5 Z" fill-opacity=".4" mask="url(#m-thermometer-0)"/>
+  <path d="M6.75 17.25 A3.75 3.75 0 1 0 14.25 17.25 A3.75 3.75 0 1 0 6.75 17.25 Z"/>
+  <path d="M10.5 14 V8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M15.5 5.5 H17.5 M15.5 9 H17.5 M15.5 12.5 H17.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".4"/>
+</svg>

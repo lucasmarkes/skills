@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-chef"><rect width="24" height="24" fill="#fff"/><path d="M7.5 16.25 H16.5 A1.75 1.75 0 0 1 18.25 18 V19 A1.75 1.75 0 0 1 16.5 20.75 H7.5 A1.75 1.75 0 0 1 5.75 19 V18 A1.75 1.75 0 0 1 7.5 16.25 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M6.75 19 V14.72 A3.75 3.75 0 0 1 7.53 7.26 A4.5 4.5 0 0 1 16.47 7.26 A3.75 3.75 0 0 1 17.25 14.72 V19 Z" fill-opacity=".4" mask="url(#m-chef)"/>
+  <path d="M7.5 16.25 H16.5 A1.75 1.75 0 0 1 18.25 18 V19 A1.75 1.75 0 0 1 16.5 20.75 H7.5 A1.75 1.75 0 0 1 5.75 19 V18 A1.75 1.75 0 0 1 7.5 16.25 Z"/>
+</svg>

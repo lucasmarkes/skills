@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-card-terminal-0"><rect width="24" height="24" fill="#fff"/><path d="M8.75 2.5 H15.25 A1.75 1.75 0 0 1 17 4.25 V9.25 A1.75 1.75 0 0 1 15.25 11 H8.75 A1.75 1.75 0 0 1 7 9.25 V4.25 A1.75 1.75 0 0 1 8.75 2.5 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M8 7.5 H16 A3.5 3.5 0 0 1 19.5 11 V18 A3.5 3.5 0 0 1 16 21.5 H8 A3.5 3.5 0 0 1 4.5 18 V11 A3.5 3.5 0 0 1 8 7.5 Z" fill-opacity=".4" mask="url(#m-card-terminal-0)"/>
+  <path d="M8.75 2.5 H15.25 A1.75 1.75 0 0 1 17 4.25 V9.25 A1.75 1.75 0 0 1 15.25 11 H8.75 A1.75 1.75 0 0 1 7 9.25 V4.25 A1.75 1.75 0 0 1 8.75 2.5 Z M10 4.5 H11.75 A0.75 0.75 0 0 1 12.5 5.25 V6.25 A0.75 0.75 0 0 1 11.75 7 H10 A0.75 0.75 0 0 1 9.25 6.25 V5.25 A0.75 0.75 0 0 1 10 4.5 Z" fill-rule="evenodd"/>
+  <path d="M8 16.5 A1 1 0 1 0 10 16.5 A1 1 0 1 0 8 16.5 Z M11 16.5 A1 1 0 1 0 13 16.5 A1 1 0 1 0 11 16.5 Z M14 16.5 A1 1 0 1 0 16 16.5 A1 1 0 1 0 14 16.5 Z"/>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-wine"><rect width="24" height="24" fill="#fff"/><path d="M6.19 9.5 H17.81 A6 6 0 0 1 6.19 9.5 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M7.25 2.75 H16.75 Q17.5 2.75 17.6 3.5 L18 8 A6 6 0 0 1 6 8 L6.4 3.5 Q6.5 2.75 7.25 2.75 Z" fill-opacity=".4" mask="url(#m-wine)"/>
+  <path d="M6.19 9.5 H17.81 A6 6 0 0 1 6.19 9.5 Z"/>
+  <path d="M12 14 V20.75 M8.75 20.75 H15.25" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-bowl"><rect width="24" height="24" fill="#fff"/><path d="M20.06 2.21 L11.06 13.71 A0.88 0.88 0 0 0 12.44 14.79 L21.44 3.29 A0.88 0.88 0 0 0 20.06 2.21 Z M16 1.81 L9.25 13.31 A0.88 0.88 0 0 0 10.75 14.19 L17.5 2.69 A0.88 0.88 0 0 0 16 1.81 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M3.75 11.25 H20.25 Q21 11.25 21 12 C21 16.5 17 20.5 12 20.5 C7 20.5 3 16.5 3 12 Q3 11.25 3.75 11.25 Z" fill-opacity=".4" mask="url(#m-bowl)"/>
+  <path d="M20.06 2.21 L11.06 13.71 A0.88 0.88 0 0 0 12.44 14.79 L21.44 3.29 A0.88 0.88 0 0 0 20.06 2.21 Z"/>
+  <path d="M16 1.81 L9.25 13.31 A0.88 0.88 0 0 0 10.75 14.19 L17.5 2.69 A0.88 0.88 0 0 0 16 1.81 Z"/>
+</svg>

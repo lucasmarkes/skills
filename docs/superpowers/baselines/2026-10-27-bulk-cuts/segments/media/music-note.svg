@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-note"><rect width="24" height="24" fill="#fff"/><path d="M3.75 17.5 A3 3 0 1 0 9.75 17.5 A3 3 0 1 0 3.75 17.5 Z M13.75 15.5 A3 3 0 1 0 19.75 15.5 A3 3 0 1 0 13.75 15.5 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M8.88 5 Q8.88 4.5 9.36 4.4 L20.14 2.1 Q20.63 2 20.63 2.5 L20.63 4.75 Q20.63 5.25 20.14 5.35 L9.36 7.65 Q8.88 7.75 8.88 7.25 Z"/>
+  <path d="M9.75 6.5 V17.5 M19.75 4 V15.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" mask="url(#m-note)"/>
+  <path d="M3.75 17.5 A3 3 0 1 0 9.75 17.5 A3 3 0 1 0 3.75 17.5 Z M13.75 15.5 A3 3 0 1 0 19.75 15.5 A3 3 0 1 0 13.75 15.5 Z" fill-opacity=".4"/>
+</svg>

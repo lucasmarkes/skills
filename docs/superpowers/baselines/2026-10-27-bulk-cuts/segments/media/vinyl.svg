@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-vinyl"><rect width="24" height="24" fill="#fff"/><path d="M19.35 3.06 L14.85 12.31 A1 1 0 0 0 16.65 13.19 L21.15 3.94 A1 1 0 0 0 19.35 3.06 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M2.25 12.5 A8.75 8.75 0 1 0 19.75 12.5 A8.75 8.75 0 1 0 2.25 12.5 Z" fill-opacity=".4" mask="url(#m-vinyl)"/>
+  <path d="M8 12.5 A3 3 0 1 0 14 12.5 A3 3 0 1 0 8 12.5 Z M10 12.5 A1 1 0 1 0 12 12.5 A1 1 0 1 0 10 12.5 Z" fill-rule="evenodd"/>
+  <path d="M19.35 3.06 L14.85 12.31 A1 1 0 0 0 16.65 13.19 L21.15 3.94 A1 1 0 0 0 19.35 3.06 Z"/>
+</svg>

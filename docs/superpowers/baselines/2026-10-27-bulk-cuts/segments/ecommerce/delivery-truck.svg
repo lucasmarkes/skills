@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-delivery-truck-0"><rect width="24" height="24" fill="#fff"/><path d="M4.75 17.5 A2.25 2.25 0 1 0 9.25 17.5 A2.25 2.25 0 1 0 4.75 17.5 Z M15.25 17.5 A2.25 2.25 0 1 0 19.75 17.5 A2.25 2.25 0 1 0 15.25 17.5 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M4.5 4.5 H12 A2.5 2.5 0 0 1 14.5 7 V13.5 A2.5 2.5 0 0 1 12 16 H4.5 A2.5 2.5 0 0 1 2 13.5 V7 A2.5 2.5 0 0 1 4.5 4.5 Z M15.25 9 Q15.25 8 16.25 8 H18 Q19 8 19.6 8.8 L21.4 11.2 Q21.75 11.7 21.75 12.3 V14.75 Q21.75 16 20.5 16 H15.25 Z" fill-opacity=".4" mask="url(#m-delivery-truck-0)"/>
+  <path d="M4.75 17.5 A2.25 2.25 0 1 0 9.25 17.5 A2.25 2.25 0 1 0 4.75 17.5 Z M15.25 17.5 A2.25 2.25 0 1 0 19.75 17.5 A2.25 2.25 0 1 0 15.25 17.5 Z"/>
+</svg>

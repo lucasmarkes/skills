@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-map-0"><rect width="24" height="24" fill="#fff"/><path d="M15 17.25 Q14.6 17.25 14.3 16.9 C12.9 15.35 11 12.35 11 9 A4 4 0 0 1 19 9 C19 12.35 17.1 15.35 15.7 16.9 Q15.4 17.25 15 17.25 Z" fill="#000" stroke="#000" stroke-width="1.75" stroke-linejoin="round"/><path d="M8.75 5.5 V16.25" fill="none" stroke="#000" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round"/></mask></defs>
+  <path d="M3 7.75 Q3 6.75 3.93 6.39 L7.82 4.86 Q8.75 4.5 9.69 4.84 L14.06 6.41 Q15 6.75 15.94 6.4 L20.06 4.85 Q21 4.5 21 5.5 L21 16.25 Q21 17.25 20.06 17.6 L15.94 19.15 Q15 19.5 14.06 19.16 L9.69 17.59 Q8.75 17.25 7.82 17.61 L3.93 19.14 Q3 19.5 3 18.5 Z" fill-opacity=".4" mask="url(#m-map-0)"/>
+  <path d="M15 17.25 Q14.6 17.25 14.3 16.9 C12.9 15.35 11 12.35 11 9 A4 4 0 0 1 19 9 C19 12.35 17.1 15.35 15.7 16.9 Q15.4 17.25 15 17.25 Z M13.5 9 A1.5 1.5 0 1 0 16.5 9 A1.5 1.5 0 1 0 13.5 9 Z" fill-rule="evenodd"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-cam"><rect width="24" height="24" fill="#fff"/><path d="M14.5 11.25 Q14.5 10 15.63 9.47 L20.37 7.28 Q21.5 6.75 21.5 8 L21.5 16 Q21.5 17.25 20.37 16.72 L15.63 14.53 Q14.5 14 14.5 12.75 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M6 5.75 H12.5 A3.5 3.5 0 0 1 16 9.25 V14.75 A3.5 3.5 0 0 1 12.5 18.25 H6 A3.5 3.5 0 0 1 2.5 14.75 V9.25 A3.5 3.5 0 0 1 6 5.75 Z" fill-opacity=".4" mask="url(#m-cam)"/>
+  <path d="M14.5 11.25 Q14.5 10 15.63 9.47 L20.37 7.28 Q21.5 6.75 21.5 8 L21.5 16 Q21.5 17.25 20.37 16.72 L15.63 14.53 Q14.5 14 14.5 12.75 Z"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-compass-0"><rect width="24" height="24" fill="#fff"/><path d="M16.32 7.33 Q17 7 16.67 7.68 L14.08 13.07 Q13.75 13.75 13.07 14.08 L7.68 16.67 Q7 17 7.33 16.32 L9.92 10.93 Q10.25 10.25 10.93 9.92 Z" fill="#000" stroke="#000" stroke-width="1.75" stroke-linejoin="round"/></mask></defs>
+  <path d="M3 12 A9 9 0 1 0 21 12 A9 9 0 1 0 3 12 Z" fill-opacity=".4" mask="url(#m-compass-0)"/>
+  <path d="M16.32 7.33 Q17 7 16.67 7.68 L14.08 13.07 Q13.75 13.75 13.07 14.08 L7.68 16.67 Q7 17 7.33 16.32 L9.92 10.93 Q10.25 10.25 10.93 9.92 Z M10.75 12 A1.25 1.25 0 1 0 13.25 12 A1.25 1.25 0 1 0 10.75 12 Z" fill-rule="evenodd"/>
+</svg>

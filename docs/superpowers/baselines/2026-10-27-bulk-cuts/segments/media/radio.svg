@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-radio"><rect width="24" height="24" fill="#fff"/><path d="M5.75 8.5 H18.25 A3.25 3.25 0 0 1 21.5 11.75 V17.75 A3.25 3.25 0 0 1 18.25 21 H5.75 A3.25 3.25 0 0 1 2.5 17.75 V11.75 A3.25 3.25 0 0 1 5.75 8.5 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M7.91 8.77 L17.91 3.52 A0.88 0.88 0 0 0 17.09 1.98 L7.09 7.23 A0.88 0.88 0 0 0 7.91 8.77 Z" mask="url(#m-radio)"/>
+  <path d="M5.75 8.5 H18.25 A3.25 3.25 0 0 1 21.5 11.75 V17.75 A3.25 3.25 0 0 1 18.25 21 H5.75 A3.25 3.25 0 0 1 2.5 17.75 V11.75 A3.25 3.25 0 0 1 5.75 8.5 Z" fill-opacity=".4"/>
+  <path d="M13.25 14.75 A2.75 2.75 0 1 0 18.75 14.75 A2.75 2.75 0 1 0 13.25 14.75 Z"/>
+  <path d="M6.25 13 H10.5 M6.25 16.5 H10.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

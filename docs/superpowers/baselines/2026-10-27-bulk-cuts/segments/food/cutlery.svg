@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-cutlery"><rect width="24" height="24" fill="#fff"/><path d="M9.88 11.29 L17.66 19.07 A1 1 0 0 0 19.07 17.66 L11.29 9.88 A1 1 0 0 0 9.88 11.29 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M20.13 6.7 C18.54 5.11 16.07 5.46 13.94 7.58 L10.59 10.94 Q9.88 11.65 10.59 12.35 L10.76 12.53 L5.81 17.48 Q4.93 18.36 5.81 19.25 Q6.7 20.13 7.58 19.25 Z" fill-opacity=".4" mask="url(#m-cutlery)"/>
+  <path d="M3.51 7.4 L6.52 10.41 Q8.64 12.53 10.59 10.59 Q12.53 8.64 10.41 6.52 L7.4 3.51 M5.46 5.46 L10.59 10.59" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M9.88 11.29 L17.66 19.07 A1 1 0 0 0 19.07 17.66 L11.29 9.88 A1 1 0 0 0 9.88 11.29 Z"/>
+</svg>

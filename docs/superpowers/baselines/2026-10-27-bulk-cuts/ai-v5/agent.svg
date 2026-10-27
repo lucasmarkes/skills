@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-agent-0"><rect width="24" height="24" fill="#fff"/><path d="M6.5 4 H17.5 A4 4 0 0 1 21.5 8 V8.75 H2.5 V8 A4 4 0 0 1 6.5 4 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask><mask id="m-agent-1"><rect width="24" height="24" fill="#fff"/><path d="M17.63 4.93 Q17.75 4.65 17.87 4.93 Q18.1 6.05 19.22 6.28 Q19.5 6.4 19.22 6.52 Q18.1 6.75 17.87 7.87 Q17.75 8.15 17.63 7.87 Q17.4 6.75 16.28 6.52 Q16 6.4 16.28 6.28 Q17.4 6.05 17.63 4.93 Z" fill="#000"/></mask></defs>
+  <path d="M6.5 4 H17.5 A4 4 0 0 1 21.5 8 V16 A4 4 0 0 1 17.5 20 H6.5 A4 4 0 0 1 2.5 16 V8 A4 4 0 0 1 6.5 4 Z" fill-opacity=".4" mask="url(#m-agent-0)"/>
+  <path d="M6.5 4 H17.5 A4 4 0 0 1 21.5 8 V8.75 H2.5 V8 A4 4 0 0 1 6.5 4 Z" mask="url(#m-agent-1)"/>
+  <path d="M7 12 L9.25 14.25 L7 16.5 M12 16.5 H16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

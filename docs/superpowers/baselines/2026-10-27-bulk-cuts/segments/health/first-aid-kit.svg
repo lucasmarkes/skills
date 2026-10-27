@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-first-aid-kit-0"><rect width="24" height="24" fill="#fff"/><path d="M8.75 7.75 V5.75 Q8.75 4 10.5 4 H13.5 Q15.25 4 15.25 5.75 V7.75" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></mask></defs>
+  <path d="M6 7 L18 7 A3.5 3.5 0 0 1 21.5 10.5 L21.5 17 A3.5 3.5 0 0 1 18 20.5 L6 20.5 A3.5 3.5 0 0 1 2.5 17 L2.5 10.5 A3.5 3.5 0 0 1 6 7 Z" fill-opacity=".4" mask="url(#m-first-aid-kit-0)"/>
+  <path d="M8.75 7.75 V5.75 Q8.75 4 10.5 4 H13.5 Q15.25 4 15.25 5.75 V7.75" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M12 10.75 V16.75 M9 13.75 H15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-mic-0"><rect width="24" height="24" fill="#fff"/><path d="M4.75 10.75 A6.25 6.25 0 0 0 17.25 10.75 M11 17 V21.25" fill="none" stroke="#000" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round"/></mask></defs>
+  <path d="M11 2.5 H11 A4 4 0 0 1 15 6.5 V13.25 A4 4 0 0 1 11 17.25 H11 A4 4 0 0 1 7 13.25 V6.5 A4 4 0 0 1 11 2.5 Z" fill-opacity=".4" mask="url(#m-mic-0)"/>
+  <path d="M4.75 10.75 A6.25 6.25 0 0 0 17.25 10.75 M11 17 V21.25" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M19.06 1.94 Q19.25 1.5 19.44 1.94 Q19.8 3.7 21.56 4.06 Q22 4.25 21.56 4.44 Q19.8 4.8 19.44 6.56 Q19.25 7 19.06 6.56 Q18.7 4.8 16.94 4.44 Q16.5 4.25 16.94 4.06 Q18.7 3.7 19.06 1.94 Z"/>
+</svg>

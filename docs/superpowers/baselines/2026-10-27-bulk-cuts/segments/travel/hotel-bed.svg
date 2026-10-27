@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-hotel-bed-0"><rect width="24" height="24" fill="#fff"/><path d="M10.13 6 L11.88 6 A2.38 2.38 0 0 1 14.25 8.38 L14.25 8.38 A2.38 2.38 0 0 1 11.88 10.75 L10.13 10.75 A2.38 2.38 0 0 1 7.75 8.38 L7.75 8.38 A2.38 2.38 0 0 1 10.13 6 Z" fill="#000" stroke="#000" stroke-width="1.75" stroke-linejoin="round"/></mask></defs>
+  <path d="M2.5 5.25 Q2.5 4 3.75 4 L4.5 4 Q5.75 4 5.75 5.25 L5.75 9.5 Q5.75 10 6.25 10 L19.5 10 Q21.5 10 21.5 12 L21.5 19.25 Q21.5 20 20.75 20 L19.5 20 Q18.75 20 18.75 19.25 L18.75 17.75 L5.25 17.75 L5.25 19.25 Q5.25 20 4.5 20 L3.25 20 Q2.5 20 2.5 19.25 Z" fill-opacity=".4" mask="url(#m-hotel-bed-0)"/>
+  <path d="M10.13 6 L11.88 6 A2.38 2.38 0 0 1 14.25 8.38 L14.25 8.38 A2.38 2.38 0 0 1 11.88 10.75 L10.13 10.75 A2.38 2.38 0 0 1 7.75 8.38 L7.75 8.38 A2.38 2.38 0 0 1 10.13 6 Z"/>
+</svg>

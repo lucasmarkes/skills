@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-wallet-0"><rect width="24" height="24" fill="#fff"/><path d="M16.5 10 H19 A2.75 2.75 0 0 1 21.75 12.75 V12.75 A2.75 2.75 0 0 1 19 15.5 H16.5 A2.75 2.75 0 0 1 13.75 12.75 V12.75 A2.75 2.75 0 0 1 16.5 10 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M6 5 H16.5 A3.5 3.5 0 0 1 20 8.5 V16.5 A3.5 3.5 0 0 1 16.5 20 H6 A3.5 3.5 0 0 1 2.5 16.5 V8.5 A3.5 3.5 0 0 1 6 5 Z" fill-opacity=".4" mask="url(#m-wallet-0)"/>
+  <path d="M16.5 10 H19 A2.75 2.75 0 0 1 21.75 12.75 V12.75 A2.75 2.75 0 0 1 19 15.5 H16.5 A2.75 2.75 0 0 1 13.75 12.75 V12.75 A2.75 2.75 0 0 1 16.5 10 Z M15.5 12.75 A1 1 0 1 0 17.5 12.75 A1 1 0 1 0 15.5 12.75 Z" fill-rule="evenodd"/>
+</svg>

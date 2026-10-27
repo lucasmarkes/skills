@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-shopping-bag-0"><rect width="24" height="24" fill="#fff"/><path d="M8.5 11 V7 A3.5 3.5 0 0 1 15.5 7 V11" fill="none" stroke="#000" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round"/></mask></defs>
+  <path d="M7 7.5 H17 A3.5 3.5 0 0 1 20.5 11 V18 A3.5 3.5 0 0 1 17 21.5 H7 A3.5 3.5 0 0 1 3.5 18 V11 A3.5 3.5 0 0 1 7 7.5 Z" fill-opacity=".4" mask="url(#m-shopping-bag-0)"/>
+  <path d="M8.5 11 V7 A3.5 3.5 0 0 1 15.5 7 V11" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

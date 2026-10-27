@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-syringe-0"><rect width="24" height="24" fill="#fff"/><path d="M16.6 6.09 L17.66 7.15 A0.75 0.75 0 0 1 17.66 8.21 L16.77 9.1 A0.75 0.75 0 0 1 15.71 9.1 L14.65 8.04 A0.75 0.75 0 0 1 14.65 6.98 L15.54 6.09 A0.75 0.75 0 0 1 16.6 6.09 Z" fill="#000" stroke="#000" stroke-width="1.75" stroke-linejoin="round"/></mask></defs>
+  <path d="M14.47 6.8 L16.95 9.28 A2.25 2.25 0 0 1 16.95 12.46 L11.65 17.76 A2.25 2.25 0 0 1 8.46 17.76 L5.99 15.29 A2.25 2.25 0 0 1 5.99 12.1 L11.29 6.8 A2.25 2.25 0 0 1 14.47 6.8 Z" fill-opacity=".4" mask="url(#m-syringe-0)"/>
+  <path d="M16.6 6.09 L17.66 7.15 A0.75 0.75 0 0 1 17.66 8.21 L16.77 9.1 A0.75 0.75 0 0 1 15.71 9.1 L14.65 8.04 A0.75 0.75 0 0 1 14.65 6.98 L15.54 6.09 A0.75 0.75 0 0 1 16.6 6.09 Z"/>
+  <path d="M17.13 6.62 L19.42 4.33" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M7.23 16.52 L5.11 18.64" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M4.22 16.7 L7.05 19.53 A1 1 0 0 1 7.05 20.94 L7.05 20.94 A1 1 0 0 1 5.64 20.94 L2.81 18.11 A1 1 0 0 1 2.81 16.7 L2.81 16.7 A1 1 0 0 1 4.22 16.7 Z"/>
+  <path d="M12.53 9.1 L14.65 11.22 M10.59 11.04 L11.65 12.1 M8.64 12.99 L10.76 15.11" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

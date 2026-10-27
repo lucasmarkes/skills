@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-pill-0"><rect width="24" height="24" fill="#fff"/><path d="M9.35 9.35 L12.71 5.99 A3.75 3.75 0 0 1 18.01 11.29 L14.65 14.65 Z" fill="#000" stroke="#000" stroke-width="1.75" stroke-linejoin="round"/></mask><mask id="m-pill-1"><rect width="24" height="24" fill="#fff"/><path d="M12.18 9.7 L14.3 7.58" fill="none" stroke="#000" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></mask></defs>
+  <path d="M14.65 14.65 L11.29 18.01 A3.75 3.75 0 0 1 5.99 12.71 L9.35 9.35 Z" fill-opacity=".4" mask="url(#m-pill-0)"/>
+  <path d="M9.35 9.35 L12.71 5.99 A3.75 3.75 0 0 1 18.01 11.29 L14.65 14.65 Z" mask="url(#m-pill-1)"/>
+</svg>

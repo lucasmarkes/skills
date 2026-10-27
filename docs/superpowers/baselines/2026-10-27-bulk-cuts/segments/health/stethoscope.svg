@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-stethoscope-0"><rect width="24" height="24" fill="#fff"/><path d="M7.5 10.75 V15.5 A4.75 4.75 0 0 0 17 15.5 V12.5" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></mask></defs>
+  <path d="M12.25 9.5 A4.75 4.75 0 1 0 21.75 9.5 A4.75 4.75 0 1 0 12.25 9.5 Z" fill-opacity=".4" mask="url(#m-stethoscope-0)"/>
+  <path d="M4 3 V7.25 A3.5 3.5 0 0 0 11 7.25 V3" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M7.5 10.75 V15.5 A4.75 4.75 0 0 0 17 15.5 V12.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M15.25 9.5 A1.75 1.75 0 1 0 18.75 9.5 A1.75 1.75 0 1 0 15.25 9.5 Z"/>
+</svg>

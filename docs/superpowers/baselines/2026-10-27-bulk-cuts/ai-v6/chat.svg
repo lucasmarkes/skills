@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+  <defs><mask id="m-chat-0"><rect width="24" height="24" fill="#fff"/><path d="M18.32 2.57 C18.89 4.67 19.58 5.36 21.68 5.93 A0.29 0.29 0 0 1 21.68 6.57 C19.58 7.14 18.89 7.83 18.32 9.93 A0.29 0.29 0 0 1 17.68 9.93 C17.11 7.83 16.42 7.14 14.32 6.57 A0.29 0.29 0 0 1 14.32 5.93 C16.42 5.36 17.11 4.67 17.68 2.57 A0.29 0.29 0 0 1 18.32 2.57 Z" fill="#000" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></mask></defs>
+  <path d="M6.5 4.5 H14.75 A4 4 0 0 1 18.75 8.5 V13.5 A4 4 0 0 1 14.75 17.5 H10 L6.6 20.3 C6.1 20.7 5.4 20.35 5.4 19.7 V17.35 A4 4 0 0 1 2.5 13.5 V8.5 A4 4 0 0 1 6.5 4.5 Z" fill-opacity=".4" mask="url(#m-chat-0)"/>
+  <path d="M6.75 9.5 H12.25 M6.75 13 H10" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18.32 2.57 C18.89 4.67 19.58 5.36 21.68 5.93 A0.29 0.29 0 0 1 21.68 6.57 C19.58 7.14 18.89 7.83 18.32 9.93 A0.29 0.29 0 0 1 17.68 9.93 C17.11 7.83 16.42 7.14 14.32 6.57 A0.29 0.29 0 0 1 14.32 5.93 C16.42 5.36 17.11 4.67 17.68 2.57 A0.29 0.29 0 0 1 18.32 2.57 Z"/>
+</svg>
