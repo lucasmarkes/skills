@@ -1,0 +1,8 @@
+<svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#25262a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="24" cy="24" r="18.5" fill="#ececea" stroke="none" />
+  <path d="M42.5 24A18.5 18.5 0 0 1 5.5 24A19.5 19.5 0 0 0 42.5 24Z" fill="#cfcfcb" stroke="none" />
+  <circle cx="24" cy="24" r="18.5" stroke-width="2" />
+  <path d="M14.75 22A9.5 9.5 0 1 1 33.25 22H29.25A5.5 5.5 0 0 0 18.75 22Z" fill="#ffffff" />
+  <path d="M14.75 26H19A5.75 5.75 0 0 0 22 29.5V33.25A9.5 9.5 0 0 1 14.75 26ZM33.25 26H29A5.75 5.75 0 0 1 26 29.5V33.25A9.5 9.5 0 0 0 33.25 26Z" fill="#ffffff" />
+  <circle cx="24" cy="24" r="2.5" fill="#25262a" stroke="none" />
+</svg>
